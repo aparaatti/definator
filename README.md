@@ -1,6 +1,7 @@
 
 # Definator
 
+## Plan and description
 
 With Definator you will be able to quickly save terms and write up definition
 for them. It should support cross referencing the terms and also enable
@@ -12,8 +13,12 @@ such it should be simplest to run on linux. Binaries for different operation sys
 be achieved by using [pyqtdeploy](http://www.riverbankcomputing.com/software/pyqtdeploy/).
 
 
+## Licensing
+
 Definator is licensed **[GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt)** which
 is in line with the [Qt 5](http://qt-project.org/doc/qt-5/licensing.html) and [PyQt 5](http://www.riverbankcomputing.co.uk/software/pyqt/license) licensing options.
+
+## Context
 
 The app is developed as a part of a
 [graphical UI programming course TIEA212](http://appro.mit.jyu.fi/gko/) (2014)
