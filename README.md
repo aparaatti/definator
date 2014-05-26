@@ -20,6 +20,10 @@ systems could be achieved by using
 [pyqtdeploy](http://www.riverbankcomputing.com/software/pyqtdeploy/),
 which will be looked into at some point.
 
+* Maybe use QML
+    ** [QML intro](http://qt-project.org/doc/qt-5/qmlapplications.html)
+    ** [PyQT and QML](http://pyqt.sourceforge.net/Docs/PyQt5/qml.html)
+
 ##Mocups
 
 There will be mocups.
@@ -30,12 +34,12 @@ There probably will be UML-diagrams.
 
 ## Licensing
 
-Definator is licensed **[GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt)**, which
+**Definator** is licensed **[GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt)**, which
 is in line with the [Qt 5](http://qt-project.org/doc/qt-5/licensing.html) and [PyQt 5](http://www.riverbankcomputing.co.uk/software/pyqt/license) licensing options.
 
 ## Context
 
-The app is developed as a part of a
+The app is developed as a part of
 [graphical UI programming course TIEA212](http://appro.mit.jyu.fi/gko/) (2014)
 at the University of Jyväskylä. It is also developed to scratch an itch and for
 fun.
