@@ -21,8 +21,8 @@ systems could be achieved by using
 which will be looked into at some point.
 
 * Maybe use QML
-    ** [QML intro](http://qt-project.org/doc/qt-5/qmlapplications.html)
-    ** [PyQT and QML](http://pyqt.sourceforge.net/Docs/PyQt5/qml.html)
+    * [QML intro](http://qt-project.org/doc/qt-5/qmlapplications.html)
+    * [PyQT and QML](http://pyqt.sourceforge.net/Docs/PyQt5/qml.html)
 
 ##Mocups
 
