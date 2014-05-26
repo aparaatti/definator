@@ -3,15 +3,30 @@
 
 ## Plan and description
 
-With Definator you will be able to quickly save terms and write up definition
-for them. It should support cross referencing the terms and also enable
-attaching media to the definition texts. It is also a plan to save the data in
-such a form, that a definition project can be also browsed in a web browser. It
-is supposed to use [PyQt 5](http://www.riverbankcomputing.co.uk/software/pyqt/intro), [Qt 5](http://qt-project.org/qt5) and the definition area is planned to be
-implemented using [Qt WebKit](http://qt-project.org/doc/qt-5/qtwebkit-index.html) module.  App is mainly developed on linux and as
-such it should be simplest to run on linux. Binaries for different operation systems could
-be achieved by using [pyqtdeploy](http://www.riverbankcomputing.com/software/pyqtdeploy/).
+With **Definator** you will be able to quickly save terms and write up
+definition for them. It should support cross-referencing the terms and also
+enable attachment of media to the definition texts (mainly images is needed). It
+is also a plan to save the data in such a form, that a definition project can be
+browsed in a web browser. It is supposed to use
+[PyQt 5](http://www.riverbankcomputing.co.uk/software/pyqt/intro),
+[Qt 5](http://qt-project.org/qt5).
+The definition area is planned to be
+implemented using
+[Qt WebKit](http://qt-project.org/doc/qt-5/qtwebkit-index.html)
+module and at least one custom built qt-module is to be done for listing of
+terms and cross references between them.  App is mainly developed on linux and
+as such it should be simplest to run on linux. Binaries for different operation
+systems could be achieved by using
+[pyqtdeploy](http://www.riverbankcomputing.com/software/pyqtdeploy/)
+which will be looked into at some point.
 
+##Mocups
+
+There will be mocups.
+
+##UML
+
+There probably will be UML-diagrams.
 
 ## Licensing
 
