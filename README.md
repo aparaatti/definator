@@ -12,7 +12,7 @@ such it should be simplest to run on linux.
 
 
 Definator is licensed **[GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt)** which
-is in line with the Qt 5 and PyQt 5 licensing options.
+is in line with the [Qt 5](http://qt-project.org/doc/qt-5/licensing.html) and [PyQt 5](http://www.riverbankcomputing.co.uk/software/pyqt/license) licensing options.
 
 The app is developed as a part of a
 [graphical UI programming course TIEA212](http://appro.mit.jyu.fi/gko/) (2014)
