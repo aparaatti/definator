@@ -8,7 +8,8 @@ attaching media to the definition texts. It is also a plan to save the data in
 such a form, that a definition project can be also browsed in a web browser. It
 is supposed to use [PyQt 5](http://www.riverbankcomputing.co.uk/software/pyqt/intro), [Qt 5](http://qt-project.org/qt5) and the definition area is planned to be
 implemented using [Qt WebKit](http://qt-project.org/doc/qt-5/qtwebkit-index.html) module.  App is mainly developed on linux and as
-such it should be simplest to run on linux.
+such it should be simplest to run on linux. Binaries for different operation systems could
+be achieved by using [pyqtdeploy](http://www.riverbankcomputing.com/software/pyqtdeploy/).
 
 
 Definator is licensed **[GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt)** which
