@@ -6,8 +6,8 @@ With Definator you will be able to quickly save terms and write up definition
 for them. It should support cross referencing the terms and also enable
 attaching media to the definition texts. It is also a plan to save the data in
 such a form, that a definition project can be also browsed in a web browser. It
-is supposed to use PyQt 5, Qt 5 and the definition area is planned to be
-implemented using Qt WebKit module.  App is mainly developed on linux and as
+is supposed to use [PyQt 5](http://www.riverbankcomputing.co.uk/software/pyqt/intro), [Qt 5](http://qt-project.org/qt5) and the definition area is planned to be
+implemented using [Qt WebKit](http://qt-project.org/doc/qt-5/qtwebkit-index.html) module.  App is mainly developed on linux and as
 such it should be simplest to run on linux.
 
 
