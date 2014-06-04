@@ -20,9 +20,10 @@ systems could be achieved by using
 [pyqtdeploy](http://www.riverbankcomputing.com/software/pyqtdeploy/),
 which will be looked into at some point.
 
-* Maybe use QML
+* Resources:
     * [QML intro](http://qt-project.org/doc/qt-5/qmlapplications.html)
     * [PyQT and QML](http://pyqt.sourceforge.net/Docs/PyQt5/qml.html)
+    * [Making a QML component](http://doc-snapshot.qt-project.org/qtcreator-2.8/quick-components.html)
 
 ##Mocups
 
@@ -30,7 +31,7 @@ There will be mocups.
 
 ##UML
 
-There probably will be UML-diagrams.
+For planning phase uml models click [here](https://github.com/aparaatti/definator/model).
 
 ## Licensing
 

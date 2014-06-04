@@ -1,0 +1,17 @@
+skinparam shadowing false
+@startuml
+class QtTermRelationMap {
+    -Term term
+    -Margin margin
+    -LineWidth lw
+    -Font font
+}
+
+class TermBall {
+    -Term term
+}
+
+QtTermRelationMap *-- "*" TermBall
+TermBall *-- Location
+TermBall "*" <-- TermBall : Related
+@enduml

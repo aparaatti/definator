@@ -1,0 +1,35 @@
+skinparam shadowing false
+@startuml
+interface DefinatorGUIInterface {
+    +linkTerms(relatedTerms : Term[])
+    +linkTermToTerms(term : Term, relatedTerms : Term[])
+    +unlinkTerms(relatedTerms : Term[])
+    +unlinkTermFromTerms(term : Term, relatedTerms : Term[])
+    +remTerm(term : Term)
+    +addTerm(term : Term)
+    +getPage(term : Term) : Text
+    +getTerms() : Term[]
+    +setPageTemplate(pt : PageTemplate)
+    +save()
+    +saveTerms(Path path)
+    +deleteTerms(Path path)
+    +openTerms(Path path)
+}
+
+class QtTermList{
+    -Orientation orientation
+    -Term[] terms
+    termChosenEvent()
+    multipleTermsChosenRightClickedEvent()
+    currentTermListener()
+}
+
+class QtTermDisplay{
+    -Term term
+}
+
+DefinatorGUIInterface <-- QtTermList : Uses
+QtTermList --> QtTermDisplay : Uses
+QtTermList --> QtTermList : Uses
+
+@enduml

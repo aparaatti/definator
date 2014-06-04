@@ -1,0 +1,70 @@
+skinparam shadowing false
+@startuml
+
+class Terms {
+    -FileHandler fh
+    -TermsTemplate trt
+    -createWepPage(template : PageTemplate, template2 : TermsTemplate, Path path)
+}
+
+class Term {
+    -FileHandler fh
+    -Str term
+    -Str[] relatedTerms
+    +addRelatedTerm(term : str)
+    +remRelatedTerm(term : str)
+    +getRelatedTerms() : str[]
+    +getDescription() : str
+    +save(Path path)
+}
+
+class Description {
+    -FileHandler fh
+    -Text textWithTags
+    +getText() : Text
+    +save(Path path)
+    +evalMediaTagsAndMove()
+}
+
+class Media {
+    -FileHandler fh
+    -Type type
+    -Path path
+    -Filename filename
+    +save(Path path)
+}
+
+Interface Template {
+    -StyleSheet ss
+    -Html container
+    +buildHtmlView() : Html
+}
+
+class PageTemplate
+class TermsTemplate
+
+interface DefinatorGUIInterface {
+    +linkTerms(relatedTerms : Term[])
+    +linkTermToTerms(term : Term, relatedTerms : Term[])
+    +unlinkTerms(relatedTerms : Term[])
+    +unlinkTermFromTerms(term : Term, relatedTerms : Term[])
+    +remTerm(term : Term)
+    +addTerm(term : Term)
+    +getPage(term : Term) : Text
+    +getTerms() : Term[]
+    +setPageTemplate(pt : PageTemplate)
+    +save()
+    +saveTerms(Path path)
+    +deleteTerms(Path path)
+    +openTerms(Path path)
+}
+
+Template <|-- PageTemplate
+Template <|-- TermsTemplate
+Terms o-- Template
+Terms *-- "*" Term
+Term *-- Description
+Description o-- "*" Media
+Terms --|> DefinatorGUIInterface
+
+@enduml
