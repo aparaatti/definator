@@ -31,7 +31,7 @@ There will be mocups.
 
 ##UML
 
-For planning phase uml models click [here](https://github.com/aparaatti/definator/model).
+For planning phase plantUml models click [here](https://github.com/aparaatti/definator/tree/master/models).
 
 ## Licensing
 
