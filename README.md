@@ -25,13 +25,9 @@ which will be looked into at some point.
     * [PyQT and QML](http://pyqt.sourceforge.net/Docs/PyQt5/qml.html)
     * [Making a QML component](http://doc-snapshot.qt-project.org/qtcreator-2.8/quick-components.html)
 
-##Mocups
+##Planning
 
-There will be mocups.
-
-##UML
-
-For planning phase plantUml models click [here](https://github.com/aparaatti/definator/tree/master/models).
+Pencil mocups for "main" -window, "add term" -window and "term reference map" -window [here](https://github.com/aparaatti/definator/tree/master/mockups). For PlantUml models click [here](https://github.com/aparaatti/definator/tree/master/models).
 
 ## Licensing
 
