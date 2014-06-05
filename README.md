@@ -27,7 +27,7 @@ which will be looked into at some point.
 
 ##Planning
 
-Pencil mocups for "main" -window, "add term" -window and "term reference map" -window [here](https://github.com/aparaatti/definator/tree/master/mockups). For PlantUml models click [here](https://github.com/aparaatti/definator/tree/master/models).
+[Pencil](http://pencil.evolus.vn/) mocups for "main" -window, "add term" -window and "term reference map" -window [here](https://github.com/aparaatti/definator/tree/master/mockups). For PlantUml models click [here](https://github.com/aparaatti/definator/tree/master/models).
 
 ## Licensing
 
