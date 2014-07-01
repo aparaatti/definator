@@ -5,70 +5,71 @@
 skinparam shadowing false
 @startuml
 
-class Terms {
-    -FileHandler fh
-    -TermsTemplate trt
-    -createWepPage(template : PageTemplate, template2 : TermsTemplate, Path path)
+class TermsController {
+    -Term[] deletedTerms
+    -Term[] addedTerms
 }
 
 class Term {
-    -FileHandler fh
     -Str term
     -Str[] relatedTerms
-    +addRelatedTerm(term : str)
-    +remRelatedTerm(term : str)
+    -Link[] links
+    .. linking ..
+    +linkTerm(term : str)
+    +unlinkTerm(term : str)
+    +linkImage(image : str)
+    +unlinkImage(image : str)
+    +linkFile(file : str)
+    +unlinkFile(file : str)
+    .. access ..
     +getRelatedTerms() : str[]
+    +getImages() : str[]
+    +getFiles() : str[]
     +getDescription() : str
-    +save(Path path)
 }
 
 class Description {
-    -FileHandler fh
-    -Text textWithTags
+    -Text text
     +getText() : Text
-    +save(Path path)
-    +evalMediaTagsAndMove()
+    +save(path : str)
 }
 
-class Media {
-    -FileHandler fh
-    -Type type
-    -Path path
-    -Filename filename
-    +save(Path path)
+class Links {
+    -Link[] links
+    +Links(path : str)
+    +addLink(type : str, value : str)
+    +save(path : str)
 }
 
-Interface Template {
-    -StyleSheet ss
-    -Html container
-    +buildHtmlView() : Html
+class Link {
+    -str[] allowedTypes
+    -str[] type
+    -str[] value
+    +Link(type : str,value : str)
 }
-
-class PageTemplate
-class TermsTemplate
 
 interface DefinatorGUIInterface {
-    +linkTerms(relatedTerms : Term[])
-    +linkTermToTerms(term : Term, relatedTerms : Term[])
-    +unlinkTerms(relatedTerms : Term[])
-    +unlinkTermFromTerms(term : Term, relatedTerms : Term[])
-    +remTerm(term : Term)
-    +addTerm(term : Term)
-    +getPage(term : Term) : Text
+    .. File handling ..
+    +loadProject(path : str)
+    +saveProject()
+    +setPath(path : str)
+    +linkImage(term : Term, path : str)
+    +linkFile(term : Term, path : str)
+    ..
+    +linkTerms(term : Term, relatedTerms : Term[])
+    +unlinkTerms(term : Term, relatedTerms : Term[])
+    +unlinkImage(term : Term, filename : str, file : File)
+    +unlinkFile(term : Term, filename : str, file : File)
+    ..
     +getTerms() : Term[]
-    +setPageTemplate(pt : PageTemplate)
-    +save()
-    +saveTerms(Path path)
-    +deleteTerms(Path path)
-    +openTerms(Path path)
+    +addTerm(term : Term)
+    +remTerm(term : Term)
 }
 
-Template <|-- PageTemplate
-Template <|-- TermsTemplate
-Terms o-- Template
-Terms *-- "*" Term
+TermsController *-- "*" Term
 Term *-- Description
-Description o-- "*" Media
-Terms --|> DefinatorGUIInterface
+Term *-- Links
+Links *-- "*" Link
+TermsController --|> DefinatorGUIInterface
 
 @enduml
