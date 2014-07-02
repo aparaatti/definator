@@ -8,21 +8,23 @@ skinparam shadowing false
 class TermsController {
     -Term[] deletedTerms
     -Term[] addedTerms
+    -Term[] changedTerms
 }
 
 class Term {
+    -int id
     -Str term
-    -Str[] relatedTerms
+    -int[] relatedTerms
     -Link[] links
     .. linking ..
-    +linkTerm(term : str)
-    +unlinkTerm(term : str)
+    +linkTerm(termId : int)
+    +unlinkTerm(termId : int)
     +linkImage(image : str)
     +unlinkImage(image : str)
     +linkFile(file : str)
     +unlinkFile(file : str)
     .. access ..
-    +getRelatedTerms() : str[]
+    +getRelatedTerms() : int[]
     +getImages() : str[]
     +getFiles() : str[]
     +getDescription() : str
@@ -31,14 +33,12 @@ class Term {
 class Description {
     -Text text
     +getText() : Text
-    +save(path : str)
 }
 
 class Links {
     -Link[] links
     +Links(path : str)
     +addLink(type : str, value : str)
-    +save(path : str)
 }
 
 class Link {
@@ -56,7 +56,7 @@ interface DefinatorGUIInterface {
     +linkImage(term : Term, path : str)
     +linkFile(term : Term, path : str)
     ..
-    +linkTerms(term : Term, relatedTerms : Term[])
+    +linkTerms(termId : Term, relatedTerms : Term[])
     +unlinkTerms(term : Term, relatedTerms : Term[])
     +unlinkImage(term : Term, filename : str, file : File)
     +unlinkFile(term : Term, filename : str, file : File)
