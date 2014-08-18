@@ -1,8 +1,6 @@
 # This file is a part of Definator (https://github.com/aparaatti/definator)
 # and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
 #
-__author__ = 'Niko Humalamäki'
-
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtGui import QKeySequence
@@ -10,8 +8,6 @@ from PyQt5.QtGui import QKeySequence
 from .main_widget import MainWidget
 from .terms_controller import TermsController
 from .helper_functions import *
-
-__version__ = "0.0.1"
 
 
 class MainWindow(QMainWindow):

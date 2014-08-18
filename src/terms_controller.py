@@ -3,14 +3,14 @@
 #
 __author__ = 'Niko Humalamäki'
 
-from copy import deepcopy, copy
+from copy import deepcopy
 
-from data.term import *
-from helper_functions import TermAlreadyExists
+from .data.term import *
+from .data.term_exceptions import TermAlreadyExists
 
 
 class TermsController(object):
-    """ 
+    """
     Controller class, handles the data objects inter operation, term changes and their history and
     loading and saving a project.
 
@@ -18,7 +18,7 @@ class TermsController(object):
     strings from terms.json file and creates Term objects using the
     string as an initializer and adds related links and description to the term
     from the filesystem.
-    
+
     Tests:
     >>> tc = TermsController()
     >>> newTerm = tc.get_term("New")
@@ -65,6 +65,9 @@ class TermsController(object):
             term_to_load = Term(term_str)
             self._terms[term_str] = term_to_load.load(self._project_path)
         return deepcopy(self._terms[term_str])
+
+    def list_of_terms(self):
+        return self._terms.keys()
 
     def remove_term(self, term_str):
         """

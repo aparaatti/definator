@@ -69,7 +69,7 @@ class LinksEncoder(json.JSONEncoder):
 
 
 class LinksDecoder(json.JSONDecoder):
-    """ Decodes an Terms object from JSON. """
+    """ Decodes a Terms object from JSON. """
 
     def decode(self, string):
         return set(json.JSONDecoder.decode(self, string))

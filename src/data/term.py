@@ -6,6 +6,7 @@ import os
 
 from .description import *
 from .term_links import *
+from .term_exceptions import *
 
 
 class Term(object):
@@ -31,12 +32,16 @@ class Term(object):
     """
 
     def __init__(self, term="New"):
-        self.term = term
+        self.__term = term
         self.__description = Description()
         self.__links = Links()
 
     def __contains__(self, related_term):
         return related_term in self.__relatedTerms
+
+    @property
+    def term(self):
+        return self.__term
 
     @property
     def description(self):
@@ -46,13 +51,20 @@ class Term(object):
     def links(self):
         return self.__links
 
+    @term.setter
+    def term(self, term: str):
+        self.__term = term
+
     @description.setter
     def description(self, description: Description):
         """
         :type description: Descripiton
         :param description: Decription of the term
         """
-        self.__description = description
+        if self.__description is None:
+            self.__description = description
+        else:
+            raise DescriptionAlreadySetException(self)
 
     @links.setter
     def links(self, links: Links):
@@ -60,9 +72,12 @@ class Term(object):
         :param links: Links object containing links to resource files and linked terms
         :type links: Links
         """
-        self.__links = links
+        if self.__links is None:
+            self.__links = links
+        else:
+            raise LinksAlreadySetException(self)
 
-    def link_term(self, term: Term):
+    def link_term(self, term):
         """
         :param term: Term object
         """
@@ -75,7 +90,7 @@ class Term(object):
         self.__description.rem_paragraph(paragraph)
 
     def add_image(self, image_path: Path):
-        #TODO check that it really is an image.
+        # TODO check that it really is an image.
         """
 
         :param image_path: path to image file

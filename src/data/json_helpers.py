@@ -3,7 +3,6 @@ from pathlib import Path
 
 def load_json(path, decoder=json.JSONDecoder()):
         """
-
         :param path: Path
         :param decoder:
         :return:
