@@ -6,8 +6,8 @@ class Links(object):
     Handles linked terms and files.
     """
 
-    def __init__(self):
-        self.__links = []
+    def __init__(self, links: list=[]):
+        self.__links = links
 
     def add_term_link(self, term_str):
         self.__links.append({"term": term_str})
@@ -54,8 +54,10 @@ class Links(object):
         save_json(path / "links.json", self, LinksEncoder())
 
     def load(self, path):
-        self.__links = load_json(path / "links.json", LinksDecoder())
+        self.__links = list(load_json(path / "links.json", LinksDecoder()))
 
+    def __str__(self):
+        return str(self.__links) + " Type: " + str(type(self.__links))
 
 class LinksEncoder(json.JSONEncoder):
     """ Encodes a Terms object to JSON eg. saves Term self.__term str 
