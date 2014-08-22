@@ -4,7 +4,7 @@
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from .qtdesigner.ui_QTermLinker import *
+from .qtdesigner.ui_QTermLinker import Ui_TermLinker
 
 
 class TermLinker(QWidget):
@@ -24,7 +24,7 @@ class TermLinker(QWidget):
         super(TermLinker, self).__init__(parent)
         self.__data = data
         self.__index = 0
-        self.ui = Ui_TermLinker();
+        self.ui = Ui_TermLinker()
         self.ui.setupUi(self)
         self.ui.buttonLinkTerm.clicked.connect(self.__link_term)
         self.ui.buttonUnlinkTerm.clicked.connect(self.__unlink_term)
@@ -36,10 +36,11 @@ class TermLinker(QWidget):
         self.ui.tableWidget.setItem(0, 0, QTableWidgetItem("Kissa"))
         #parent = self.tableWidget.parent()
 
-
+    @pyqtSlot()
     def __link_term(self):
         self.ui.linkTermClicked.emit()
 
+    @pyqtSlot()
     def __unlink_term(self):
         self.ui.unlinkTermClicked.emit("kizza")
 
