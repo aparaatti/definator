@@ -87,23 +87,21 @@ class MainWindow(QMainWindow):
         """
         Here is the main signaling action of the application.
         """
-        #Selection of term signals map here, because we get the term here from
-        #termsController and pass it to MainWidget:
-        #termSelected signals should pass the term as string.
-        self.main_widget.termBrowser.strSelected.connect(self.change_term)
-        self.main_widget.termDisplay.termSelected.connect(self.change_term)
-        self.main_widget.add_a_term.connect(self.add_term)
+        #Selection of term and saving of terms signals map here,
+        #because TermsController handles them.
+        self.main_widget.term_str_selected.connect(self.change_term)
+        self.main_widget.save_changes.connect(self.save_project)
+
+        #When new term is added, we give it to termsController and update Main
+        #Widget
+        self.main_widget.add_new_term.connect(self.add_term)
 
         #When term content has changed, we update the term to termController
         #and pass updated term to MainWidget:
         self.signal_updated_a_term.connect(self.main_widget.update_term)
 
-        #When new term is added, we give it to termsController and update Main
-        #Widget
-        self.main_widget.add_a_term.connect(self.add_term)
-
         #MainWidget handles changing and updating the term to it's components:
-        self.main_widget.current_term_updated.connect(self.update_term)
+        #self.main_widget.current_term_updated.connect(self.update_term)
         self.signal_current_term.connect(self.main_widget.change_term)
         self.signal_opened_a_project.connect(self.main_widget.opened_a_new_project)
         self.signal_added_a_term.connect(self.main_widget.added_a_term)

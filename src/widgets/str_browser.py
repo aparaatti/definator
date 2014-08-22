@@ -5,7 +5,7 @@ from .qtdesigner.ui_QStrBrowser import Ui_QStrBrowser
 
 
 class StrBrowser(QWidget):
-    strSelected = pyqtSignal(str)
+    str_selected = pyqtSignal(str)
     listUpdated = pyqtSignal()
 
     def __init__(self, parent=None):
@@ -41,7 +41,7 @@ class StrBrowser(QWidget):
 
     def __str_selected(self):
         self._current_str = self.ui.listWidget.currentItem().text()
-        self.strSelected.emit(self._current_str)
+        self.str_selected.emit(self._current_str)
 
     def set_current_str(self, string: str):
         if self._current_str == string:

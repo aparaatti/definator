@@ -6,5 +6,6 @@ from .qtdesigner.ui_QTermDisplay import Ui_TermDisplay
 
 
 class TermEditor(QWidget):
-    stopEditing = pyqtSignal(bool)
+    stopped_editing = pyqtSignal(bool)
+    stopped_editing_new_term = pyqtSignal(Term)
     pass

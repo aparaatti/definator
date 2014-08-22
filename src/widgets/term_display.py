@@ -1,5 +1,5 @@
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
+from PyQt5.QtWidgets import QWidget, QApplication
 
 from ..data.term import Term
 from .qtdesigner.ui_QTermDisplay import Ui_TermDisplay
