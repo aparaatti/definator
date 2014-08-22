@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'QStrBrowser.ui'
 #
-# Created: Wed Aug 20 12:04:22 2014
+# Created: Fri Aug 22 10:33:08 2014
 #      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!
