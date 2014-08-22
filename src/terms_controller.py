@@ -11,7 +11,7 @@ from .data.term_exceptions import TermAlreadyExists
 
 class TermsController(object):
     """
-    Controller class, handles the data objects inter operation, term changes and their history and
+    Controller class, handles the data object inter operation, term changes and their history and
     loading and saving a project.
 
     Has a set of Term objects. On initialization reads a list of term
@@ -35,6 +35,7 @@ class TermsController(object):
 
     def __init__(self):
         self._project_path = Path('')
+
         self._terms_list = []
         self._terms = {}
 
@@ -42,32 +43,39 @@ class TermsController(object):
         self._deleted_terms = {}
         self._changed_terms = {}
 
+        self._has_changed = False
+
         self.add_term("New")
 
     @property
-    def project_path(self):
-        return self._project_path.parts
-
-    @project_path.setter
-    def project_path(self, project_path):
-        """
-        :param project_path: Path
-        """
-        self._project_path = Path(project_path)
-
+    def unsaved_changes(self):
+        return self._has_changed
 
     def get_term(self, term_str):
         self._lazy_load_term(term_str)
         return deepcopy(self._terms[term_str])
 
     def _lazy_load_term(self, term_str):
-        if term_str not in self._terms.keys():
+        if term_str not in self._terms.keys() and term_str in self._terms_list:
             term_to_load = Term(term_str)
             self._terms[term_str] = term_to_load.load(self._project_path)
+
         return deepcopy(self._terms[term_str])
 
+    @property
     def list_of_terms(self):
         return self._terms.keys()
+
+    @property
+    def project_path(self):
+        return self._project_path
+
+    @property
+    def project_name(self):
+        if len(self._project_path.parts) is 0:
+            return "Untitled"
+
+        return self.project_path.parts[-1]
 
     def remove_term(self, term_str):
         """
@@ -79,50 +87,75 @@ class TermsController(object):
         self._lazy_load_term(term_str)
         self._deleted_terms.add(self._terms.pop(term_str))
         self._terms_list.remove(term_str)
+        self._has_changed = True
 
     def add_term(self, term_str):
         """
-        Adds a term to the project. If the term already exist, throws term already exists exception.
-        Content has to be added to the term using methods change_term_name, change_term_description,
-        change_term_images and change_term_attachments.
+        Adds a term to the project.
 
         :param term_str: type str
+        :return bool: If the term already exist, returns false if term is added successfully
+        returns true.
         """
         term = Term(term_str)
         if term_str not in self._terms_list:
             self._terms[term_str] = term
             self._added_terms[term_str] = term
+            self._has_changed = True
+            return True
         else:
             raise TermAlreadyExists(
-                "There already is a term '" + term_str + "'. Update terms using methods change_term_name, "
-                + "change_term_description, change_term_images and change_term_attachments")
+                "There already is a term '" + term_str + "'. Update terms using update_term method)")
+            return False
 
-    def change_term_name(self, term):
-        self._changed_terms(self._terms[term])
-        raise NotImplemented
+    def update_term(self, original: Term, new: Term):
+        self._changed_term(self._term[original])
+        self._has_changed = True
+        return True
 
-    def change_term_description(self, term, description):
-        self._changed_terms(self._terms[term])
-        raise NotImplemented
-
-    def change_term_images(self, term, paths):
-        self._changed_terms(self._terms[term])
-        raise NotImplemented
-
-    def change_term_attachments(self, term, paths):
-        self._changed_terms(self._terms[term])
-        raise NotImplemented
+    # def change_term_name(self, term):
+    #     self._changed_terms(self._terms[term])
+    #     raise NotImplemented
+    #
+    # def change_term_description(self, term, description):
+    #     self._changed_terms(self._terms[term])
+    #     raise NotImplemented
+    #
+    # def change_term_images(self, term, paths):
+    #     self._changed_terms(self._terms[term])
+    #     raise NotImplemented
+    #
+    # def change_term_attachments(self, term, paths):
+    #     self._changed_terms(self._terms[term])
+    #     raise NotImplemented
 
     @staticmethod
-    def link_terms(term, related_terms):
+    def link_terms(self, term, related_terms):
         for rlTerm in related_terms:
-            term.linkTerm(rlTerm)
-            rlTerm.linkTerm(term)
+            term.link_term(rlTerm)
+            rlTerm.link_term(term)
 
-    def load_project(self):
-        self._terms = {}
-        self._terms_list = load_json(self._project_path / "terms.json", TermsDecoder())
-        return self._terms_list.copy()
+        self._has_changed = True
+
+    def load_project(self, project_path):
+        """
+        Build a list of terms in the project.
+        Throws FileNotFoundError if can't load the file. The individual terms
+        are build lazily when get_term is called.
+
+        :param project_path:
+        :return:
+        """
+        terms_list = load_json(project_path / "terms.json", TermsDecoder())
+        if terms_list is not None:
+            self._project_path = project_path
+            self._terms = {}
+            self._terms_list = list(terms_list)
+            self._terms_list.sort()
+            self._has_changed = False
+            return self._terms_list.copy()
+        else:
+            return None
 
     def save_project(self):
         """
@@ -149,6 +182,7 @@ class TermsController(object):
             term.save(self.__project_path / term.term)
 
         self.__save_terms()
+        self._has_changed = False
 
     def __save_terms(self):
         """
@@ -175,5 +209,6 @@ class TermsDecoder(json.JSONDecoder):
     """ Decodes an TermsController object from JSON. """
 
     def decode(self, term_str):
+        print(term_str)
         return set(json.JSONDecoder.decode(self, term_str))
 
