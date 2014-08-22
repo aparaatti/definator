@@ -21,7 +21,7 @@ class StrBrowser(QWidget):
         self.ui.lineEdit.hide()
 
         #Data:
-        self.set_list(["New", "Old"])
+        self.set_list(list())
         self._populate_list_view()
         self.ui.listWidget.itemDoubleClicked.connect(self.__str_selected)
         self.listUpdated.connect(self.ui.listWidget.clear)

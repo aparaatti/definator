@@ -168,7 +168,7 @@ class MainWindow(QMainWindow):
 
     def save_project(self):
         if self.terms_controller.project_path == Path(""):
-            self.warning_dialog("Not implemented", "Saving... but it's not implemented!")
+            self.warning_dialog("Not implemented", "Saving a new project... but it's not implemented!")
         else:
             self.terms_controller.save_project()
 
