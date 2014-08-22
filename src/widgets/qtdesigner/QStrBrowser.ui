@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>QTermList</class>
- <widget class="QWidget" name="QTermList">
+ <class>QStrBrowser</class>
+ <widget class="QWidget" name="QStrBrowser">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -70,13 +70,6 @@
        <widget class="QListWidget" name="listWidget"/>
       </item>
      </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="buttonAddTerm">
-     <property name="text">
-      <string>&amp;Add term</string>
-     </property>
     </widget>
    </item>
   </layout>
