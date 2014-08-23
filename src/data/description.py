@@ -36,7 +36,7 @@ class Description(object):
             if type(item) is Paragraph:
                 content.append("<p>" + str(item) + "</p>")
             elif type(item) is Title:
-                content.append("<h1>" + str(item) + "</h1>")
+                content.append("<h2>" + str(item) + "</h2>")
             elif type(item) is ImagePath:
                 content.append('<img src="' + str(item) + '"/>')
             else:
@@ -45,6 +45,23 @@ class Description(object):
                 print("Item: " + str(item))
 
         return "".join(content)
+
+    @property
+    def content_text(self):
+        content_text = list()
+
+        for item in self.__content:
+            if type(item) is Paragraph:
+                content_text.append(str(item))
+            elif type(item) is Title:
+                content_text.append(str(item))
+            elif type(item) is ImagePath:
+                content_text.append(str(item))
+            else:
+                print("Could not find type, where are the types?")
+                print("Type: " + str(type(item)))
+                print("Item: " + str(item))
+        return "".join(content_text)
 
     def __str__(self):
         return str(self.__content)
