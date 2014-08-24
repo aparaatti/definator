@@ -1,3 +1,6 @@
+# This file is a part of Definator (https://github.com/aparaatti/definator)
+# and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
+#
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QApplication
 
@@ -10,7 +13,7 @@ class TermDisplay(QWidget):
     termSelected = pyqtSignal(str)
 
     def __init__(self, term: Term=Term(), parent=None):
-        super(TermDisplay, self).__init__(parent)
+        super().__init__(parent)
         self.ui = Ui_TermDisplay()
         self.__text = term
         self.__index = 0

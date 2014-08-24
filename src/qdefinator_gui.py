@@ -103,7 +103,7 @@ class MainWindow(QMainWindow):
         #MainWidget handles changing and updating the term to it's components:
         #self.main_widget.current_term_updated.connect(self.update_term)
         self.signal_current_term.connect(self.main_widget.change_term)
-        self.signal_opened_a_project.connect(self.main_widget.opened_a_new_project)
+        self.signal_opened_a_project.connect(self.main_widget.initialize_a_project)
         self.signal_added_a_term.connect(self.main_widget.added_a_term)
 
     @pyqtSlot(Term)
