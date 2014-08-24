@@ -72,7 +72,7 @@ class Term(object):
 
     @property
     def description(self):
-        return self.__description
+        return self.__description.content_text
 
     @property
     def links(self):
