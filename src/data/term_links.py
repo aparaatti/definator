@@ -55,6 +55,10 @@ class Links(object):
     def get_linked_files(self):
         return self._get_linked_type("file")
 
+    @property
+    def has_changed(self):
+        False
+
     def save(self, path):
         save_json(path / "links.json", self, LinksEncoder())
 

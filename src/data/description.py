@@ -76,10 +76,10 @@ class Description(object):
         :param text: Str containing text annotated with tags.
         """
         self.__content = list()
-
-        self.__content.append(Paragraph(text))
-        #self.__content.append(Title(text))
-        #self.__content.append(ImagePath(path))
+        if len(text):
+            self.__content.append(Paragraph(text))
+            #self.__content.append(Title(text))
+            #self.__content.append(ImagePath(path))
 
     def __str__(self):
         return str(self.__content)

@@ -32,20 +32,19 @@ class TermsController(object):
     >>> termJSON.term
     'JSON'
     """
-
+    #TODO: Mitä tapahtuu kun string listin termin nimi muuttuu?
+    #   -menee has changed listaan
+    #   -tallennettaessa kysytään termin nimi ladattaessa (vanha nimi), jos on vaihtunut:
+    #       --> kopioidaan vanhat tiedot talteen
+    #       --> poistetaan vanha termi
     def __init__(self):
         self._project_path = Path('')
-
         self._terms_list = []
         self._terms = {}
-
         self._added_terms = {}
         self._deleted_terms = {}
         self._changed_terms = {}
-
         self._has_changed = False
-
-        self.add_term("New")
 
     @property
     def unsaved_changes(self):
@@ -89,29 +88,28 @@ class TermsController(object):
         self._terms_list.remove(term_str)
         self._has_changed = True
 
-    def add_term(self, term_str):
+    def add_term(self, term: Term):
         """
         Adds a term to the project.
 
-        :param term_str: type str
+        :param term: type Term
         :return bool: If the term already exist, returns false if term is added successfully
         returns true.
         """
-        term = Term(term_str)
-        if term_str not in self._terms_list:
-            self._terms[term_str] = term
-            self._added_terms[term_str] = term
+        print("Adding term @ TermsController: " + str(term))
+        if term.term not in self._terms_list:
+            self._terms[term.term] = term
+            self._added_terms[term.term] = term
             self._has_changed = True
+            self._terms_list.append(term.term)
             return True
         else:
             raise TermAlreadyExists(
-                "There already is a term '" + term_str + "'. Update terms using update_term method)")
+                "There already is a term '" + term.term + "'. Update terms using update_term method)")
             return False
 
-    def update_term(self, original: Term, new: Term):
-        self._changed_term(self._term[original])
-        self._has_changed = True
-        return True
+    def update_term(self, term: Term):
+        self._changed_terms[self.get_term(term.term_on_init)] = term
 
     # def change_term_name(self, term):
     #     self._changed_terms(self._terms[term])

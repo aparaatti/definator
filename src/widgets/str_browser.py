@@ -12,7 +12,7 @@ class StrBrowser(QWidget):
         #Load QWidget
         super(StrBrowser, self).__init__(parent)
         self._current_str = ""
-        self.str_list = []
+        self.str_dict = {}
         self.ui = Ui_QStrBrowser()
 
         #Setup widgets from Ui_QStrBrowser (qtdesigner made ui):
@@ -31,13 +31,19 @@ class StrBrowser(QWidget):
         return self._current_str
 
     def set_list(self, str_list: list):
-        self.str_list = str_list
+        for item in str_list:
+            self.str_dict[item] = 0
+
         self.listUpdated.emit()
         self._populate_list_view()
 
     def _populate_list_view(self):
-        for row, string in enumerate(self.str_list):
+        string_list = list(self.str_dict.keys())
+        string_list.sort()
+        self.ui.listWidget.clear()
+        for row, string in enumerate(string_list):
             self.ui.listWidget.insertItem(row, string)
+            self.str_dict[string] = row
 
     def __str_selected(self):
         self._current_str = self.ui.listWidget.currentItem().text()
@@ -50,6 +56,14 @@ class StrBrowser(QWidget):
             if item.text == string:
                 self.ui.listWidget.setCurrentItem(item)
                 break
+
+    def mark_str(self, string: str):
+        pass
+
+    def add_a_str(self, string: str):
+        self.str_dict[string] = 0
+        self._populate_list_view()
+        self.mark_str(string)
 
 if __name__ == "__main__":
     import sys

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'QTermDisplay.ui'
 #
-# Created: Mon Aug 25 12:47:20 2014
+# Created: Tue Aug 26 16:40:33 2014
 #      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!

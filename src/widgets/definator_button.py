@@ -31,3 +31,6 @@ class DefinatorButton(QWidget):
 
     def align_right(self):
         self.layout.setAlignment(Qt.AlignRight)
+
+    def center(self):
+        self.layout.setAlignment(Qt.AlignCenter)

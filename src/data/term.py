@@ -47,12 +47,12 @@ class Term(object):
     </head>
     <body>
     <h1>{{ term }}</h1>
-    {{ description|safe }}.
+    {{ description|safe }}
     </body>
     </html>
     """)
 
-    def __init__(self, term="New"):
+    def __init__(self, term=""):
         self.__termId = 0
         self.__term = None
         self.term = term
