@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'QTermDisplay.ui'
 #
-# Created: Sun Aug 24 00:29:15 2014
+# Created: Mon Aug 25 12:47:20 2014
 #      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -13,7 +13,7 @@ class Ui_TermDisplay(object):
     def setupUi(self, TermDisplay):
         TermDisplay.setObjectName("TermDisplay")
         TermDisplay.resize(658, 429)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(TermDisplay.sizePolicy().hasHeightForWidth())

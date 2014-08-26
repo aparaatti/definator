@@ -6,6 +6,7 @@
 __author__ = 'Niko Humalamäki'
 
 import os
+from pathlib import Path
 
 from .description import *
 from .term_links import *
@@ -14,6 +15,7 @@ from .term_exceptions import *
 from django.template import Template, Context
 from django.conf import settings
 settings.configure()
+
 
 class Term(object):
     termId = 0
@@ -52,12 +54,25 @@ class Term(object):
 
     def __init__(self, term="New"):
         self.__termId = 0
-        self.__term = term
+        self.__term = None
+        self.term = term
+        self.__term_on_init = term
         self.__description = Description()
         self.__links = Links()
+        self.__has_changed = False
 
     def __contains__(self, related_term):
         return related_term in self.__relatedTerms
+
+    @property
+    def has_changed(self):
+        if self.__description.has_changed or self.__links.has_changed or self.term != self.__term_on_init:
+            return True
+        return False
+
+    @property
+    def term_on_init(self):
+        return self.__term_on_init
 
     @property
     def term_as_html(self):
@@ -80,29 +95,19 @@ class Term(object):
 
     @term.setter
     def term(self, term: str):
-        self.__term = term
+        if term != self.__term:
+            self.__has_changed = True
+            self.__term = term
 
     @description.setter
-    def description(self, description: Description):
+    def description(self, description_text: str):
         """
-        :type description: Descripiton
-        :param description: Decription of the term
-        """
-        if self.__description is None:
-            self.__description = description
-        else:
-            raise DescriptionAlreadySetException(self)
+        :param description_text: text version of the description. Description
+            object has to be able to parse this.
 
-    @links.setter
-    def links(self, links: Links):
+        :return:
         """
-        :param links: Links object containing links to resource files and linked terms
-        :type links: Links
-        """
-        if self.__links is None:
-            self.__links = links
-        else:
-            raise LinksAlreadySetException(self)
+        self.__description.content_text = description_text
 
     def link_term(self, term):
         """
@@ -110,31 +115,8 @@ class Term(object):
         """
         self.__links.add_term_link(term.term)
 
-    def add_paragraph(self, paragraph: str):
-        self.__description.add_paragraph(paragraph)
-
-    def rem_paragraph(self, paragraph: str):
-        self.__description.rem_paragraph(paragraph)
-
-    def add_image(self, image_path: Path):
-        # TODO check that it really is an image.
-        """
-
-        :param image_path: path to image file
-        :raise NotImplementedException:
-        """
-        raise NotImplementedException("Adding an image not implemented")
-
-    def add_image_to_text(self, new_description: Description, image_path: Path):
-        """
-        Add image to term and tag it to a location in Description text.
-
-        :param new_description: description containing tag for image
-        :param image_path: path to image
-        :raise NotImplementedException:
-        """
-        self.description.add_image_path(image_path)
-        raise NotImplementedException("Adding an image not implemented")
+    def link_file(self, path: Path):
+        self.__links.add_file(path)
 
     def load(self, path):
         self.__links = Links()
@@ -144,6 +126,7 @@ class Term(object):
         self.__description.load(path / self.term)
         print(str(self) + "description: " + str(self.__description))
         print(self.__description.content_html)
+        self.__term_on_init = self.term
         return self
 
     def save(self, path):

@@ -1,4 +1,5 @@
 from .json_helpers import *
+from pathlib import Path
 
 
 class Links(object):
@@ -16,6 +17,10 @@ class Links(object):
         # TODO kopioi oikeaan paikkaan
         # self.__links.add({"image": str(path)})
         raise NotImplementedException("Adding an image not implemented yet.")
+
+    def add_images(self, path: Path):
+        if path.exists():
+            self.__links.add(Image)
 
     def add_file(self, path):
         # TODO lisää tiedosto
@@ -59,8 +64,9 @@ class Links(object):
     def __str__(self):
         return str(self.__links) + " Type: " + str(type(self.__links))
 
+
 class LinksEncoder(json.JSONEncoder):
-    """ Encodes a Terms object to JSON eg. saves Term self.__term str 
+    """ Encodes a Terms object to JSON eg. saves Term self.__term str
     attributes as JSON array """
 
     def default(self, obj):
@@ -75,4 +81,3 @@ class LinksDecoder(json.JSONDecoder):
 
     def decode(self, string):
         return set(json.JSONDecoder.decode(self, string))
-        
