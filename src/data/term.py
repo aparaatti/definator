@@ -26,6 +26,9 @@ class Term(object):
     The description and links JSON files are assumed to be located under
     the project folder in a folder named as self.__term string.
 
+    Term it self is saved, when it creates self named folder for
+    description and links.
+
     Todo:
         handle missing folder and missing or empty files.
 
@@ -129,9 +132,13 @@ class Term(object):
         self.__term_on_init = self.term
         return self
 
-    def save(self, path):
-        self.__links.save(path / self.term)
-        self.__description.save(path / self.term)
+    def save(self, path: Path):
+        path = path / self.term
+        if not path.exists():
+            path.mkdir()
+
+        self.__description.save(path)
+        self.__links.save(path)
 
     def delete(self, path):
         self.__links.delete(path / self.term)

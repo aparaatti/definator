@@ -1,3 +1,4 @@
+import os
 from .json_helpers import *
 from pathlib import Path
 
@@ -8,10 +9,10 @@ class Links(object):
     """
 
     def __init__(self, links: list=[]):
-        self.__links = links
+        self._links = links
 
     def add_term_link(self, term_str):
-        self.__links.append({"term": term_str})
+        self._links.append({"term": term_str})
 
     def add_image(self, path):
         # TODO kopioi oikeaan paikkaan
@@ -20,7 +21,7 @@ class Links(object):
 
     def add_images(self, path: Path):
         if path.exists():
-            self.__links.add(Image)
+            self._links.add(Image)
 
     def add_file(self, path):
         # TODO lisää tiedosto
@@ -28,7 +29,7 @@ class Links(object):
         raise NotImplementedException("Adding a file not implemented yet.")
 
     def rem_term_link(self, term_str):
-        self.__links.rem({"term": term_str})
+        self._links.rem({"term": term_str})
 
     def rem_image(self, name):
         # TODO poista kuva projektikansiosta
@@ -41,8 +42,8 @@ class Links(object):
 
     def _get_linked_type(self, type_of_link):
         linked = []
-        for value in self.__links:
-            if self.__links[value] == type_of_link:
+        for value in self._links:
+            if self._links[value] == type_of_link:
                 linked.append(value)
         return linked
 
@@ -55,18 +56,21 @@ class Links(object):
     def get_linked_files(self):
         return self._get_linked_type("file")
 
+    def save(self, path: Path):
+        save_json(path / "links.json", self, LinksEncoder())
+
+    def load(self, path: Path):
+        self._links = list(load_json(path / "links.json", LinksDecoder()))
+
+    def delete(self, path: Path):
+        os.remove(str(path / "links.json"))
+
     @property
     def has_changed(self):
         False
 
-    def save(self, path):
-        save_json(path / "links.json", self, LinksEncoder())
-
-    def load(self, path):
-        self.__links = list(load_json(path / "links.json", LinksDecoder()))
-
     def __str__(self):
-        return str(self.__links) + " Type: " + str(type(self.__links))
+        return str(self._links) + " Type: " + str(type(self._links))
 
 
 class LinksEncoder(json.JSONEncoder):
@@ -75,7 +79,7 @@ class LinksEncoder(json.JSONEncoder):
 
     def default(self, obj):
         if isinstance(obj, Links):
-            return obj.__links
+            return obj._links
         # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)
 

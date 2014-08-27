@@ -3,7 +3,7 @@
 #
 __author__ = 'Niko Humalamäki'
 
-from copy import deepcopy
+from copy import deepcopy, copy
 
 from .data.term import *
 from .data.term_exceptions import TermAlreadyExists
@@ -41,7 +41,6 @@ class TermsController(object):
         self._project_path = Path('')
         self._terms_list = []
         self._terms = {}
-        self._added_terms = {}
         self._deleted_terms = {}
         self._changed_terms = {}
         self._has_changed = False
@@ -50,24 +49,13 @@ class TermsController(object):
     def unsaved_changes(self):
         return self._has_changed
 
-    def get_term(self, term_str):
-        self._lazy_load_term(term_str)
-        return deepcopy(self._terms[term_str])
-
-    def _lazy_load_term(self, term_str):
-        if term_str not in self._terms.keys() and term_str in self._terms_list:
-            term_to_load = Term(term_str)
-            self._terms[term_str] = term_to_load.load(self._project_path)
-
-        return deepcopy(self._terms[term_str])
-
     @property
     def list_of_terms(self):
         return self._terms.keys()
 
     @property
     def project_path(self):
-        return self._project_path
+        return copy(self._project_path)
 
     @property
     def project_name(self):
@@ -76,16 +64,21 @@ class TermsController(object):
 
         return self.project_path.parts[-1]
 
-    def remove_term(self, term_str):
+    def get_term(self, term_str):
+        return self._lazy_load_term(term_str)
+
+    def remove_term(self, term: Term):
         """
         Removes a term given as a string by moving it to deleted terms. The term disappears
         when the project is saved.
 
-        :param term_str:
+        :param term: type Term
         """
-        self._lazy_load_term(term_str)
-        self._deleted_terms.add(self._terms.pop(term_str))
-        self._terms_list.remove(term_str)
+        if self._deleted_terms.get(term.term) is None:
+            self._deleted_terms[term.term] = list()
+
+        self._deleted_terms[term.term].append(self._terms.pop(term.term))
+        self._terms_list.remove(term.term)
         self._has_changed = True
 
     def add_term(self, term: Term):
@@ -96,44 +89,62 @@ class TermsController(object):
         :return bool: If the term already exist, returns false if term is added successfully
         returns true.
         """
-        print("Adding term @ TermsController: " + str(term))
         if term.term not in self._terms_list:
             self._terms[term.term] = term
-            self._added_terms[term.term] = term
+
+            if self._changed_terms.get(term.term) is None:
+                self._changed_terms[term.term] = list()
+
+            self._changed_terms[term.term].append(term)
             self._has_changed = True
             self._terms_list.append(term.term)
             return True
         else:
-            raise TermAlreadyExists(
-                "There already is a term '" + term.term + "'. Update terms using update_term method)")
+            #Term already exists
             return False
 
     def update_term(self, term: Term):
-        self._changed_terms[self.get_term(term.term_on_init)] = term
+        """
+        Update terms assumes that it is given a copy of the terms object TermsController
+        already has.
 
-    # def change_term_name(self, term):
-    #     self._changed_terms(self._terms[term])
-    #     raise NotImplemented
-    #
-    # def change_term_description(self, term, description):
-    #     self._changed_terms(self._terms[term])
-    #     raise NotImplemented
-    #
-    # def change_term_images(self, term, paths):
-    #     self._changed_terms(self._terms[term])
-    #     raise NotImplemented
-    #
-    # def change_term_attachments(self, term, paths):
-    #     self._changed_terms(self._terms[term])
-    #     raise NotImplemented
+        :param term:
+        """
+        if term.term_on_init != term.term and term.term not in self._terms_list:
+            #We add the term that has changed it's term string as a new Term
+            #objet.
+            self.add_term(term)
 
-    @staticmethod
+            #We remove the old term str from terms_list, which contains all terms as str
+            self._terms_list.remove(term.term_on_init)
+            if self._deleted_terms.get(term.term_on_init) is None:
+                self._deleted_terms[term.term_on_init] = list()
+
+            #The original unchanged Term object is removed from self._terms
+            #dictionary and added to a list in delete dictionary:
+            self._deleted_terms[term.term_on_init].append(self._terms.pop(term.term_on_init))
+        else:
+            #We put the old version of Term in to a list in changed terms dictionary,
+            #and replace the older version in self._terms
+            if self._changed_terms.get(term.term) is None:
+                self._changed_terms[term.term] = list()
+
+            self._changed_terms[term.term].append(self._terms.pop(term.term))
+            self._terms[term.term] = term
+
     def link_terms(self, term, related_terms):
         for rlTerm in related_terms:
             term.link_term(rlTerm)
             rlTerm.link_term(term)
 
         self._has_changed = True
+
+    def _lazy_load_term(self, term_str):
+        if term_str not in self._terms.keys() and term_str in self._terms_list:
+            term_to_load = Term(term_str)
+            self._terms[term_str] = term_to_load.load(self._project_path)
+
+        return deepcopy(self._terms[term_str])
 
     def load_project(self, project_path):
         """
@@ -155,38 +166,29 @@ class TermsController(object):
         else:
             return None
 
-    def save_project(self):
+    def save_project(self, path: Path=None):
         """
-        Saves the project to project_path
-
-        :return:
+        Saves the project to given path, or if it's not
+        given to self._project_path.
         """
-        if os.path.exists(self.__project_path):
-            raise NotImplemented
-        else:
-            raise NotImplemented
+        if path is None:
+            path = self._project_path
+        if os.path.exists(str(path)):
+            for term_list in self._deleted_terms.values():
+                term_list[0].delete(path)
+            for term_list in self._changed_terms.values():
+                term_list[-1].save(path)
 
-        for term in self.changed_terms:
-            term.save(self.__project_path)
-        for term in self._added_terms:
-            term.save(self.__project_path)
-        for term in self._deleted_terms:
-            term.delete(self.__project_path)
+            self._save_terms()
+            self._changed_terms = {}
+            self._deleted_terms = {}
+            self._has_changed = False
 
-        self._added_terms = {}
-        self._deleted_terms = {}
-
-        for term in self.terms:
-            term.save(self.__project_path / term.term)
-
-        self.__save_terms()
-        self._has_changed = False
-
-    def __save_terms(self):
+    def _save_terms(self):
         """
         Saves list of terms as json to the project root "terms.json".
         """
-        save_json(self.__project_path / "terms.json", self._terms, TermsEncoder())
+        save_json(self._project_path / "terms.json", self, TermsEncoder())
 
 
 class TermsEncoder(json.JSONEncoder):
@@ -196,7 +198,7 @@ class TermsEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, TermsController):
             terms = []
-            for term in obj:
+            for term in obj._terms.values():
                 terms.append(term.term)
             return terms
         # Let the base class default method raise the TypeError

@@ -12,7 +12,6 @@ def load_json(path: Path, decoder=json.JSONDecoder()):
     """
     file = None
     try:
-        #terms = {str(x) for x in p.iterdir() if x.is_dir()}
         file = path.open("r")
         json_set = decoder.decode(file.read())
         file.close()
@@ -24,7 +23,9 @@ def load_json(path: Path, decoder=json.JSONDecoder()):
 
 
 def save_json(path: Path, obj, encoder=json.JSONEncoder()):
-    file = open(path,   "w")
+    if not path.exists():
+        path.touch()
+    file = open(str(path), "w")
     file.truncate()
     for encoded_line in encoder.encode(obj):
         file.write(encoded_line)

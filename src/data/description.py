@@ -1,3 +1,4 @@
+import os
 from .json_helpers import *
 from .items import Title, ImagePath, Paragraph
 
@@ -11,24 +12,27 @@ class Description(object):
     Description can have Titles, Paragraphs and ImagePaths.
     """
     def __init__(self):
-        self.__content = list()
-        self.__old_content = tuple()
+        self._content = list()
+        self._old_content = tuple()
 
-    def load(self, path):
+    def load(self, path: Path):
         content = load_json(path / "description.json", DescriptionDecoder())
-        self.__content = content
-        self.__old_content = tuple(content)
+        self._content = content
+        self._old_content = tuple(content)
 
-    def save(self, path):
-        save_json(self,  path, DescriptionEncoder())
+    def save(self, path: Path):
+        save_json(path / "description.json", self, DescriptionEncoder())
+
+    def delete(self, path: Path):
+        os.remove(str(path / "description.json"))
 
     @property
     def has_changed(self):
-        if len(self.__content) != len(self.__old_content):
+        if len(self._content) != len(self._old_content):
             return True
 
-        for item in self.__content:
-            if item not in self.__old_content:
+        for item in self._content:
+            if item not in self._old_content:
                 return True
 
         return False
@@ -36,7 +40,7 @@ class Description(object):
     @property
     def content_html(self):
         content = list()
-        for item in self.__content:
+        for item in self._content:
             if type(item) is Paragraph:
                 content.append("<p>" + str(item) + "</p>")
             elif type(item) is Title:
@@ -54,7 +58,7 @@ class Description(object):
     def content_text(self):
         content_text = list()
 
-        for item in self.__content:
+        for item in self._content:
             if type(item) is Paragraph:
                 content_text.append(str(item))
             elif type(item) is Title:
@@ -75,14 +79,14 @@ class Description(object):
 
         :param text: Str containing text annotated with tags.
         """
-        self.__content = list()
+        self._content = list()
         if len(text):
-            self.__content.append(Paragraph(text))
+            self._content.append(Paragraph(text))
             #self.__content.append(Title(text))
             #self.__content.append(ImagePath(path))
 
     def __str__(self):
-        return str(self.__content)
+        return str(self._content)
 
 
 class DescriptionEncoder(json.JSONEncoder):
@@ -90,7 +94,16 @@ class DescriptionEncoder(json.JSONEncoder):
     str attributes as JSON array """
     def default(self, obj):
         if isinstance(obj, Description):
-            return list(obj.__content)
+            print(obj.content_text)
+            strlist = list()
+            for item in obj._content:
+                if type(item) is Paragraph:
+                    strlist.append("Paragraph:" + str(item))
+                elif type(item) is Title:
+                    strlist.append("Title:" + str(item))
+                elif type(item) is ImagePath:
+                    strlist.append("ImagePath:" + str(item))
+            return strlist
         # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)
 
@@ -107,4 +120,4 @@ class DescriptionDecoder(json.JSONDecoder):
                 content.append(Title(string[6:]))
             if string.startswith("ImagePath:"):
                 content.append(ImagePath(Path(string[10:])))
-        return tuple(content)
+        return content
