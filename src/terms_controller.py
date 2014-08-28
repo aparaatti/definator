@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+#
 # This file is a part of Definator (https://github.com/aparaatti/definator)
 # and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
 #
@@ -6,8 +8,6 @@ __author__ = 'Niko Humalamäki'
 from copy import deepcopy, copy
 
 from .data.term import *
-from .data.term_exceptions import TermAlreadyExists
-
 
 class TermsController(object):
     """
@@ -65,7 +65,8 @@ class TermsController(object):
         return self.project_path.parts[-1]
 
     def get_term(self, term_str):
-        return self._lazy_load_term(term_str)
+        self._lazy_load_term(term_str)
+        return deepcopy(self._terms[term_str])
 
     def remove_term(self, term: Term):
         """
@@ -74,14 +75,18 @@ class TermsController(object):
 
         :param term: type Term
         """
+        if term not in self._terms.values():
+            return False
+
         if self._deleted_terms.get(term.term) is None:
             self._deleted_terms[term.term] = list()
 
         self._deleted_terms[term.term].append(self._terms.pop(term.term))
         self._terms_list.remove(term.term)
         self._has_changed = True
+        return True
 
-    def add_term(self, term: Term):
+    def add_term(self, term_to_add: Term):
         """
         Adds a term to the project.
 
@@ -89,15 +94,15 @@ class TermsController(object):
         :return bool: If the term already exist, returns false if term is added successfully
         returns true.
         """
+        term = deepcopy(term_to_add)
         if term.term not in self._terms_list:
             self._terms[term.term] = term
-
             if self._changed_terms.get(term.term) is None:
                 self._changed_terms[term.term] = list()
-
             self._changed_terms[term.term].append(term)
-            self._has_changed = True
             self._terms_list.append(term.term)
+
+            self._has_changed = True
             return True
         else:
             #Term already exists
@@ -144,8 +149,6 @@ class TermsController(object):
             term_to_load = Term(term_str)
             self._terms[term_str] = term_to_load.load(self._project_path)
 
-        return deepcopy(self._terms[term_str])
-
     def load_project(self, project_path):
         """
         Build a list of terms in the project.
@@ -166,14 +169,14 @@ class TermsController(object):
         else:
             return None
 
-    def save_project(self, path: Path=None):
+    def save_project(self):
         """
-        Saves the project to given path, or if it's not
-        given to self._project_path.
+        Saves the project to self._project_path.
+
+        The path has to exists, will not create one.
         """
-        if path is None:
-            path = self._project_path
-        if os.path.exists(str(path)):
+        path = self._project_path
+        if path.exists() and path is not Path(''):
             for term_list in self._deleted_terms.values():
                 term_list[0].delete(path)
             for term_list in self._changed_terms.values():
@@ -183,6 +186,24 @@ class TermsController(object):
             self._changed_terms = {}
             self._deleted_terms = {}
             self._has_changed = False
+
+    def save_project_as(self, path: Path=None):
+        """
+        Saves the project to given path.
+
+        The path has to exists, will not create one.
+        """
+        if path.exists():
+            for term in self._terms_list:
+                self._lazy_load_term(term)
+            for term in self._terms.values():
+                term.save(path)
+
+            self._changed_terms = {}
+            self._deleted_terms = {}
+            self._has_changed = False
+            self._project_path = path
+            self._save_terms()
 
     def _save_terms(self):
         """
@@ -200,6 +221,7 @@ class TermsEncoder(json.JSONEncoder):
             terms = []
             for term in obj._terms.values():
                 terms.append(term.term)
+                print("terms.json: " + term.term)
             return terms
         # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)
@@ -209,6 +231,5 @@ class TermsDecoder(json.JSONDecoder):
     """ Decodes an TermsController object from JSON. """
 
     def decode(self, term_str):
-        print(term_str)
         return set(json.JSONDecoder.decode(self, term_str))
 
