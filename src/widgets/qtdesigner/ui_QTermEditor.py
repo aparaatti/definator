@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'QTermEditor.ui'
 #
-# Created: Tue Aug 26 16:40:33 2014
+# Created: Thu Aug 28 12:22:04 2014
 #      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!

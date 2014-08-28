@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'QTermDisplay.ui'
 #
-# Created: Tue Aug 26 16:40:33 2014
+# Created: Thu Aug 28 12:22:04 2014
 #      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -30,6 +30,9 @@ class Ui_TermDisplay(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.contentWebView.sizePolicy().hasHeightForWidth())
         self.contentWebView.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setFamily("Monospace")
+        self.contentWebView.setFont(font)
         self.contentWebView.setUrl(QtCore.QUrl("about:blank"))
         self.contentWebView.setObjectName("contentWebView")
         self.verticalLayout.addWidget(self.contentWebView)

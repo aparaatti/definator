@@ -1,21 +1,11 @@
+# -*- coding: utf-8 -*-
+#
 # This file is a part of Definator (https://github.com/aparaatti/definator)
 # and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
-#
-# html template idea from:
-# http://stackoverflow.com/questions/6748559/generating-html-documents-in-python
 __author__ = 'Niko Humalamäki'
-
-import os
-from pathlib import Path
 
 from .description import *
 from .term_links import *
-from .term_exceptions import *
-
-from django.template import Template, Context
-from django.conf import settings
-settings.configure()
-
 
 class Term(object):
     termId = 0
@@ -43,35 +33,22 @@ class Term(object):
     >>> term.link_term(term2)
     """
 
-    template = Template("""
-    <html>
-    <head>
-    <title>{{ term }}</title>
-    </head>
-    <body>
-    <h1>{{ term }}</h1>
-    {{ description|safe }}
-    </body>
-    </html>
-    """)
-
-    def __init__(self, term=""):
+    def __init__(self, term=None):
         self.__termId = 0
-        self.__term = None
-        self.term = term
+        self.__term = term
         self.__term_on_init = term
         self.__description = Description()
         self.__links = Links()
         self.__has_changed = False
 
     def __contains__(self, related_term):
-        return related_term in self.__relatedTerms
+        return related_term in self.__links.get_linked_terms()
 
     @property
     def has_changed(self):
-        if self.__description.has_changed or self.__links.has_changed or self.term != self.__term_on_init:
-            return True
-        return False
+        return self.__description.has_changed or \
+            self.__links.has_changed or \
+            self.term != self.__term_on_init
 
     @property
     def term_on_init(self):
@@ -79,10 +56,15 @@ class Term(object):
 
     @property
     def term_as_html(self):
-        context = Context(
-            dict(term=self.__term, description=self.__description.content_html)
-        )
-        return self.template.render(context)
+        return "<html><head>" +\
+            '<meta charset="UTF-8">' +\
+            "<title>" + self.term + "</title>" +\
+            "</head>" +\
+            "<body>" +\
+            "<h1>" + self.term + "</h1>" +\
+            self.__description.content_html + \
+            "</body>" + \
+            "</html>"
 
     @property
     def term(self):

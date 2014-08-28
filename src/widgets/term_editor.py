@@ -17,8 +17,7 @@ class TermEditor(QWidget):
         self.ui = Ui_TermEditor()
         self.ui.setupUi(self)
         self.ui.lineEditTitle.text = ""
-        self._current_term = Term()
-        self._is_new_term = False
+        self._current_term = None
 
         #TODO Tähän tulee oma moduulinsa text dropper bar, jossa ikoni
         #jonka voi raahata tekstialueelle, jolloin alueelle tulee
@@ -48,28 +47,21 @@ class TermEditor(QWidget):
 
     def set_term(self, term: Term):
         self._current_term = term
-        if term.term == Term().term:
-            self._is_new_term = True
-
         self.ui.lineEditTitle.setText(term.term)
         self.ui.textEditContent.setText(term.description)
 
     def hide(self):
-        self._update_term()
-        if self._is_new_term:
-            if self._current_term.has_changed:
-                self.stopped_editing_new_term.emit(self._current_term)
-
-            self._is_new_term = False
+        if self._current_term is None:
+            term = Term(self.ui.lineEditTitle.displayText())
+            term.description = self.ui.textEditContent.toPlainText()
+            self.ui.lineEditTitle.clear()
+            self.ui.textEditContent.clear()
+            self.stopped_editing_new_term.emit(term)
         else:
+            self._current_term.term = self.ui.lineEditTitle.displayText()
+            self._current_term.description = self.ui.textEditContent.toPlainText()
             self.stopped_editing.emit(self._current_term)
+            self._current_term = None
 
         super().hide()
 
-    def _update_term(self):
-        self._current_term.term = self.ui.lineEditTitle.displayText()
-        self._current_term.description = self.ui.textEditContent.toPlainText()
-        #print(
-        #"Line-edit: " + self.ui.lineEditTitle.displayText() + " textEdit: "
-        #+ self.ui.textEditContent.toPlainText() + " resulting term: "
-        #+ str(self._current_term))

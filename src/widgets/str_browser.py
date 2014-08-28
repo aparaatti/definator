@@ -1,5 +1,5 @@
 from PyQt5.QtCore import pyqtSignal, QMimeData
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget, QListWidgetItem
 
 from .qtdesigner.ui_QStrBrowser import Ui_QStrBrowser
 
@@ -7,12 +7,13 @@ from .qtdesigner.ui_QStrBrowser import Ui_QStrBrowser
 class StrBrowser(QWidget):
     str_selected = pyqtSignal(str)
     listUpdated = pyqtSignal()
+    list_is_empty = pyqtSignal()
 
     def __init__(self, parent=None):
         #Load QWidget
         super(StrBrowser, self).__init__(parent)
         self._current_str = ""
-        self.str_dict = {}
+        self.str_2_item = {}
         self.ui = Ui_QStrBrowser()
 
         #Setup widgets from Ui_QStrBrowser (qtdesigner made ui):
@@ -22,8 +23,8 @@ class StrBrowser(QWidget):
 
         #Data:
         self.set_list(list())
-        self._populate_list_view()
-        self.ui.listWidget.itemDoubleClicked.connect(self.__str_selected)
+        self.ui.listWidget.itemClicked.connect(self._str_selected)
+        self.ui.listWidget.setSortingEnabled(True)
         self.listUpdated.connect(self.ui.listWidget.clear)
 
     @property
@@ -31,23 +32,20 @@ class StrBrowser(QWidget):
         return self._current_str
 
     def set_list(self, str_list: list):
-        for item in str_list:
-            self.str_dict[item] = 0
-
-        self.listUpdated.emit()
-        self._populate_list_view()
-
-    def _populate_list_view(self):
-        string_list = list(self.str_dict.keys())
-        string_list.sort()
         self.ui.listWidget.clear()
-        for row, string in enumerate(string_list):
-            self.ui.listWidget.insertItem(row, string)
-            self.str_dict[string] = row
+        for row, string in enumerate(str_list):
+            self.str_2_item[string] = \
+                QListWidgetItem(string, self.ui.listWidget)
 
-    def __str_selected(self):
-        self._current_str = self.ui.listWidget.currentItem().text()
-        self.str_selected.emit(self._current_str)
+        self.ui.listWidget.sortItems()
+        self.listUpdated.emit()
+
+    def _str_selected(self):
+        if self.ui.listWidget.currentItem() is not None:
+            self._current_str = self.ui.listWidget.currentItem().text()
+            self.str_selected.emit(self._current_str)
+        else:
+            self.list_is_empty.emit()
 
     def set_current_str(self, string: str):
         if self._current_str == string:
@@ -61,9 +59,17 @@ class StrBrowser(QWidget):
         pass
 
     def add_a_str(self, string: str):
-        self.str_dict[string] = 0
-        self._populate_list_view()
+        self.str_2_item[string] = QListWidgetItem(string, self.ui.listWidget)
+        self.ui.listWidget.sortItems()
         self.mark_str(string)
+
+    def rem_a_str(self, string: str):
+        self.ui.listWidget.takeItem(
+            self.ui.listWidget.indexFromItem(self.str_2_item.pop(string)).row())
+        if self.ui.listWidget.count() > 0:
+            self.ui.listWidget.setCurrentRow(0)
+        self._str_selected()
+
 
 if __name__ == "__main__":
     import sys
