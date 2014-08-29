@@ -84,6 +84,11 @@ class MainWidget(QWidget):
         self.term_display.set_current_term(term)
         self.current_term = term
 
+    @pyqtSlot()
+    def reset(self):
+        self.term_str_browser.set_list([])
+        self._create_new_term()
+
     # In comming slots from outside:
     @pyqtSlot(tuple, Term)
     def initialize_a_project(self, terms: tuple, term: Term):

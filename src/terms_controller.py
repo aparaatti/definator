@@ -9,10 +9,11 @@ from copy import deepcopy, copy
 
 from .data.term import *
 
+
 class TermsController(object):
     """
-    Controller class, handles the data object inter operation, term changes and their history and
-    loading and saving a project.
+    Controller class, handles the data object inter operation, term changes and
+    their history and loading and saving a project.
 
     Has a set of Term objects. On initialization reads a list of term
     strings from terms.json file and creates Term objects using the
@@ -32,11 +33,6 @@ class TermsController(object):
     >>> termJSON.term
     'JSON'
     """
-    #TODO: Mitä tapahtuu kun string listin termin nimi muuttuu?
-    #   -menee has changed listaan
-    #   -tallennettaessa kysytään termin nimi ladattaessa (vanha nimi), jos on vaihtunut:
-    #       --> kopioidaan vanhat tiedot talteen
-    #       --> poistetaan vanha termi
     def __init__(self):
         self._project_path = Path('')
         self._terms_list = []
@@ -70,8 +66,8 @@ class TermsController(object):
 
     def remove_term(self, term: Term):
         """
-        Removes a term given as a string by moving it to deleted terms. The term disappears
-        when the project is saved.
+        Removes a term given as a string by moving it to deleted terms. The term
+        disappears when the project is saved.
 
         :param term: type Term
         """
@@ -91,8 +87,8 @@ class TermsController(object):
         Adds a term to the project.
 
         :param term: type Term
-        :return bool: If the term already exist, returns false if term is added successfully
-        returns true.
+        :return bool: If the term already exist, returns false if term is added
+        successfully returns true.
         """
         term = deepcopy(term_to_add)
         if term.term not in self._terms_list:
@@ -110,8 +106,8 @@ class TermsController(object):
 
     def update_term(self, term: Term):
         """
-        Update terms assumes that it is given a copy of the terms object TermsController
-        already has.
+        Update terms assumes that it is given a copy of the terms object
+        TermsController already has.
 
         :param term:
         """
@@ -120,17 +116,19 @@ class TermsController(object):
             #objet.
             self.add_term(term)
 
-            #We remove the old term str from terms_list, which contains all terms as str
+            #We remove the old term str from terms_list, which contains all
+            #terms as str
             self._terms_list.remove(term.term_on_init)
             if self._deleted_terms.get(term.term_on_init) is None:
                 self._deleted_terms[term.term_on_init] = list()
 
             #The original unchanged Term object is removed from self._terms
             #dictionary and added to a list in delete dictionary:
-            self._deleted_terms[term.term_on_init].append(self._terms.pop(term.term_on_init))
+            self._deleted_terms[term.term_on_init].append(
+                self._terms.pop(term.term_on_init))
         else:
-            #We put the old version of Term in to a list in changed terms dictionary,
-            #and replace the older version in self._terms
+            #We put the old version of Term in to a list in changed terms
+            #dictionary, and replace the older version in self._terms
             if self._changed_terms.get(term.term) is None:
                 self._changed_terms[term.term] = list()
 
@@ -232,4 +230,3 @@ class TermsDecoder(json.JSONDecoder):
 
     def decode(self, term_str):
         return set(json.JSONDecoder.decode(self, term_str))
-

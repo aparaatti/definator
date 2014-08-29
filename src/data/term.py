@@ -7,6 +7,7 @@ __author__ = 'Niko Humalamäki'
 from .description import *
 from .term_links import *
 
+
 class Term(object):
     termId = 0
     """
@@ -33,7 +34,7 @@ class Term(object):
     >>> term.link_term(term2)
     """
 
-    def __init__(self, term=None):
+    def __init__(self, term: str=None):
         self.__termId = 0
         self.__term = term
         self.__term_on_init = term

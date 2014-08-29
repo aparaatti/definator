@@ -69,6 +69,7 @@ class MainWindowHelper(object):
         mw.signal_opened_a_project.connect(mw.main_widget.initialize_a_project)
         mw.signal_added_a_term.connect(mw.main_widget.added_a_term)
         mw.signal_removed_a_term.connect(mw.main_widget.term_has_been_removed)
+        mw.signal_started_a_new_project.connect(mw.main_widget.reset)
 
 
 def make_action_helper(self, text, help_text, shortcut: QShortcut,

@@ -19,13 +19,10 @@ class StrBrowser(QWidget):
         #Setup widgets from Ui_QStrBrowser (qtdesigner made ui):
         self.ui.setupUi(self)
         self.ui.lineEdit.setEnabled(False)
-        self.ui.lineEdit.hide()
 
-        #Data:
-        self.set_list(list())
+        #Signals and slots:
         self.ui.listWidget.itemClicked.connect(self._str_selected)
         self.ui.listWidget.setSortingEnabled(True)
-        self.listUpdated.connect(self.ui.listWidget.clear)
 
     @property
     def current_str(self):
@@ -33,12 +30,13 @@ class StrBrowser(QWidget):
 
     def set_list(self, str_list: list):
         self.ui.listWidget.clear()
-        for row, string in enumerate(str_list):
-            self.str_2_item[string] = \
-                QListWidgetItem(string, self.ui.listWidget)
+        for string in str_list:
+            self._add_a_str(string)
 
+    def _add_a_str(self, string: str):
+        print("Adding string: " + string)
+        self.str_2_item[string] = QListWidgetItem(string, self.ui.listWidget)
         self.ui.listWidget.sortItems()
-        self.listUpdated.emit()
 
     def _str_selected(self):
         if self.ui.listWidget.currentItem() is not None:
@@ -59,8 +57,7 @@ class StrBrowser(QWidget):
         pass
 
     def add_a_str(self, string: str):
-        self.str_2_item[string] = QListWidgetItem(string, self.ui.listWidget)
-        self.ui.listWidget.sortItems()
+        self._add_a_str(string)
         self.mark_str(string)
 
     def rem_a_str(self, string: str):
