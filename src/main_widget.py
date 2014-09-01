@@ -2,15 +2,19 @@
 #
 # This file is a part of Definator (https://github.com/aparaatti/definator)
 # and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
+#
+#TODO: replace sub module method calls with signals
+#
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QSize
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
 
 from .data.term import Term
 
 from .widgets.str_browser import StrBrowser
 from .widgets.term_display import TermDisplay
 from .widgets.term_editor import TermEditor
-from .main_widget_helpers import MainWidgetButtons, MainWidgetHelper
+from .widgets.term_linker import TermLinker
+from .widgets.definator_button import DefinatorButton
 
 
 class MainWidget(QWidget):
@@ -39,24 +43,61 @@ class MainWidget(QWidget):
         self.term_str_browser = StrBrowser()
         self.term_display = TermDisplay()
         self.term_editor = TermEditor()
+        self.term_linker = TermLinker()
 
-        self.buttons = MainWidgetButtons()
+        #self.save_project = DefinatorButton("Save changes")
+        #self.save_project.center()
+        self.buttons.edit_term = DefinatorButton("Edit")
+        self.buttons.view_term = DefinatorButton("View")
+        self.buttons.remove_term = DefinatorButton("Delete")
+        self.buttons.edit_term.align_right()
+        self.buttons.view_term.align_right()
+        self.buttons.remove_term.align_right()
+        self.buttons.add_term = DefinatorButton("Add term")
+        self.buttons.add_term.center()
+
         self.setMinimumSize(QSize(750, 200))
 
         #Set layout
-        self.setLayout(MainWidgetHelper.make_layout(self))
+        layout_h = QHBoxLayout()
+
+        layout_h_term_buttons = QHBoxLayout()
+        layout_v_term_view = QVBoxLayout()
+        layout_v_term_browser = QVBoxLayout()
+
+        #Term browser area:
+        layout_h.addLayout(layout_v_term_browser)
+        layout_v_term_browser.addWidget(self.term_str_browser)
+        layout_v_term_browser.addWidget(self.buttons.add_term)
+        #layout_v_term_browser.addWidget(self.buttons.save_project)
+
+        #Term editor area:
+        layout_h_term_buttons.addWidget(self.buttons.remove_term)
+        layout_h_term_buttons.addWidget(self.buttons.view_term)
+        layout_h_term_buttons.addWidget(self.buttons.edit_term)
+        self.buttons.edit_term.hide()
+        self.buttons.remove_term.hide()
+
+        layout_v_term_view.addLayout(layout_h_term_buttons)
+        layout_v_term_view.addWidget(self.term_editor)
+        layout_v_term_view.addWidget(self.term_display)
+        self.term_display.hide()
+        layout_v_term_view.addWidget(self.term_linker)
+        #Add editor area to browser layout
+        layout_h.addLayout(layout_v_term_view)
+
+        self.setLayout(layout_h)
 
         self.term_str_browser.setFocus()
 
         # Inner interaction logic:
-        self.term_display.startEditing.connect(self._start_editing)
-
         self.term_editor.stopped_editing.connect(self._stopped_editing)
         self.term_editor.stopped_editing_new_term.connect(
             self._stopped_editing_new_term)
 
         self.term_str_browser.str_selected.connect(self._change_term)
         self.term_str_browser.list_is_empty.connect(self._create_new_term)
+
         self.buttons.add_term.clicked.connect(self._create_new_term)
         self.buttons.edit_term.clicked.connect(self._start_editing)
         self.buttons.view_term.clicked.connect(self._show_term_display)
@@ -64,10 +105,14 @@ class MainWidget(QWidget):
 
     @pyqtSlot()
     def _show_term_display(self):
+        """
+        TermEditor emits changes when it is hidden.
+        """
         if self.term_editor.isVisible():
             self.term_editor.hide()
             self.term_display.show()
             self.buttons.view_term.hide()
+            self.buttons.view_term.siz
             self.buttons.edit_term.show()
             self.buttons.remove_term.show()
 
@@ -82,6 +127,7 @@ class MainWidget(QWidget):
     def _set_current_term(self, term: Term):
         self.term_str_browser.set_current_str(term.term)
         self.term_display.set_current_term(term)
+        self.term_linker.set_current_term(term)
         self.current_term = term
 
     @pyqtSlot()
@@ -94,7 +140,6 @@ class MainWidget(QWidget):
     def initialize_a_project(self, terms: tuple, term: Term):
         self._show_term_display()
         self.term_str_browser.set_list(list(terms))
-        self.term_str_browser.set_current_str(term.term)
         self._set_current_term(term)
 
     @pyqtSlot(Term)
@@ -130,17 +175,21 @@ class MainWidget(QWidget):
 
     @pyqtSlot()
     def _start_editing(self):
+        self.term_linker.edit_mode()
         self.term_editor.set_term(self.current_term)
         self._show_term_editor()
 
     @pyqtSlot(Term)
     def _stopped_editing(self, term: Term):
+        self.term_linker.display_mode()
         self.term_display.show()
         self.update_term.emit(term)
 
     @pyqtSlot(Term)
-    def _stopped_editing_new_term(self, term):
+    def _stopped_editing_new_term(self, term: Term):
+        self.term_linker.display_mode()
         self.term_display.show()
+        print("add new")
         self.add_new_term.emit(term)
 
     @pyqtSlot()

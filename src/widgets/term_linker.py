@@ -4,10 +4,11 @@
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from .qtdesigner.ui_QTermLinker import Ui_TermLinker
+from ..data.term import Term
+from .qtdesigner.ui_QTermLinks import Ui_QTermLinks
 
 
-class TermLinker(QWidget):
+class TermLinks(QWidget):
 
     linkTermClicked = pyqtSignal()
     unlinkTermClicked = pyqtSignal(str)
@@ -20,21 +21,37 @@ class TermLinker(QWidget):
     Signals do not pass current term, since the module doesn't need to know it.
     """
 
-    def __init__(self, data: tuple, parent=None):
-        super(TermLinker, self).__init__(parent)
-        self.__data = data
+    def __init__(self, parent=None):
+        super(TermLinks, self).__init__(parent)
+        self._items = []
         self.__index = 0
-        self.ui = Ui_TermLinker()
+        self.ui = Ui_QTermLinks()
         self.ui.setupUi(self)
         self.ui.buttonLinkTerm.clicked.connect(self.__link_term)
         self.ui.buttonUnlinkTerm.clicked.connect(self.__unlink_term)
-        self.populateTableWidget(self.__data)
+        self.display_mode()
 
-    def populateTableWidget(self, data):
+    def populateTableWidget(self, thingList: list):
+        self._items.clear()
         self.ui.tableWidget.setColumnCount(3)
-        self.ui.tableWidget.setRowCount(len(data)//3+1)
-        self.ui.tableWidget.setItem(0, 0, QTableWidgetItem("Kissa"))
-        #parent = self.tableWidget.parent()
+        self.ui.tableWidget.setRowCount(len(thingList)//3+1)
+        for thing in thingList:
+            self._items.append(QTabWidgetItem(thins, self.ui.tableWidget))
+
+    @pyqtSlot(Term)
+    def set_current_term(self, term: Term):
+        self._items = term.related_terms
+        self.populateTableWidget()
+
+    @pyqtSlot()
+    def edit_mode(self):
+        self.ui.buttonUnlinkTerm.show()
+        self.ui.buttonLinkTerm.show()
+
+    @pyqtSlot()
+    def display_mode(self):
+        self.ui.buttonUnlinkTerm.hide()
+        self.ui.buttonLinkTerm.hide()
 
     @pyqtSlot()
     def __link_term(self):
@@ -42,7 +59,7 @@ class TermLinker(QWidget):
 
     @pyqtSlot()
     def __unlink_term(self):
-        self.ui.unlinkTermClicked.emit("kizza")
+        self.ui.unlinkTermClicked.emit()
 
 
 if __name__ == "__main__":
@@ -51,3 +68,14 @@ if __name__ == "__main__":
     form = TermLinker("kissa")
     form.show()
     app.exec()
+
+
+        #TODO Tästä tulee oma moduulinsa "String linker", sillä edit mode, jossa
+        # voi lisätä linkkejä
+        #self.ui.verticalLayout.addLayout(link_button_layout)
+        #link_button_layout = QHBoxLayout()
+        #self.link_terms_button = QPushButton("Link terms", self)
+        #self.unlink_terms_button = QPushButton("Unlink terms", self)
+        #link_button_layout.addWidget(self.link_terms_button)
+        #link_button_layout.addWidget(self.unlink_terms_button)
+        ## end
