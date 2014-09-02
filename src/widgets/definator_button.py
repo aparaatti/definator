@@ -15,7 +15,7 @@ class DefinatorButton(QWidget):
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        #sizePolicy.setHeightForWidth(.sizePolicy().hasHeightForWidth())
+        #sizePolicy.setHeightForWidth(QSizePolicy.hasHeightForWidth())
 
         self.layout = QVBoxLayout(self)
         self.button = QPushButton(self)
@@ -34,3 +34,6 @@ class DefinatorButton(QWidget):
 
     def center(self):
         self.layout.setAlignment(Qt.AlignCenter)
+
+    def setEnabled(self, boolean: bool):
+        self.button.setEnabled(boolean)

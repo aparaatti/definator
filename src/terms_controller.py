@@ -51,7 +51,7 @@ class TermsController(object):
 
     @property
     def project_path(self):
-        return copy(self._project_path)
+        return copy.copy(self._project_path)
 
     @property
     def project_name(self):
@@ -110,6 +110,7 @@ class TermsController(object):
         TermsController already has.
 
         :param term:
+        :return bool: Returns True if the name of the term has changed.
         """
         if term.term_on_init != term.term and term.term not in self._terms_list:
             #We add the term that has changed it's term string as a new Term
@@ -126,6 +127,7 @@ class TermsController(object):
             #dictionary and added to a list in delete dictionary:
             self._deleted_terms[term.term_on_init].append(
                 self._terms.pop(term.term_on_init))
+            return True
         else:
             #We put the old version of Term in to a list in changed terms
             #dictionary, and replace the older version in self._terms
@@ -134,13 +136,30 @@ class TermsController(object):
 
             self._changed_terms[term.term].append(self._terms.pop(term.term))
             self._terms[term.term] = term
+            return False
 
-    def link_terms(self, term, related_terms):
-        for rlTerm in related_terms:
-            term.link_term(rlTerm)
-            rlTerm.link_term(term)
+    def link_terms(self, term_str: str, str_related_terms: list):
+        target1 = self.get_term(term_str)
+        for str_related_term in str_related_terms:
+            target2 = self.get_term(str_related_term)
+            target1.link_term(target2)
+            target2.link_term(target1)
+            self.update_term(target2)
 
-        self._has_changed = True
+        self.update_term(target1)
+        return True
+
+    def unlink_terms(self, term_str: str, str_related_terms: list):
+        target1 = self.get_term(term_str)
+        for str_related_term in str_related_terms:
+            target2 = self.get_term(str_related_term)
+            target1.unlink_term(target2)
+            target2.unlink_term(target1)
+            self.update_term(target2)
+
+        self.update_term(target1)
+        return True
+
 
     def _lazy_load_term(self, term_str):
         if term_str not in self._terms.keys() and term_str in self._terms_list:
@@ -219,7 +238,6 @@ class TermsEncoder(json.JSONEncoder):
             terms = []
             for term in obj._terms.values():
                 terms.append(term.term)
-                print("terms.json: " + term.term)
             return terms
         # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)

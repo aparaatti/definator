@@ -1,4 +1,4 @@
-from PyQt5.QtCore import pyqtSignal, QMimeData
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget, QListWidgetItem
 
 from .qtdesigner.ui_QStrBrowser import Ui_QStrBrowser
@@ -21,7 +21,7 @@ class StrBrowser(QWidget):
         self.ui.lineEdit.setEnabled(False)
 
         #Signals and slots:
-        self.ui.listWidget.itemClicked.connect(self._str_selected)
+        self.ui.listWidget.itemActivated.connect(self._str_selected)
         self.ui.listWidget.setSortingEnabled(True)
 
     @property
@@ -33,8 +33,10 @@ class StrBrowser(QWidget):
         for string in str_list:
             self._add_a_str(string)
 
+    def get_list(self):
+        return list(self.str_2_item.keys())
+
     def _add_a_str(self, string: str):
-        print("Adding string: " + string)
         self.str_2_item[string] = QListWidgetItem(string, self.ui.listWidget)
         self.ui.listWidget.sortItems()
 
@@ -48,12 +50,10 @@ class StrBrowser(QWidget):
     def set_current_str(self, string: str):
         if self._current_str == string:
             return
-        for item in self.ui.listWidget.items(QMimeData()):
-            if item.text == string:
-                self.ui.listWidget.setCurrentItem(item)
-                break
+        self.ui.listWidget.setCurrentItem(self.str_2_item[string])
 
     def mark_str(self, string: str):
+        #TODO this
         pass
 
     def add_a_str(self, string: str):
@@ -66,12 +66,3 @@ class StrBrowser(QWidget):
         if self.ui.listWidget.count() > 0:
             self.ui.listWidget.setCurrentRow(0)
         self._str_selected()
-
-
-if __name__ == "__main__":
-    import sys
-    from PyQt5.QtWidgets import QApplication
-    app = QApplication(sys.argv)
-    form = StrBrowser()
-    form.show()
-    app.exec()

@@ -2,7 +2,7 @@
 # and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
 #
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QPushButton, QWidget, QHBoxLayout
+from PyQt5.QtWidgets import QWidget
 
 from ..data.term import Term
 from .qtdesigner.ui_QTermEditor import Ui_TermEditor
@@ -33,35 +33,31 @@ class TermEditor(QWidget):
         # Aluksi voisi esim. avata tiedoston käyttöjärjestelmän
         # oletussovelluksella.
 
-        #TODO Tästä tulee oma moduulinsa "String linker", sillä edit mode, jossa
-        # voi lisätä linkkejä
-
-        link_button_layout = QHBoxLayout()
-        self.link_terms_button = QPushButton("Link terms", self)
-        self.unlink_terms_button = QPushButton("Unlink terms", self)
-        link_button_layout.addWidget(self.link_terms_button)
-        link_button_layout.addWidget(self.unlink_terms_button)
-        # end
-
-        self.ui.verticalLayout.addLayout(link_button_layout)
+    def _clear(self):
+        self.ui.lineEditTitle.clear()
+        self.ui.textEditContent.clear()
+        self._current_term = None
 
     def set_term(self, term: Term):
         self._current_term = term
-        self.ui.lineEditTitle.setText(term.term)
-        self.ui.textEditContent.setText(term.description)
+        if self._current_term is None:
+            self._clear()
+        else:
+            self.ui.lineEditTitle.setText(term.term)
+            self.ui.textEditContent.setText(term.description)
 
     def hide(self):
         if self._current_term is None:
-            term = Term(self.ui.lineEditTitle.displayText())
-            term.description = self.ui.textEditContent.toPlainText()
-            self.ui.lineEditTitle.clear()
-            self.ui.textEditContent.clear()
-            self.stopped_editing_new_term.emit(term)
+            self.stopped_editing_new_term.emit(self._fill_term(Term()))
+            self._clear()
         else:
-            self._current_term.term = self.ui.lineEditTitle.displayText()
-            self._current_term.description = self.ui.textEditContent.toPlainText()
+            self._fill_term(self._current_term)
             self.stopped_editing.emit(self._current_term)
-            self._current_term = None
+            self._clear()
 
         super().hide()
 
+    def _fill_term(self, term: Term):
+        term.term = self.ui.lineEditTitle.displayText()
+        term.description = self.ui.textEditContent.toPlainText()
+        return term

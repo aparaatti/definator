@@ -8,40 +8,49 @@ from ..data.term import Term
 from .qtdesigner.ui_QTermLinks import Ui_QTermLinks
 
 
-class TermLinks(QWidget):
+class TermLinker(QWidget):
 
-    linkTermClicked = pyqtSignal()
-    unlinkTermClicked = pyqtSignal(str)
+    linkTermsClicked = pyqtSignal()
+    unlinkTermsClicked = pyqtSignal()
 
     """
-    ToDo:
-        -Lista näytetään webkitillä. Html generoidaan oliosta.
-        -
-
     Signals do not pass current term, since the module doesn't need to know it.
     """
 
     def __init__(self, parent=None):
-        super(TermLinks, self).__init__(parent)
+        super(TermLinker, self).__init__(parent)
         self._items = []
         self.__index = 0
         self.ui = Ui_QTermLinks()
         self.ui.setupUi(self)
-        self.ui.buttonLinkTerm.clicked.connect(self.__link_term)
-        self.ui.buttonUnlinkTerm.clicked.connect(self.__unlink_term)
         self.display_mode()
+        self.ui.tableWidget.setColumnCount(5)
 
-    def populateTableWidget(self, thingList: list):
+        self.ui.buttonLinkTerm.clicked.connect(self._link_term)
+        self.ui.buttonUnlinkTerm.clicked.connect(self._unlink_term)
+        #self.ui.verticalLayout.size
+        #self.ui.tableWidget.resizeEvent.connect(self.reset_columns_and_rows)
+        #self.ui.tableWidget.cellActivated.connect(self._term_selected)
+
+    def _populate_TableWidget(self, str_list: list):
         self._items.clear()
-        self.ui.tableWidget.setColumnCount(3)
-        self.ui.tableWidget.setRowCount(len(thingList)//3+1)
-        for thing in thingList:
-            self._items.append(QTabWidgetItem(thins, self.ui.tableWidget))
+        self.ui.tableWidget.clear()
+        for string in str_list:
+            self._items.append(QTableWidgetItem(string))
+
+        self.ui.tableWidget.setRowCount(len(str_list)//5+1)
+        row = 0
+        col = 0
+        for item in self._items:
+            self.ui.tableWidget.setItem(row, col, item)
+            col += 1
+            if col > 4:
+                col = 0
+                row += 1
 
     @pyqtSlot(Term)
     def set_current_term(self, term: Term):
-        self._items = term.related_terms
-        self.populateTableWidget()
+        self._populate_TableWidget(term.related_terms)
 
     @pyqtSlot()
     def edit_mode(self):
@@ -54,28 +63,13 @@ class TermLinks(QWidget):
         self.ui.buttonLinkTerm.hide()
 
     @pyqtSlot()
-    def __link_term(self):
-        self.ui.linkTermClicked.emit()
+    def _link_term(self):
+        self.linkTermsClicked.emit()
 
     @pyqtSlot()
-    def __unlink_term(self):
-        self.ui.unlinkTermClicked.emit()
+    def _unlink_term(self):
+        self.unlinkTermsClicked.emit()
 
-
-if __name__ == "__main__":
-    import sys
-    app = QApplication(sys.argv)
-    form = TermLinker("kissa")
-    form.show()
-    app.exec()
-
-
-        #TODO Tästä tulee oma moduulinsa "String linker", sillä edit mode, jossa
-        # voi lisätä linkkejä
-        #self.ui.verticalLayout.addLayout(link_button_layout)
-        #link_button_layout = QHBoxLayout()
-        #self.link_terms_button = QPushButton("Link terms", self)
-        #self.unlink_terms_button = QPushButton("Unlink terms", self)
-        #link_button_layout.addWidget(self.link_terms_button)
-        #link_button_layout.addWidget(self.unlink_terms_button)
-        ## end
+    @pyqtSlot()
+    def reset_columns_and_rows(self):
+        print("resize")

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'QTextEditDrop.ui'
 #
-# Created: Sun Aug 24 00:29:15 2014
+# Created: Tue Sep  2 14:55:00 2014
 #      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!

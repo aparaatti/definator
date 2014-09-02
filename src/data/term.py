@@ -12,7 +12,7 @@ class Term(object):
     termId = 0
     """
     Term object. Is given a term string on initialization and tells
-    its attributes self.__description and self.__links to initialize.
+    its attributes self._description and self.__links to initialize.
 
     The description and links JSON files are assumed to be located under
     the project folder in a folder named as self.__term string.
@@ -35,25 +35,25 @@ class Term(object):
     """
 
     def __init__(self, term: str=None):
-        self.__termId = 0
-        self.__term = term
-        self.__term_on_init = term
-        self.__description = Description()
-        self.__links = Links()
-        self.__has_changed = False
+        self._termId = 0
+        self._term = term
+        self._term_on_init = term
+        self._description = Description()
+        self._links = Links()
+        self._has_changed = False
 
     def __contains__(self, related_term):
-        return related_term in self.__links.get_linked_terms()
+        return related_term in self._links.get_linked_terms()
 
     @property
     def has_changed(self):
-        return self.__description.has_changed or \
-            self.__links.has_changed or \
-            self.term != self.__term_on_init
+        return self._description.has_changed or \
+            self._links.has_changed or \
+            self.term != self._term_on_init
 
     @property
     def term_on_init(self):
-        return self.__term_on_init
+        return self._term_on_init
 
     @property
     def term_as_html(self):
@@ -63,27 +63,33 @@ class Term(object):
             "</head>" +\
             "<body>" +\
             "<h1>" + self.term + "</h1>" +\
-            self.__description.content_html + \
+            self._description.content_html + \
             "</body>" + \
             "</html>"
 
     @property
     def term(self):
-        return self.__term
+        return self._term
 
     @property
     def description(self):
-        return self.__description.content_text
+        return self._description.content_text
 
     @property
     def links(self):
-        return self.__links
+        return self._links
+
+    @property
+    def related_terms(self):
+        return self._links.get_linked_terms()
 
     @term.setter
     def term(self, term: str):
-        if term != self.__term:
-            self.__has_changed = True
-            self.__term = term
+        if term == "":
+            self.term = None
+        elif term != self._term:
+            self._has_changed = True
+            self._term = term
 
     @description.setter
     def description(self, description_text: str):
@@ -93,42 +99,42 @@ class Term(object):
 
         :return:
         """
-        self.__description.content_text = description_text
+        self._description.content_text = description_text
 
     def link_term(self, term):
         """
         :param term: Term object
         """
-        self.__links.add_term_link(term.term)
+        self._links.add_term_link(term.term)
+
+    def unlink_term(self, term):
+        self._links.rem_term_link(term.term)
 
     def link_file(self, path: Path):
-        self.__links.add_file(path)
+        self._links.add_file(path)
 
     def load(self, path):
-        self.__links = Links()
-        self.__description = Description()
-        self.__links.load(path / self.term)
-        print(str(self) + "links: " + str(self.__links))
-        self.__description.load(path / self.term)
-        print(str(self) + "description: " + str(self.__description))
-        print(self.__description.content_html)
-        self.__term_on_init = self.term
+        self._links = Links()
+        self._description = Description()
+        self._links.load(path / self.term)
+        self._description.load(path / self.term)
+        self._term_on_init = self.term
         return self
 
     def save(self, path: Path):
-        path = path / self.term
+        path /= self.term
         if not path.exists():
             path.mkdir()
 
-        self.__description.save(path)
-        self.__links.save(path)
+        self._description.save(path)
+        self._links.save(path)
 
     def delete(self, path):
-        self.__links.delete(path / self.term)
-        self.__description.delete(path / self.term)
+        self._links.delete(path / self.term)
+        self._description.delete(path / self.term)
 
     def __str__(self):
-        return self.term + os.linesep + str(self.__description) + os.linesep
+        return self.term + os.linesep + str(self._description) + os.linesep
         + str(self.__links)
 
     def __lt__(self, other):

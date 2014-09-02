@@ -5,7 +5,8 @@
 #
 # "Road map":
 # TODO: linking of terms (dialog for linking, module to show linked terms=)
-#   TODO: Links to terms at project root in term-links.json
+#   WON'T DO: Links to terms at project root in term-links.json
+#          -easy to do with dict term specific
 #   TODO: attached files could be just read from the content of term folder!
 # TODO: split description text to description objects
 #   TODO: handling of tags in text (Paragraph, Title)
@@ -23,6 +24,8 @@
 #       Writing unit tests
 #       utf8 problem with QLineEdit in TermEditor!
 #
+# Monikielisyys --> tulisi kolmonen
+# Joku asetus esim. kielen vaihto?
 #
 from PyQt5.QtWidgets import QApplication
 import sys
