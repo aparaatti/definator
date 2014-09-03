@@ -62,7 +62,6 @@ class Links(object):
             self._linked_files = dictionary.get("files")
             self._linked_images = dictionary.get("images")
         else:
-            print("not a dict")
             self._linked_terms = list()
             self._linked_files = list()
             self._linked_images = list()
@@ -97,5 +96,4 @@ class LinksDecoder(json.JSONDecoder):
     """ Decodes a Terms object from JSON. """
 
     def decode(self, string):
-        print(string)
         return json.JSONDecoder.decode(self, string)

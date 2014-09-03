@@ -22,9 +22,10 @@ class TermsController(object):
 
     Tests:
     >>> tc = TermsController()
+    >>> tc.add_term(Term("New"))
+    True
     >>> newTerm = tc.get_term("New")
-    >>> tc.project_path = "/home/aparaatti/Code/Python/definator/test-project"
-    >>> term_list = tc.load_project()
+    >>> term_list = tc.load_project(Path("/home/aparaatti/Code/Python/definator/test-project"))
     >>> "html5" in term_list
     True
     >>> "koira" in term_list

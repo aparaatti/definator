@@ -4,14 +4,17 @@
 # and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
 #
 # "Road map":
-# TODO: linking of terms (dialog for linking, module to show linked terms=)
-#   WON'T DO: Links to terms at project root in term-links.json
-#          -easy to do with dict term specific
-#   TODO: attached files could be just read from the content of term folder!
 # TODO: split description text to description objects
 #   TODO: handling of tags in text (Paragraph, Title)
 #   TODO: buttons/icons to add tags
 #   TODO: test that saving and loading works
+# TODO: Make linking UI:s pretty
+#   TODO: attached files could be just read from the content of term folder!
+# TODO: All menu items
+#   -copy/paste
+#   -about, help
+#   -setting?
+# TODO: Translations
 # TODO: linking of files
 # TODO: tagging images to text (ImagePath)
 #   TODO: test that saving and loading of links works

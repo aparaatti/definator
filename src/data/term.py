@@ -145,16 +145,44 @@ class Term(object):
         True
         >>> term > term2
         False
+        >>> term.term = None
+        >>> term > term2
+        False
 
         :param other:
         """
+        if self.term is None:
+            return True
+        if other.term is None:
+            return False
         return self.term.capitalize() < other.term.capitalize()
 
     def __gt__(self, other):
-        return self.term.capitalize() > other.term.capitalize()
+        return not self.__lt__(other)
 
     def __hash__(self):
         return self.term.__hash__()
 
     def __eq__(self, other):
+        """
+        Terms are thought as being immutable so if two
+        Term objects have same term string they represent the same
+        term, although the content may be different.
+
+        >>> term1 = Term("ABC")
+        >>> term2 = Term("ABC")
+        >>> term1 == term2
+        True
+        >>> term1.term = "DBC"
+        >>> term1 == term2
+        False
+        >>> term1.term = ""
+        >>> print(term1.term)
+        None
+        >>> term1 == term2
+        False
+
+        :param other:
+        :return:
+        """
         return self.term == other.term
