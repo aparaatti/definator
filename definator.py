@@ -4,31 +4,31 @@
 # and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
 #
 # "Road map":
-# TODO: split description text to description objects
-#   TODO: handling of tags in text (Paragraph, Title)
-#   TODO: buttons/icons to add tags
-#   TODO: test that saving and loading works
-# TODO: Make linking UI:s pretty
-#   TODO: attached files could be just read from the content of term folder!
+# BUG: save term when term links have changed
+# TODO: Support for title tags (done) and image tags in Paragraphs
 # TODO: All menu items
+#   -Save term (ctrl + s) + save project + save project as
 #   -copy/paste
 #   -about, help
-#   -setting?
+#   -settings
 # TODO: Translations
-# TODO: linking of files
-# TODO: tagging images to text (ImagePath)
-#   TODO: test that saving and loading of links works
-#
+# TODO: Settings:
+#   -language
+#   -remember opened projects
+#   -load last opened project on startup
+# TODO: Make linking UI:s better (combine to term editor)
+#   -attached files could be just read from the content of term folder!
+#   linking of files
+#   -Files and images as list on the term display
+#   -Files and images as separate web display on term editor
+#   -buttons/icons to add tags
 # TODO Later:
-#       str-browser as own widget to left side and MainWidget contains term
-#           display and editor.
-#       Maybe open terms in tabs, with editor/term --> proper undo/redo
-#       Save term (ctrl + s) + save project + save project as
-#       Writing unit tests
-#       utf8 problem with QLineEdit in TermEditor!
-#
-# Monikielisyys --> tulisi kolmonen
-# Joku asetus esim. kielen vaihto?
+#   -str-browser as own widget to left side and MainWidget contains term display and editor.
+#   -Maybe open terms in tabs, with editor/term --> proper undo/redo
+#   -Writing of unit tests
+#   -utf8 problem with QLineEdit in TermEditor!
+#   -Add list of synonymous terms to a term.
+# TODO: Use python built in serialization/deserialization for saving stuff
 #
 from PyQt5.QtWidgets import QApplication
 import sys

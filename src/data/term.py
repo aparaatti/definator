@@ -40,16 +40,9 @@ class Term(object):
         self._term_on_init = term
         self._description = Description()
         self._links = Links()
-        self._has_changed = False
 
     def __contains__(self, related_term):
         return related_term in self._links.get_linked_terms()
-
-    @property
-    def has_changed(self):
-        return self._description.has_changed or \
-            self._links.has_changed or \
-            self.term != self._term_on_init
 
     @property
     def term_on_init(self):
@@ -88,7 +81,6 @@ class Term(object):
         if term == "":
             self.term = None
         elif term != self._term:
-            self._has_changed = True
             self._term = term
 
     @description.setter
@@ -134,8 +126,7 @@ class Term(object):
         self._description.delete(path / self.term)
 
     def __str__(self):
-        return self.term + os.linesep + str(self._description) + os.linesep
-        + str(self.__links)
+        return "Term object: " + self.term + " " + str(id(self))
 
     def __lt__(self, other):
         """

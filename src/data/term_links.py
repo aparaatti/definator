@@ -45,6 +45,7 @@ class Links(object):
     def save(self, path: Path):
         self._save_files_to_term_path(path)
         save_json(path / "links.json", self, LinksEncoder())
+        print("saved links at " + str(path))
 
     def _save_files_to_term_path(self, path):
         #TODO move all referenced files in to the term's folder
@@ -68,10 +69,6 @@ class Links(object):
 
     def delete(self, path: Path):
         os.remove(str(path / "links.json"))
-
-    @property
-    def has_changed(self):
-        return copy.copy(self._has_changed)
 
     def __str__(self):
         return str(self._linked_terms) + " Type: " + str(type(self._linked_terms))

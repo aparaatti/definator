@@ -128,6 +128,7 @@ class TermsController(object):
             #dictionary and added to a list in delete dictionary:
             self._deleted_terms[term.term_on_init].append(
                 self._terms.pop(term.term_on_init))
+            self._has_changed = True
             return True
         else:
             #We put the old version of Term in to a list in changed terms
@@ -137,6 +138,7 @@ class TermsController(object):
 
             self._changed_terms[term.term].append(self._terms.pop(term.term))
             self._terms[term.term] = term
+            self._has_changed = True
             return False
 
     def link_terms(self, term_str: str, str_related_terms: list):
@@ -146,6 +148,7 @@ class TermsController(object):
             target1.link_term(target2)
             target2.link_term(target1)
             self.update_term(target2)
+            print("t1: " + str(target1) + "\nt2: " + str(target2))
 
         self.update_term(target1)
         return True
@@ -197,8 +200,8 @@ class TermsController(object):
         if path.exists() and path is not Path(''):
             for term_list in self._deleted_terms.values():
                 term_list[0].delete(path)
-            for term_list in self._changed_terms.values():
-                term_list[-1].save(path)
+            for changed_term in self._changed_terms.keys():
+                self.get_term(changed_term).save(path)
 
             self._save_terms()
             self._changed_terms = {}
@@ -236,10 +239,7 @@ class TermsEncoder(json.JSONEncoder):
 
     def default(self, obj):
         if isinstance(obj, TermsController):
-            terms = []
-            for term in obj._terms.values():
-                terms.append(term.term)
-            return terms
+            return obj._terms_list
         # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)
 

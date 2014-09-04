@@ -30,17 +30,6 @@ class Description(object):
         os.remove(str(path / "description.json"))
 
     @property
-    def has_changed(self):
-        if len(self._content) != len(self._old_content):
-            return True
-
-        for item in self._content:
-            if item not in self._old_content:
-                return True
-
-        return False
-
-    @property
     def content_html(self):
         content = list()
         for item in self._content:
@@ -97,6 +86,7 @@ class Description(object):
         """
         self._content.clear()
         print(text)
+        text.replace(os.linesep + " ", os.linesep)
         split_text = text.split(os.linesep + os.linesep)
         print(split_text)
         new_part = None
@@ -124,7 +114,6 @@ class Description(object):
                 self._content.insert(paragraph_index, Paragraph(part))
                 print(self._content)
 
-
     def __str__(self):
         return str(self._content)
 
@@ -135,15 +124,15 @@ class DescriptionEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Description):
             print(obj.content_text)
-            strlist = list()
+            str_list = list()
             for item in obj._content:
                 if type(item) is Paragraph:
-                    strlist.append("Paragraph:" + str(item))
+                    str_list.append("Paragraph:" + str(item))
                 elif type(item) is Title:
-                    strlist.append("Title:" + str(item))
+                    str_list.append("Title:" + str(item))
                 elif type(item) is AttachedImage:
-                    strlist.append("ImagePath:" + str(item))
-            return strlist
+                    str_list.append("ImagePath:" + str(item))
+            return str_list
         # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)
 
