@@ -54,13 +54,12 @@ class AttachedImage(object):
         return "Image: " + title
 
 
-
 class Paragraph(object):
     def __init__(self, text: str=""):
         self._text = html.escape(text)
 
     def __str__(self):
-        return self._text + os.linesep + os.linesep
+        return html.unescape(self._text) + os.linesep + os.linesep
 
     @property
     def text(self):
