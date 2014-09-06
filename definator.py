@@ -4,8 +4,11 @@
 # and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
 #
 # "Road map":
-# BUG: save term when term links have changed
-# TODO: Support for title tags (done) and image tags in Paragraphs
+# TODO: linking
+#   -refresh linked terms when a term is linked
+#   -make StrChooser to adjust its cols and line count on size change
+#   -make StrChooser item draggable on term editor and drop text at drop location (tags)
+#   -combine file and image linking (add file, rem file), add tag to end of editor when image is added.
 # TODO: All menu items
 #   -Save term (ctrl + s) + save project + save project as
 #   -copy/paste
@@ -17,8 +20,6 @@
 #   -remember opened projects
 #   -load last opened project on startup
 # TODO: Make linking UI:s better (combine to term editor)
-#   -attached files could be just read from the content of term folder!
-#   linking of files
 #   -Files and images as list on the term display
 #   -Files and images as separate web display on term editor
 #   -buttons/icons to add tags
@@ -34,8 +35,11 @@ from PyQt5.QtWidgets import QApplication
 import sys
 import src.qdefinator_gui
 
-if __name__ == "__main__":
+def run():
     app = QApplication(sys.argv)
     form = src.qdefinator_gui.MainWindow()
     form.show()
     app.exec()
+
+if __name__ == "__main__":
+    run()

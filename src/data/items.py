@@ -10,6 +10,7 @@ class AttachedImage(object):
     def __init__(self, path: Path=None, title: str=None):
         self._path = path
         self._title = title
+        self._tag = None
 
     @property
     def path(self):
@@ -19,11 +20,26 @@ class AttachedImage(object):
     def path(self, value):
         if type(value) is Path:
             self._path = value
+        elif type(value) is str:
+            self._path = Path(str)
+
+    @property
+    def title(self):
+        return self._title
+
+    @title.setter
+    def title(self, value):
+        self._title = value
+
     @property
     def image_tag(self):
+        return self._tag
+
+    @property
+    def image_tag_name_only(self):
         if self._title:
-            return '#img("' + str(self._path) + ',"' + self._title + '")'
-        return '#img"' + str(self.path) + '")'
+            return '#img("' + str(self._path.name) + '","' + self._title + '")'
+        return '#img("' + str(self.path.name) + '","' + str(self.path.stem) + '")'
 
     def parse(self, string: str):
         """
@@ -42,13 +58,17 @@ class AttachedImage(object):
         if len(matches) > 1:
             self._title = matches[1].strip('"')
 
+        self._tag = string
         return self
+
+    def __eq__(self, other):
+        return self.path.name == other.path.name
 
     def __str__(self):
         if self._title:
             title = self._title
         else:
-            title = str(self._path)
+            title = str(self._path.stem)
 
         #TODO: translation
         return "Image: " + title

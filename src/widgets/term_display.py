@@ -3,7 +3,8 @@
 # This file is a part of Definator (https://github.com/aparaatti/definator)
 # and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
 #
-from PyQt5.QtCore import pyqtSlot
+from pathlib import Path
+from PyQt5.QtCore import pyqtSlot, QUrl
 from PyQt5.QtWidgets import QWidget
 
 from ..data.term import Term
@@ -18,4 +19,4 @@ class TermDisplay(QWidget):
 
     @pyqtSlot(Term)
     def set_current_term(self, term: Term):
-        self.ui.contentWebView.setContent(term.term_as_html.encode('utf-8'))
+        self.ui.contentWebView.setHtml(term.term_as_html, QUrl("file://"))

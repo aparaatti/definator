@@ -5,6 +5,7 @@
 #
 #TODO: replace sub module method calls with signals
 #
+from pathlib import Path
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QSize
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
 
@@ -152,16 +153,17 @@ class MainWidget(QWidget):
             self.remove_term_button.setEnabled(True)
 
     @pyqtSlot()
-    def reset(self):
+    def reset(self, currentPath: Path=None):
         self.term_str_browser.set_list([])
         self._create_new_term()
+        self.term_display = TermDisplay(currentPath)
 
     # In coming slots from outside:
     @pyqtSlot(tuple, Term)
     def initialize_a_project(self, terms: tuple, term: Term):
-        self._show_term_display()
         self.term_str_browser.set_list(list(terms))
         self._set_current_term(term)
+        self._show_term_display()
 
     @pyqtSlot(Term)
     def change_term(self, term: Term):

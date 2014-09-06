@@ -42,7 +42,7 @@ class Term(object):
         self._links = Links()
 
     def __contains__(self, related_term):
-        return related_term in self._links.get_linked_terms()
+        return related_term in self._links.linked_terms()
 
     @property
     def term_on_init(self):
@@ -50,15 +50,48 @@ class Term(object):
 
     @property
     def term_as_html(self):
-        return "<html><head>" +\
-            '<meta charset="UTF-8">' +\
+        html = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" ' +\
+            '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' +\
+            '<html xmlns="http://www.w3.org/1999/xhtml">' +\
+            "<head>" +\
+            '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />' +\
             "<title>" + self.term + "</title>" +\
             "</head>" +\
             "<body>" +\
+            "<code>" +\
             "<h1>" + self.term + "</h1>" +\
-            self._description.content_html + \
-            "</body>" + \
+            self._description.content_html +\
+            self._make_html_list_of_images() +\
+            self._make_html_list_of_files() +\
+            "</code>" +\
+            "</body>" +\
             "</html>"
+        return html
+
+    def _make_html_list_of_images(self):
+        image_names = list()
+        added_names = set()
+        for path in self._description.added_image_paths:
+            image_names.append('<a href="' + str(path) + '" target="_blank">' + path.name + '</a>')
+            added_names.add(path.name)
+
+        for name in self._links.linked_images:
+            if name not in added_names:
+                image_names.append('<a href="' + name + '" target="_blank">' + name + '</a>')
+
+        if len(image_names) > 0:
+            return "<h2>Attached images: </h2><ul>" + "<br/>".join(image_names) + "</ul>"
+        return ""
+
+    def _make_html_list_of_files(self):
+        file_names = list()
+        for name in self._links.linked_files:
+            file_names.append('<a href="' + name + '" target="_blank">' + name + '</a>')
+
+        if len(file_names) > 0:
+            return "<h2>Attached files: </h2><ul>" + "<br/>".join(file_names) + "</ul>"
+        return ""
+
 
     @property
     def term(self):
@@ -74,7 +107,7 @@ class Term(object):
 
     @property
     def related_terms(self):
-        return self._links.get_linked_terms()
+        return self._links.linked_terms
 
     @term.setter
     def term(self, term: str):
@@ -97,18 +130,18 @@ class Term(object):
         """
         :param term: Term object
         """
-        self._links.add_term_link(term.term)
+        self._links.link_term(term.term)
 
     def unlink_term(self, term):
-        self._links.rem_term_link(term.term)
+        self._links.unlink_term(term.term)
 
     def link_file(self, path: Path):
-        self._links.add_file(path)
+        self._links.link_file(path)
 
     def load(self, path):
         self._links = Links()
-        self._description = Description()
         self._links.load(path / self.term)
+        self._description = Description()
         self._description.load(path / self.term)
         self._term_on_init = self.term
         return self
@@ -117,9 +150,8 @@ class Term(object):
         path /= self.term
         if not path.exists():
             path.mkdir()
-
+        self._links.save(path, self._description.added_image_paths)
         self._description.save(path)
-        self._links.save(path)
 
     def delete(self, path):
         self._links.delete(path / self.term)

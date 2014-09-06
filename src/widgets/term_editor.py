@@ -1,6 +1,7 @@
 # This file is a part of Definator (https://github.com/aparaatti/definator)
 # and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
 #
+import os
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget
 
@@ -59,5 +60,8 @@ class TermEditor(QWidget):
 
     def _fill_term(self, term: Term):
         term.term = self.ui.lineEditTitle.displayText()
-        term.description = self.ui.textEditContent.toPlainText()
+        text = self.ui.textEditContent.toPlainText()
+        white_space_removed = list()
+        [white_space_removed.append(line.strip()) for line in text.splitlines()]
+        term.description = os.linesep.join(white_space_removed)
         return term
