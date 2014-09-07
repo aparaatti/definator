@@ -23,7 +23,7 @@ class TermLinker(QWidget):
         self.__index = 0
         self.ui = Ui_QTermLinks()
         self.ui.setupUi(self)
-        self.display_mode()
+        self.edit_mode()
         self.ui.tableWidget.setColumnCount(5)
 
         self.ui.buttonLinkTerm.clicked.connect(self._link_term)

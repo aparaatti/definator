@@ -5,10 +5,11 @@
 #
 # "Road map":
 # TODO: linking
-#   -refresh linked terms when a term is linked
+#   -make Term display to send term selected event on term link press
 #   -make StrChooser to adjust its cols and line count on size change
 #   -make StrChooser item draggable on term editor and drop text at drop location (tags)
 #   -combine file and image linking (add file, rem file), add tag to end of editor when image is added.
+# TODO signal when editor has saveable term --> view button activation
 # TODO: All menu items
 #   -Save term (ctrl + s) + save project + save project as
 #   -copy/paste
@@ -27,7 +28,6 @@
 #   -str-browser as own widget to left side and MainWidget contains term display and editor.
 #   -Maybe open terms in tabs, with editor/term --> proper undo/redo
 #   -Writing of unit tests
-#   -utf8 problem with QLineEdit in TermEditor!
 #   -Add list of synonymous terms to a term.
 # TODO: Use python built in serialization/deserialization for saving stuff
 #

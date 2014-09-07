@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'QStrBrowser.ui'
 #
-# Created: Sun Sep  7 15:26:47 2014
+# Created: Sun Sep  7 17:03:44 2014
 #      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -22,7 +22,11 @@ class Ui_QStrBrowser(object):
         QStrBrowser.setMaximumSize(QtCore.QSize(166, 16777215))
         self.verticalLayout = QtWidgets.QVBoxLayout(QStrBrowser)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.lineEdit = QtWidgets.QLineEdit(QStrBrowser)
+        self.str_box = QtWidgets.QGroupBox(QStrBrowser)
+        self.str_box.setObjectName("str_box")
+        self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.str_box)
+        self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.lineEdit = QtWidgets.QLineEdit(self.str_box)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -30,17 +34,11 @@ class Ui_QStrBrowser(object):
         self.lineEdit.setSizePolicy(sizePolicy)
         self.lineEdit.setText("")
         self.lineEdit.setObjectName("lineEdit")
-        self.verticalLayout.addWidget(self.lineEdit)
-        self.widget = QtWidgets.QWidget(QStrBrowser)
-        self.widget.setObjectName("widget")
-        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.widget)
-        self.verticalLayout_2.setSpacing(0)
-        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.listWidget = QtWidgets.QListWidget(self.widget)
+        self.verticalLayout_3.addWidget(self.lineEdit)
+        self.listWidget = QtWidgets.QListWidget(self.str_box)
         self.listWidget.setObjectName("listWidget")
-        self.verticalLayout_2.addWidget(self.listWidget)
-        self.verticalLayout.addWidget(self.widget)
+        self.verticalLayout_3.addWidget(self.listWidget)
+        self.verticalLayout.addWidget(self.str_box)
 
         self.retranslateUi(QStrBrowser)
         QtCore.QMetaObject.connectSlotsByName(QStrBrowser)
@@ -48,6 +46,7 @@ class Ui_QStrBrowser(object):
     def retranslateUi(self, QStrBrowser):
         _translate = QtCore.QCoreApplication.translate
         QStrBrowser.setWindowTitle(_translate("QStrBrowser", "Term list"))
+        self.str_box.setTitle(_translate("QStrBrowser", "String browser"))
         self.lineEdit.setToolTip(_translate("QStrBrowser", "<html><head/><body><p>Filter out terms by writing here</p></body></html>"))
         self.lineEdit.setPlaceholderText(_translate("QStrBrowser", "Filter"))
 

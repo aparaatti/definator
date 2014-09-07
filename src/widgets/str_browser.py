@@ -9,7 +9,7 @@ class StrBrowser(QWidget):
     listUpdated = pyqtSignal()
     list_is_empty = pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self, title: str="Str Browser", parent=None):
         #Load QWidget
         super(StrBrowser, self).__init__(parent)
         self._current_str = ""
@@ -18,7 +18,7 @@ class StrBrowser(QWidget):
 
         #Setup widgets from Ui_QStrBrowser (qtdesigner made ui):
         self.ui.setupUi(self)
-        #self.ui.lineEdit.setEnabled(False)
+        self.ui.str_box.setTitle(title)
 
         #Signals and slots:
         self.ui.listWidget.itemActivated.connect(self._str_selected)

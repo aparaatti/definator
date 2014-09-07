@@ -50,7 +50,7 @@ class MainWidget(QWidget):
         super(MainWidget, self).__init__(parent)
         self.current_term = None
 
-        self.term_str_browser = StrBrowser()
+        self.term_str_browser = StrBrowser("Term Browser")
         self.term_display = TermDisplay()
         self.term_editor = TermEditor()
         self.term_linker = TermLinker()
@@ -111,6 +111,7 @@ class MainWidget(QWidget):
             self._stopped_editing_new_term)
 
         self.term_str_browser.str_selected.connect(self._change_term)
+        self.term_display.term_selected.connect(self._change_term)
         self.term_str_browser.list_is_empty.connect(self._create_new_term)
 
         self.term_linker.linkTermsClicked.connect(self._link_terms)
@@ -131,7 +132,7 @@ class MainWidget(QWidget):
 
     def _show_term_editor(self):
         if self.term_display.isVisible():
-            self.term_linker.edit_mode()
+            self.term_linker.show()
             self.term_display.hide()
             self.term_editor.show()
             self.add_term_button.setEnabled(False)
@@ -145,6 +146,7 @@ class MainWidget(QWidget):
         TermEditor emits changes when it is hidden.
         """
         if self.term_editor.isVisible():
+            self.term_linker.hide()
             self.term_editor.hide()
             self.term_display.show()
             self.add_term_button.setEnabled(True)
@@ -214,7 +216,6 @@ class MainWidget(QWidget):
 
     @pyqtSlot(Term)
     def _stopped_editing(self, term: Term):
-        self.term_linker.display_mode()
         self.term_display.show()
         self.update_term.emit(term)
 

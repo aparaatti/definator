@@ -89,7 +89,6 @@ class Term(object):
             return "<h2>Attached files: </h2><ul>" + "<br/>".join(file_names) + "</ul>"
         return ""
 
-
     @property
     def term(self):
         return self._term
@@ -105,6 +104,24 @@ class Term(object):
     @property
     def related_terms(self):
         return self._links.linked_terms
+
+    @property
+    def related_terms_as_html(self):
+        html = list()
+        html.append('''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+            "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+            <html xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            <title>Related terms</title>
+            </head><body><code>''')
+
+        for term in self._links.linked_terms:
+            html.append('<a href="' + term + '" target="_blank">' + term + '</a> ')
+
+        html.append("</code></body></html>")
+
+        return "".join(html)
 
     @term.setter
     def term(self, term: str):
