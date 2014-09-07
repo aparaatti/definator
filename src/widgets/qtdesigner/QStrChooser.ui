@@ -51,6 +51,13 @@
        <number>0</number>
       </property>
       <item>
+       <widget class="QLineEdit" name="lineEdit">
+        <property name="placeholderText">
+         <string>Filter</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QListWidget" name="listWidget">
         <property name="selectionMode">
          <enum>QAbstractItemView::MultiSelection</enum>

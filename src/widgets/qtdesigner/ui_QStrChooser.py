@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'QStrChooser.ui'
 #
-# Created: Tue Sep  2 14:54:59 2014
+# Created: Sun Sep  7 15:26:47 2014
 #      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -28,6 +28,9 @@ class Ui_QStrChooser(object):
         self.verticalLayout_2.setSpacing(0)
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.lineEdit = QtWidgets.QLineEdit(self.widget)
+        self.lineEdit.setObjectName("lineEdit")
+        self.verticalLayout_2.addWidget(self.lineEdit)
         self.listWidget = QtWidgets.QListWidget(self.widget)
         self.listWidget.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.listWidget.setSelectionRectVisible(True)
@@ -41,4 +44,5 @@ class Ui_QStrChooser(object):
     def retranslateUi(self, QStrChooser):
         _translate = QtCore.QCoreApplication.translate
         QStrChooser.setWindowTitle(_translate("QStrChooser", "Term list"))
+        self.lineEdit.setPlaceholderText(_translate("QStrChooser", "Filter"))
 

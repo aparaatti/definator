@@ -13,6 +13,7 @@ class StrChooser(QDialog):
     def __init__(self, parent):
         super(StrChooser, self).__init__(parent)
         self.ui = Ui_QStrChooser()
+        self._str_2_item = dict()
         self.ui.setupUi(self)
 
         buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
@@ -20,9 +21,22 @@ class StrChooser(QDialog):
         buttonBox.rejected.connect(self.reject)
 
         self.ui.verticalLayout.addWidget(buttonBox)
+        self.ui.lineEdit.textChanged.connect(self._filter)
+
+    @pyqtSlot(str)
+    def _filter(self, string):
+        if string == "":
+            self.set_list(list(self._str_2_item.keys()))
+        else:
+            filtered_list = [filtered_string for filtered_string
+                             in self._str_2_item.keys()
+                             if filtered_string.startswith(string)]
+            self.ui.listWidget.clear()
+            for string in filtered_list:
+                self._add_a_str(string)
 
     def _add_a_str(self, string: str):
-        QListWidgetItem(string, self.ui.listWidget)
+        self._str_2_item[string] = QListWidgetItem(string, self.ui.listWidget)
         self.ui.listWidget.sortItems()
 
     def set_list(self, str_list: list):

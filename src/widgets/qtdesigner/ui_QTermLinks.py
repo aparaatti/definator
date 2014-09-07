@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'QTermLinks.ui'
 #
-# Created: Tue Sep  2 14:55:00 2014
+# Created: Sun Sep  7 15:26:47 2014
 #      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!

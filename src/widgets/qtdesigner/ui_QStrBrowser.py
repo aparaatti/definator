@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'QStrBrowser.ui'
 #
-# Created: Tue Sep  2 14:54:59 2014
+# Created: Sun Sep  7 15:26:47 2014
 #      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -28,6 +28,7 @@ class Ui_QStrBrowser(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.lineEdit.sizePolicy().hasHeightForWidth())
         self.lineEdit.setSizePolicy(sizePolicy)
+        self.lineEdit.setText("")
         self.lineEdit.setObjectName("lineEdit")
         self.verticalLayout.addWidget(self.lineEdit)
         self.widget = QtWidgets.QWidget(QStrBrowser)
@@ -48,5 +49,5 @@ class Ui_QStrBrowser(object):
         _translate = QtCore.QCoreApplication.translate
         QStrBrowser.setWindowTitle(_translate("QStrBrowser", "Term list"))
         self.lineEdit.setToolTip(_translate("QStrBrowser", "<html><head/><body><p>Filter out terms by writing here</p></body></html>"))
-        self.lineEdit.setText(_translate("QStrBrowser", "Filter"))
+        self.lineEdit.setPlaceholderText(_translate("QStrBrowser", "Filter"))
 
