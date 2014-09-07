@@ -1,4 +1,4 @@
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QListWidgetItem
 
 from .qtdesigner.ui_QStrBrowser import Ui_QStrBrowser
@@ -13,20 +13,29 @@ class StrBrowser(QWidget):
         #Load QWidget
         super(StrBrowser, self).__init__(parent)
         self._current_str = ""
-        self.str_2_item = {}
+        self._str_2_item = {}
         self.ui = Ui_QStrBrowser()
 
         #Setup widgets from Ui_QStrBrowser (qtdesigner made ui):
         self.ui.setupUi(self)
-        self.ui.lineEdit.setEnabled(False)
+        #self.ui.lineEdit.setEnabled(False)
 
         #Signals and slots:
         self.ui.listWidget.itemActivated.connect(self._str_selected)
         self.ui.listWidget.setSortingEnabled(True)
+        self.ui.lineEdit.textChanged.connect(self._filter)
 
-    @property
-    def current_str(self):
-        return self._current_str
+    @pyqtSlot(str)
+    def _filter(self, string):
+        if string == "":
+            self.set_list(list(self._str_2_item.keys()))
+        else:
+            filtered_list = [filtered_string for filtered_string
+                             in self._str_2_item.keys()
+                             if filtered_string.startswith(string)]
+            self.ui.listWidget.clear()
+            for string in filtered_list:
+                self._add_a_str(string)
 
     def set_list(self, str_list: list):
         self.ui.listWidget.clear()
@@ -34,10 +43,10 @@ class StrBrowser(QWidget):
             self._add_a_str(string)
 
     def get_list(self):
-        return list(self.str_2_item.keys())
+        return list(self._str_2_item.keys())
 
     def _add_a_str(self, string: str):
-        self.str_2_item[string] = QListWidgetItem(string, self.ui.listWidget)
+        self._str_2_item[string] = QListWidgetItem(string, self.ui.listWidget)
         self.ui.listWidget.sortItems()
 
     def _str_selected(self):
@@ -50,7 +59,10 @@ class StrBrowser(QWidget):
     def set_current_str(self, string: str):
         if self._current_str == string:
             return
-        self.ui.listWidget.setCurrentItem(self.str_2_item[string])
+        #items = self.ui.listWidget.items()
+        #print(str(items) + " " + type(items))
+        print(str(self.ui.listWidget.mimeTypes()))
+        self.ui.listWidget.setCurrentItem(self._str_2_item[string])
 
     def mark_str(self, string: str):
         #TODO this
@@ -62,7 +74,11 @@ class StrBrowser(QWidget):
 
     def rem_a_str(self, string: str):
         self.ui.listWidget.takeItem(
-            self.ui.listWidget.indexFromItem(self.str_2_item.pop(string)).row())
+            self.ui.listWidget.indexFromItem(self._str_2_item.pop(string)).row())
         if self.ui.listWidget.count() > 0:
             self.ui.listWidget.setCurrentRow(0)
         self._str_selected()
+
+    @property
+    def current_str(self):
+        return self._current_str

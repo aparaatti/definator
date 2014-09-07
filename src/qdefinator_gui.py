@@ -221,6 +221,7 @@ class MainWindow(QMainWindow):
         if self.terms_controller.link_terms(term_str, str_terms):
             self.signal_updated_a_term.emit(
                 self.terms_controller.get_term(term_str))
+            print("UPDATE TERM SENT")
 
     @pyqtSlot(str, list)
     def unlink_terms(self, term_str: str, str_terms: list):

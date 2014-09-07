@@ -13,47 +13,66 @@ class Links(object):
 
     def __init__(self, links: list=[]):
         self._linked_terms = []
-        self._linked_files = []
-        self._linked_images = []
+        self._linked_files = dict()
+        self._linked_images = dict()
+
+    def __str__(self):
+        return str(self._linked_terms) + " Type: " + str(type(self._linked_terms))
 
     def link_term(self, term_str):
         if term_str not in self._linked_terms:
             self._linked_terms.append(term_str)
 
-    def link_image(self, path: Path):
-        if type(path) is Path and path not in self._linked_images:
-            self._linked_images.append(path)
-        #elif type(path) is str:
-        #    self._linked_images.append(Path(str))
+    def link_image(self, path):
+        if issubclass(type(path), Path) and path not in self._linked_images.values():
+            self._linked_images[path.name] = path
+            return True
         else:
-            print(str(type(self)) + ": could not link image " + str(path))
+            print(str(type(path)) + ": could not link image " + str(path))
+            return False
 
     def link_file(self, path):
-        self._linked_files.append(path)
+        if issubclass(type(path), Path) and path not in self._linked_files.values():
+            self._linked_files[path.name] = path
+            return True
+        else:
+            print(str(type(path)) + ": could not link file " + str(path))
+            return False
 
     def unlink_term(self, term_str):
         self._linked_terms.remove(term_str)
 
-    def unlink_image(self, name):
-        self._linked_images.remove(name)
+    def unlink_image(self, path: Path):
+        self._linked_images.pop(path.name)
 
-    def unlink_file(self, name):
-        self._linked_images.remove(name)
+    def unlink_file(self, path: Path):
+        self._linked_files.pop(path.name)
 
     def save(self, path: Path, added_images: list()):
         self._save_files_to_term_path(path, added_images)
         save_json(path / "links.json", self, LinksEncoder())
 
     def _save_files_to_term_path(self, path: Path, added_images):
-        for file_path in self._linked_files:
-            if file_path.parent != path:
+        """
+        Saving of external files happens because their path is different than "". It also
+        means that, one  can't add stuff from root folder (maybe).
+
+        The files that are in external paths are copied to term folder, from which they
+        are read on load.
+
+        :param path:
+        :param added_images:
+        :return:
+        """
+        for file_path in self._linked_files.values():
+            if len(file_path.parent.parts) > 0:
                 self._copy_file_to(file_path, path)
+                self._linked_files[file_path.name] = Path(file_path.name)
 
         for img_path in added_images:
-            if img_path.parent != path:
-                print("Image path on save: " + str(img_path) + " \n target on save " + str(path))
-                self._copy_file_to(img_path, path)
-                self._linked_images.append(img_path.name)
+            if len(img_path.parent.parts) > 0:
+                self._copy_file_to(img_path, Path(path))
+                self._linked_images[img_path.name] = Path(img_path.name)
 
     def _copy_file_to(self, src: Path, target: Path):
         shutil.copy2(str(src), str(target / src.name))
@@ -69,17 +88,13 @@ class Links(object):
                     type_tuple = mimetypes.guess_type(str(x))
                     self._link_file_on_mime(type_tuple, x)
 
-        print("links after load: " + str(self._linked_images) + " " + str(self._linked_files))
+        print("links after load: " + str(self.linked_images) + " " + str(self.linked_files) + " " + str(self.linked_terms))
 
     def _link_file_on_mime(self, type_tuple: tuple, x: Path):
-        print("FILE TYPE: " + str(type_tuple) + "\ntype(tuble[0]): " + str(type(type_tuple[0])))
-        if type_tuple[0].startswith('image'):
+        if type_tuple[0] is not None and type_tuple[0].startswith('image'):
             self.link_image(Path(x.name))
-            #self._linked_images.append(x.name)
-            print("added image: " + x.name)
         else:
-            self.link_file.append(Path(x.name))
-            print("added file: " + x.name)
+            self.link_file(Path(x.name))
 
     def delete(self, path: Path):
         os.remove(str(path / "links.json"))
@@ -90,14 +105,11 @@ class Links(object):
 
     @property
     def linked_images(self):
-        return copy.copy(self._linked_images)
+        return self._linked_images.values()
 
     @property
     def linked_files(self):
-        return copy.copy(self._linked_files)
-
-    def __str__(self):
-        return str(self._linked_terms) + " Type: " + str(type(self._linked_terms))
+        return self._linked_files.values()
 
 
 class LinksEncoder(json.JSONEncoder):
@@ -107,9 +119,14 @@ class LinksEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Links):
             links = dict()
-            links["terms"] = obj._linked_terms
-            links["files"] = obj._linked_files
-            links["images"] = obj._linked_images
+            images = []
+            files = []
+            [images.append(path.name) for path in obj.linked_images]
+            [files.append(path.name) for path in obj.linked_files]
+            links["terms"] = obj.linked_terms
+            links["files"] = files
+            links["images"] = images
+
             return links
         # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)

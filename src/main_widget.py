@@ -174,6 +174,7 @@ class MainWidget(QWidget):
     def term_has_been_updated(self, term: Term):
         self.term_str_browser.mark_str(term.term)
         self.term_display.set_current_term(term)
+        self.term_linker.set_current_term(term)
 
     @pyqtSlot(Term)
     def added_a_term(self, term: Term):

@@ -42,25 +42,6 @@ class TermsController(object):
         self._changed_terms = {}
         self._has_changed = False
 
-    @property
-    def unsaved_changes(self):
-        return self._has_changed
-
-    @property
-    def list_of_terms(self):
-        return self._terms.keys()
-
-    @property
-    def project_path(self):
-        return copy.copy(self._project_path)
-
-    @property
-    def project_name(self):
-        if len(self._project_path.parts) is 0:
-            return "Untitled"
-
-        return self.project_path.parts[-1]
-
     def get_term(self, term_str):
         self._lazy_load_term(term_str)
         return deepcopy(self._terms[term_str])
@@ -133,6 +114,8 @@ class TermsController(object):
         else:
             #We put the old version of Term in to a list in changed terms
             #dictionary, and replace the older version in self._terms
+            #This could be replaced with references from term object to previous
+            #term object, eg. linked list.
             if self._changed_terms.get(term.term) is None:
                 self._changed_terms[term.term] = list()
 
@@ -148,7 +131,7 @@ class TermsController(object):
             target1.link_term(target2)
             target2.link_term(target1)
             self.update_term(target2)
-            print("t1: " + str(target1) + "\nt2: " + str(target2))
+            print("-------[" + str(target1) + " <==> " + str(target2) + "]-------")
 
         self.update_term(target1)
         return True
@@ -163,7 +146,6 @@ class TermsController(object):
 
         self.update_term(target1)
         return True
-
 
     def _lazy_load_term(self, term_str):
         if term_str not in self._terms.keys() and term_str in self._terms_list:
@@ -231,6 +213,25 @@ class TermsController(object):
         Saves list of terms as json to the project root "terms.json".
         """
         save_json(self._project_path / "terms.json", self, TermsEncoder())
+
+    @property
+    def unsaved_changes(self):
+        return self._has_changed
+
+    @property
+    def list_of_terms(self):
+        return self._terms.keys()
+
+    @property
+    def project_path(self):
+        return copy.copy(self._project_path)
+
+    @property
+    def project_name(self):
+        if len(self._project_path.parts) is 0:
+            return "Untitled"
+
+        return self.project_path.parts[-1]
 
 
 class TermsEncoder(json.JSONEncoder):

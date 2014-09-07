@@ -19,6 +19,10 @@ class Description(object):
         self._attached_images = dict()
         self._old_content = tuple()
 
+    def __str__(self):
+        return str(self._content)
+
+
     def load(self, path: Path):
         content = load_json(path / "description.json", DescriptionDecoder())
         self._path = path
@@ -28,38 +32,30 @@ class Description(object):
         self.content_text = self.content_text
 
     def save(self, path: Path):
+        self._path = path
         save_json(path / "description.json", self, DescriptionEncoder())
 
     def delete(self, path: Path):
         os.remove(str(path / "description.json"))
 
     def _parse_image_tags(self, text: str):
-        image_count = 0
-        new_part = None
         match_iterator = self._img_tag_pattern.finditer(text)
 
         for match in match_iterator:
             ip = AttachedImage().parse(match.group())
             if ip:
-                if str(ip.path) in self._attached_images.keys():
-                    self._attached_images[str(ip.path)] = ip
-                self._attached_images[str(ip.path)] = ip
-                self._content.append(ip)
-                new_part = text.replace(match.group(), str(ip))
-                image_count += 1
+                if not self._attached_images.get(str(ip.path.name)):
+                    self._attached_images[str(ip.path.name)] = ip
+                    self._content.append(ip)
 
-            if image_count > 0:
-                text = new_part
         return text
 
     @property
-    def added_image_paths(self):
-        image_paths = list()
-        [image_paths.append(ip.path) for ip in self._attached_images.values()]
-        return image_paths
-
-    @property
     def content_html(self):
+        """
+        This make s a html repreasentation of this Description object.
+        :return:
+        """
         content = list()
         for item in self._content:
             if type(item) is Paragraph:
@@ -67,15 +63,17 @@ class Description(object):
             elif type(item) is Title:
                 content.append("<h2>" + str(item) + "</h2>")
             elif type(item) is AttachedImage:
+                img_path = None
                 if len(item.path.parts) > 1:
                     img_path = item.path
-                else:
+                elif self._path:
                     img_path = self._path / item.path
 
-                content.append(
-                    '<center><img src="' + str(img_path) +
-                    '" alt="' + str(item) + '"/><br/>' +
-                    '<b>' + str(item.title) + '</b></center>')
+                if img_path:
+                    content.append(
+                        '<center><img src="' + str(img_path) +
+                        '" alt="' + str(item) + '"/><br/>' +
+                        '<b>' + str(item.title) + '</b></center>')
             else:
                 print("Could not find type, where are the types?")
                 print("Type: " + str(type(item)))
@@ -84,7 +82,6 @@ class Description(object):
         content_html = "".join(content)
         for ip in self._attached_images.values():
             content_html = content_html.replace(ip.image_tag, str(ip))
-
         return content_html
 
     @property
@@ -101,12 +98,7 @@ class Description(object):
                 print("Type: " + str(type(item)))
                 print("Item: " + str(item))
 
-        content_text = "".join(content_text_list).strip(os.linesep)
-
-        for ai in self._attached_images.values():
-            content_text = content_text.replace(str(ai), ai.image_tag)
-
-        return content_text
+        return "".join(content_text_list).strip(os.linesep)
 
     @content_text.setter
     def content_text(self, text: str):
@@ -119,28 +111,29 @@ class Description(object):
 
         Text that starts with ## and ends with ## and two line separators is a Title.
 
-        Text that starts with '#img(' and ends with ')' is an AttachedImage.
-        AttachedImage tag can be inside a paragraph, but not in a title. Between image
+        Text that starts with '#img(' and ends with ')' is an AttachedImage. Between image
         tags is path to image and optionally a title for image '"/path/to/image","Image title"'.
         If title is not given, the file name stem is used as reference in paragraph.
 
         :param text: Str containing text annotated with tags.
         """
         self._content.clear()
+        self._attached_images.clear()
         split_text = text.split(os.linesep + os.linesep)
 
         for part in split_text:
-            part = part.strip(os.linesep + " ")
             if part.startswith("##") and part.endswith("##"):
                 self._content.append(Title(part[2:-2]))
             else:
                 paragraph_index = len(self._content)
-                self._content.append(self._parse_image_tags(part))
-                self._content.insert(paragraph_index, Paragraph(part))
+                paragraph = Paragraph(self._parse_image_tags(part))
+                self._content.insert(paragraph_index, paragraph)
 
-    def __str__(self):
-        return str(self._content)
-
+    @property
+    def added_image_paths(self):
+        image_paths = list()
+        [image_paths.append(ip.path) for ip in self._attached_images.values()]
+        return image_paths
 
 class DescriptionEncoder(json.JSONEncoder):
     """ Encodes a Description object to JSON eg. saves Description self.content
@@ -154,13 +147,8 @@ class DescriptionEncoder(json.JSONEncoder):
                     for ai in obj._attached_images.values():
                         paragraph = paragraph.replace(ai.image_tag, ai.image_tag_name_only)
                     str_list.append("Paragraph:" + paragraph)
-                    print(paragraph)
                 elif type(item) is Title:
                     str_list.append("Title:" + str(item))
-                #No need to save images, since they are instantiated from paragraphs on load.
-                #elif type(item) is AttachedImage:
-                    #We save only the stem, since Links moves files to term root on save.
-                #    str_list.append("ImagePath:" + item.path.name + ":" + item.image_tag)
             return str_list
         # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)

@@ -12,6 +12,35 @@ class AttachedImage(object):
         self._title = title
         self._tag = None
 
+    def __eq__(self, other):
+        return self.path.name == other.path.name
+
+    def __str__(self):
+        return self.title
+
+    def parse(self, string: str):
+        """
+        Initializes the object from a string of form
+        #img("path/string"[,"image title text"])
+
+        :param string: string representation of object
+        """
+        print("parsing image from string: " + string)
+        matches = self.match_attribute.findall(string)
+        if not matches[0]:
+            return None
+
+        self._path = Path(matches[0].strip('"'))
+
+        if len(matches) > 1:
+            self._title = matches[1].strip('"')
+        else:
+            self._title = str(self._path.stem)
+
+        self._tag = string
+        print("Parsed img tag: " + self._tag + " " + self._title + " " + str(self._path))
+        return self
+
     @property
     def path(self):
         return self._path
@@ -41,38 +70,6 @@ class AttachedImage(object):
             return '#img("' + str(self._path.name) + '","' + self._title + '")'
         return '#img("' + str(self.path.name) + '","' + str(self.path.stem) + '")'
 
-    def parse(self, string: str):
-        """
-        Initializes the object from a string of form
-        #img("path/string"[,"image title text"])
-
-        :param string: string representation of object
-        """
-        print("parsing image from string: " + string)
-        matches = self.match_attribute.findall(string)
-        if not matches[0]:
-            return None
-
-        self._path = Path(matches[0].strip('"'))
-
-        if len(matches) > 1:
-            self._title = matches[1].strip('"')
-
-        self._tag = string
-        return self
-
-    def __eq__(self, other):
-        return self.path.name == other.path.name
-
-    def __str__(self):
-        if self._title:
-            title = self._title
-        else:
-            title = str(self._path.stem)
-
-        #TODO: translation
-        return "Image: " + title
-
 
 class Paragraph(object):
     def __init__(self, text: str=""):
@@ -94,6 +91,9 @@ class Title(object):
     def __init__(self, title: str=""):
         self._title = html.escape(title)
 
+    def __str__(self):
+        return self._title
+
     @property
     def title(self):
         return self._title
@@ -105,6 +105,3 @@ class Title(object):
     @property
     def title_tag(self):
         return "##" + self._title + "##" + os.linesep + os.linesep
-
-    def __str__(self):
-        return self._title

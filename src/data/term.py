@@ -50,22 +50,19 @@ class Term(object):
 
     @property
     def term_as_html(self):
-        html = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" ' +\
-            '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' +\
-            '<html xmlns="http://www.w3.org/1999/xhtml">' +\
-            "<head>" +\
-            '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />' +\
+        html = '''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+            "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+            <html xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />''' +\
             "<title>" + self.term + "</title>" +\
-            "</head>" +\
-            "<body>" +\
-            "<code>" +\
+            "</head><body><code>" +\
             "<h1>" + self.term + "</h1>" +\
             self._description.content_html +\
             self._make_html_list_of_images() +\
             self._make_html_list_of_files() +\
-            "</code>" +\
-            "</body>" +\
-            "</html>"
+            "</code></body></html>"
+            #self._make_html_list_of_related_terms() +\
         return html
 
     def _make_html_list_of_images(self):
@@ -75,9 +72,9 @@ class Term(object):
             image_names.append('<a href="' + str(path) + '" target="_blank">' + path.name + '</a>')
             added_names.add(path.name)
 
-        for name in self._links.linked_images:
-            if name not in added_names:
-                image_names.append('<a href="' + name + '" target="_blank">' + name + '</a>')
+        for path in self._links.linked_images:
+            if path.name not in added_names:
+                image_names.append('<a href="' + path.name + '" target="_blank">' + path.name + '</a>')
 
         if len(image_names) > 0:
             return "<h2>Attached images: </h2><ul>" + "<br/>".join(image_names) + "</ul>"
@@ -85,8 +82,8 @@ class Term(object):
 
     def _make_html_list_of_files(self):
         file_names = list()
-        for name in self._links.linked_files:
-            file_names.append('<a href="' + name + '" target="_blank">' + name + '</a>')
+        for path in self._links.linked_files:
+            file_names.append('<a href="' + path.name + '" target="_blank">' + path.name + '</a>')
 
         if len(file_names) > 0:
             return "<h2>Attached files: </h2><ul>" + "<br/>".join(file_names) + "</ul>"
