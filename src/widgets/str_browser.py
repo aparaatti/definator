@@ -63,7 +63,8 @@ class StrBrowser(QWidget):
     def set_current_str(self, string: str):
         if self._current_str == string:
             return
-        self.ui.listWidget.setCurrentItem(self._str_2_item[string])
+        if string and string in self._str_2_item.keys():
+            self.ui.listWidget.setCurrentItem(self._str_2_item[string])
 
     def mark_str(self, string: str):
         item = self._str_2_item[string]

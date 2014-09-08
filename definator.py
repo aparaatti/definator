@@ -31,12 +31,19 @@
 #   -show tags bold on term editor, show references to images bold on term display
 # TODO: Use python built in serialization/deserialization for saving stuff
 #
-from PyQt5.QtWidgets import QApplication
+# FIX: create new term when term str has changed!
+# FIX: after removal of terms a term editor with last edited term is opened
+#from PyQt5.QtWidgets import QApplication
+import PyQt5
 import sys
+import os
 import src.qdefinator_gui
 
 def run():
-    app = QApplication(sys.argv)
+    app = PyQt5.QtWidgets.QApplication(sys.argv)
+    path = os.path.dirname(__file__)
+    print(path)
+    app.setWindowIcon(PyQt5.QtGui.QIcon(path + "/" + "definator.xpm"))
     form = src.qdefinator_gui.MainWindow()
     form.show()
     app.exec()

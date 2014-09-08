@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'QTermDisplay.ui'
 #
-# Created: Mon Sep  8 03:39:46 2014
+# Created: Mon Sep  8 19:54:26 2014
 #      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,13 +12,14 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_TermDisplay(object):
     def setupUi(self, TermDisplay):
         TermDisplay.setObjectName("TermDisplay")
-        TermDisplay.resize(658, 600)
+        TermDisplay.resize(521, 449)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(TermDisplay.sizePolicy().hasHeightForWidth())
         TermDisplay.setSizePolicy(sizePolicy)
         TermDisplay.setLayoutDirection(QtCore.Qt.LeftToRight)
+        TermDisplay.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedKingdom))
         self.verticalLayout = QtWidgets.QVBoxLayout(TermDisplay)
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)

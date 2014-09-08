@@ -30,13 +30,14 @@ class TermLinker(QWidget):
         self.ui = Ui_QTermLinks()
         self.ui.setupUi(self)
         self.edit_mode()
+
         self.ui.tableWidget.setColumnCount(5)
         palette = self.ui.tableWidget.palette()
-        palette.setColor(QPalette.Background, QColor("Gray"))
         palette.setColor(QPalette.Base, QColor("Gray"))
         palette.setColor(QPalette.HighlightedText, QColor("Black"))
         palette.setColor(QPalette.Highlight, QColor("White"))
         self.ui.tableWidget.setPalette(palette)
+        palette.setColor(QPalette.Base, QColor("Black"))
         self.ui.keyTableWidget.setPalette(palette)
 
         self.ui.buttonLinkTerms.clicked.connect(self._link_term)
@@ -46,7 +47,10 @@ class TermLinker(QWidget):
 
         self.ui.keyTableWidget.setRowCount(1)
         self.ui.keyTableWidget.setColumnCount(3)
-        self.ui.keyTableWidget.setMaximumHeight(self.ui.labelKeys.size().height())
+        max_height = self.ui.labelKeys.size().height()*0.70
+        self.ui.keyTableWidget.setMaximumHeight(max_height)
+        self.ui.keyTableWidget.setMaximumWidth(self.ui.keyTableWidget.width()*3)
+        self.ui.keyTableWidget.setRowHeight(0, max_height)
         self.ui.keyTableWidget.columnWidth(self.ui.keyTableWidget.width()//3)
         self.ui.keyTableWidget.setEnabled(False)
 
@@ -91,13 +95,17 @@ class TermLinker(QWidget):
 
     @pyqtSlot()
     def edit_mode(self):
-        self.ui.buttonUnlinkTerms.show()
-        self.ui.buttonLinkTerms.show()
+        self.ui.buttonUnlinkTerms.setEnabled(True)
+        self.ui.buttonLinkTerms.setEnabled(True)
+        self.ui.buttonRemoveFiles.setEnabled(True)
+        self.ui.buttonAddFile.setEnabled(True)
 
     @pyqtSlot()
     def display_mode(self):
-        self.ui.buttonUnlinkTerms.hide()
-        self.ui.buttonLinkTerms.hide()
+        self.ui.buttonUnlinkTerms.setEnabled(False)
+        self.ui.buttonLinkTerms.setEnabled(False)
+        self.ui.buttonRemoveFiles.setEnabled(False)
+        self.ui.buttonAddFile.setEnabled(False)
 
     @pyqtSlot()
     def _link_term(self):
@@ -106,6 +114,12 @@ class TermLinker(QWidget):
     @pyqtSlot()
     def _unlink_term(self):
         self.unlinkTermsClicked.emit()
+
+    @pyqtSlot()
+    def clear(self):
+        self.ui.tableWidget.clear()
+        for key in self._item_dictionary:
+            self._item_dictionary[key] = []
 
     def showEvent(self, arg):
         self._populate_TableWidget()

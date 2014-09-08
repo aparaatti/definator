@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'QStrBrowser.ui'
 #
-# Created: Mon Sep  8 03:39:45 2014
+# Created: Mon Sep  8 19:54:26 2014
 #      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_QStrBrowser(object):
     def setupUi(self, QStrBrowser):
         QStrBrowser.setObjectName("QStrBrowser")
-        QStrBrowser.resize(166, 210)
+        QStrBrowser.resize(166, 357)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -21,6 +21,8 @@ class Ui_QStrBrowser(object):
         QStrBrowser.setMinimumSize(QtCore.QSize(166, 200))
         QStrBrowser.setMaximumSize(QtCore.QSize(166, 16777215))
         self.verticalLayout = QtWidgets.QVBoxLayout(QStrBrowser)
+        self.verticalLayout.setSpacing(0)
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setObjectName("verticalLayout")
         self.str_box = QtWidgets.QGroupBox(QStrBrowser)
         self.str_box.setObjectName("str_box")

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'QLinkList.ui'
 #
-# Created: Mon Sep  8 03:39:45 2014
+# Created: Mon Sep  8 19:54:26 2014
 #      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -14,6 +14,8 @@ class Ui_QLinkList(object):
         QLinkList.setObjectName("QLinkList")
         QLinkList.resize(400, 118)
         self.verticalLayout = QtWidgets.QVBoxLayout(QLinkList)
+        self.verticalLayout.setSpacing(0)
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setObjectName("verticalLayout")
         self.linkBox = QtWidgets.QGroupBox(QLinkList)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Minimum)
