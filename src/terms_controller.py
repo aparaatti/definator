@@ -147,8 +147,25 @@ class TermsController(object):
         self.update_term(target1)
         return True
 
+    def link_files(self, term_str: str, file_paths_str: list):
+        target = self.get_term(term_str)
+        results = [target.link_file(Path(file_path)) for file_path in file_paths_str]
+        if True in results:
+            self.update_term(target)
+            return True
+        return False
+
+    def unlink_files(self, term_str: str, str_files: list):
+        target = self.get_term(term_str)
+        results = [target.unlink_file(Path(str_file)) for str_file in str_files]
+        if True in results:
+            self.update_term(target)
+            return True
+        return False
+
     def _lazy_load_term(self, term_str):
         if term_str not in self._terms.keys() and term_str in self._terms_list:
+            print("loading term " + term_str)
             term_to_load = Term(term_str)
             self._terms[term_str] = term_to_load.load(self._project_path)
 

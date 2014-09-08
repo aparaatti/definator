@@ -31,6 +31,7 @@ class MainWindow(QMainWindow):
 
     signal_opened_a_project = pyqtSignal(list, Term)
     signal_started_a_new_project = pyqtSignal()
+    signal_project_saved = pyqtSignal()
 
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
@@ -105,12 +106,17 @@ class MainWindow(QMainWindow):
         self.main_widget.save_changes.connect(self._save_project)
         self.main_widget.remove_term.connect(self.remove_term)
 
-        #When new term is added, we give it to termsController and update Main
-        #Widget
+        #When new term is added, we give it to termsController and update MainWidget
         self.main_widget.add_new_term.connect(self.add_term)
         self.main_widget.update_term.connect(self.update_term)
+
+        #Link terms
         self.main_widget.add_links_to_term.connect(self.link_terms)
         self.main_widget.remove_links_from_term.connect(self.unlink_terms)
+
+        #Add files
+        self.main_widget.add_files_to_term.connect(self.link_files)
+        self.main_widget.remove_files_from_term.connect(self.unlink_files)
 
         #When term content has changed, we update the term to termController
         #and pass updated term to MainWidget:
@@ -123,6 +129,7 @@ class MainWindow(QMainWindow):
         self.signal_added_a_term.connect(self.main_widget.added_a_term)
         self.signal_removed_a_term.connect(self.main_widget.term_has_been_removed)
         self.signal_started_a_new_project.connect(self.main_widget.reset)
+        self.signal_project_saved.connect(self.main_widget.unmark)
 
     def _initialize_project(self, project_path):
         try:
@@ -184,16 +191,16 @@ class MainWindow(QMainWindow):
             self._save_project_as()
         else:
             self.terms_controller.save_project()
+            self.signal_project_saved.emit()
 
     def _save_project_as(self):
         self.terms_controller.save_project_as(self._choose_a_folder())
 
     def _remove_current_term(self):
-        self.remove_term(self._current_term)
+        self.remove_term(self.current_term)
 
     @pyqtSlot(Term)
     def update_term(self, term: Term):
-        #If the name of the term changed:
         if self.terms_controller.update_term(term):
             self.signal_removed_a_term.emit(Term(term.term_on_init))
             self.signal_added_a_term.emit(term)
@@ -221,11 +228,22 @@ class MainWindow(QMainWindow):
         if self.terms_controller.link_terms(term_str, str_terms):
             self.signal_updated_a_term.emit(
                 self.terms_controller.get_term(term_str))
-            print("UPDATE TERM SENT")
 
     @pyqtSlot(str, list)
     def unlink_terms(self, term_str: str, str_terms: list):
         if self.terms_controller.unlink_terms(term_str, str_terms):
+            self.signal_updated_a_term.emit(
+                self.terms_controller.get_term())
+
+    @pyqtSlot(str, str)
+    def link_files(self, term_str: str, file_paths_str: list):
+        if self.terms_controller.link_files(term_str, file_paths_str):
+            self.signal_updated_a_term.emit(
+                self.terms_controller.get_term(term_str))
+
+    @pyqtSlot(str, list)
+    def unlink_files(self, term_str: str, file_paths: list):
+        if self.terms_controller.unlink_files(term_str, file_paths):
             self.signal_updated_a_term.emit(
                 self.terms_controller.get_term(term_str))
 

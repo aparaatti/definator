@@ -93,6 +93,8 @@ class Description(object):
                 content_text_list.append(str(item))
             elif type(item) is Title:
                 content_text_list.append(item.title_tag)
+            elif type(item) is AttachedImage:
+                pass
             else:
                 print("Could not find type, where are the types?")
                 print("Type: " + str(type(item)))

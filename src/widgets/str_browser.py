@@ -1,5 +1,6 @@
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QListWidgetItem
+from PyQt5.QtGui import QColor, QBrush
 
 from .qtdesigner.ui_QStrBrowser import Ui_QStrBrowser
 
@@ -13,6 +14,9 @@ class StrBrowser(QWidget):
         #Load QWidget
         super(StrBrowser, self).__init__(parent)
         self._current_str = ""
+        self._mark_color = ["White", "Black"]
+        self._default_colors = ["Black", "White"]
+        self._marked_items = list()
         self._str_2_item = {}
         self.ui = Ui_QStrBrowser()
 
@@ -59,14 +63,20 @@ class StrBrowser(QWidget):
     def set_current_str(self, string: str):
         if self._current_str == string:
             return
-        #items = self.ui.listWidget.items()
-        #print(str(items) + " " + type(items))
-        print(str(self.ui.listWidget.mimeTypes()))
         self.ui.listWidget.setCurrentItem(self._str_2_item[string])
 
     def mark_str(self, string: str):
-        #TODO this
-        pass
+        item = self._str_2_item[string]
+        print("marked")
+        item.setForeground(QBrush(QColor(self._mark_color[0])))
+        item.setBackground(QBrush(QColor(self._mark_color[1])))
+        self._marked_items.append(item)
+
+    def unmark(self):
+        for item in self._marked_items:
+            item.setForeground(QBrush(QColor(self._default_colors[0])))
+            item.setBackground(QBrush(QColor(self._default_colors[1])))
+        self._marked_items.clear()
 
     def add_a_str(self, string: str):
         self._add_a_str(string)
@@ -82,3 +92,15 @@ class StrBrowser(QWidget):
     @property
     def current_str(self):
         return self._current_str
+
+    @property
+    def mark_color(self):
+        return self._mark_color
+
+    @mark_color.setter
+    def mark_color(self, str_colors: list):
+        if len(str_colors) < 2:
+            return
+        if QColor(str_colors[0]).isValid() and QColor(str_colors[1]).isValid:
+            self._mark_color[0] = str_colors[0]
+            self._mark_color[1] = str_colors[1]

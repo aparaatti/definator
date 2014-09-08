@@ -23,30 +23,32 @@ class Links(object):
         if term_str not in self._linked_terms:
             self._linked_terms.append(term_str)
 
-    def link_image(self, path):
+    def _link_image(self, path):
         if issubclass(type(path), Path) and path not in self._linked_images.values():
             self._linked_images[path.name] = path
             return True
         else:
-            print(str(type(path)) + ": could not link image " + str(path))
             return False
 
-    def link_file(self, path):
+    def _link_file(self, path):
         if issubclass(type(path), Path) and path not in self._linked_files.values():
             self._linked_files[path.name] = path
             return True
         else:
-            print(str(type(path)) + ": could not link file " + str(path))
             return False
 
     def unlink_term(self, term_str):
         self._linked_terms.remove(term_str)
 
     def unlink_image(self, path: Path):
-        self._linked_images.pop(path.name)
+        if self._linked_images.pop(path.name):
+            return True
+        return False
 
     def unlink_file(self, path: Path):
-        self._linked_files.pop(path.name)
+        if self._linked_files.pop(path.name):
+            return True
+        return False
 
     def save(self, path: Path, added_images: list()):
         self._save_files_to_term_path(path, added_images)
@@ -83,18 +85,18 @@ class Links(object):
             self._linked_terms = dictionary.get("terms")
 
         if path.is_dir():
-            for x in path.iterdir():
-                if x.is_file and x.name not in ["links.json", "description.json"]:
-                    type_tuple = mimetypes.guess_type(str(x))
-                    self._link_file_on_mime(type_tuple, x)
+            for files in path.iterdir():
+                if files.is_file and files.name not in ["links.json", "description.json"]:
+                    self.link_file_on_mime(files)
 
         print("links after load: " + str(self.linked_images) + " " + str(self.linked_files) + " " + str(self.linked_terms))
 
-    def _link_file_on_mime(self, type_tuple: tuple, x: Path):
+    def link_file_on_mime(self, path: Path):
+        type_tuple = mimetypes.guess_type(str(path))
         if type_tuple[0] is not None and type_tuple[0].startswith('image'):
-            self.link_image(Path(x.name))
+            return self._link_image(Path(path.name))
         else:
-            self.link_file(Path(x.name))
+            return self._link_file(Path(path.name))
 
     def delete(self, path: Path):
         os.remove(str(path / "links.json"))
@@ -105,11 +107,11 @@ class Links(object):
 
     @property
     def linked_images(self):
-        return self._linked_images.values()
+        return list(self._linked_images.values())
 
     @property
     def linked_files(self):
-        return self._linked_files.values()
+        return list(self._linked_files.values())
 
 
 class LinksEncoder(json.JSONEncoder):

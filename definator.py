@@ -5,7 +5,6 @@
 #
 # "Road map":
 # TODO: linking
-#   -make Term display to send term selected event on term link press
 #   -make StrChooser to adjust its cols and line count on size change
 #   -make StrChooser item draggable on term editor and drop text at drop location (tags)
 #   -combine file and image linking (add file, rem file), add tag to end of editor when image is added.
@@ -29,6 +28,7 @@
 #   -Maybe open terms in tabs, with editor/term --> proper undo/redo
 #   -Writing of unit tests
 #   -Add list of synonymous terms to a term.
+#   -show tags bold on term editor, show references to images bold on term display
 # TODO: Use python built in serialization/deserialization for saving stuff
 #
 from PyQt5.QtWidgets import QApplication

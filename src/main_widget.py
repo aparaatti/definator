@@ -7,7 +7,7 @@
 #
 from pathlib import Path
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QSize
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QFileDialog
 
 from .data.term import Term
 
@@ -17,6 +17,7 @@ from .widgets.term_editor import TermEditor
 from .widgets.term_linker import TermLinker
 from .widgets.definator_button import DefinatorButton
 from .widgets.str_chooser import StrChooser
+from .widgets.link_list import LinkList
 
 
 class MainWidget(QWidget):
@@ -52,10 +53,17 @@ class MainWidget(QWidget):
 
         self.term_str_browser = StrBrowser("Term Browser")
         self.term_display = TermDisplay()
+        self.term_related_terms = LinkList("Related terms")
         self.term_editor = TermEditor()
         self.term_linker = TermLinker()
-        self.str_chooser = StrChooser(self)
-        self.str_remover = StrChooser(self)
+        self.term_chooser = StrChooser(self)
+        self.term_remover = StrChooser(self)
+        self.file_chooser = QFileDialog()
+        self.file_remover = StrChooser(self)
+
+        self.term_linker.add_item_group("Term", "Yellow", "Black")
+        self.term_linker.add_item_group("Image", "Cyan", "Black")
+        self.term_linker.add_item_group("File", "Magenta", "Black")
 
         self.edit_term_button = DefinatorButton("Edit")
         self.view_term_button = DefinatorButton("View")
@@ -87,11 +95,13 @@ class MainWidget(QWidget):
 
         layout_v_term_view.addLayout(layout_h_term_buttons)
         layout_v_term_view.addWidget(self.term_editor)
-        layout_v_term_view.addWidget(self.term_display)
         layout_v_term_view.addWidget(self.term_linker)
+        layout_v_term_view.addWidget(self.term_display)
+        layout_v_term_view.addWidget(self.term_related_terms)
 
         #New project state:
         self.term_display.hide()
+        self.term_related_terms.hide()
         self.add_term_button.setEnabled(False)
         self.remove_term_button.setEnabled(False)
         self.edit_term_button.setEnabled(False)
@@ -111,13 +121,19 @@ class MainWidget(QWidget):
             self._stopped_editing_new_term)
 
         self.term_str_browser.str_selected.connect(self._change_term)
-        self.term_display.term_selected.connect(self._change_term)
+        self.term_related_terms.link_selected.connect(self._change_term)
         self.term_str_browser.list_is_empty.connect(self._create_new_term)
 
+        #Linking of terms
         self.term_linker.linkTermsClicked.connect(self._link_terms)
         self.term_linker.unlinkTermsClicked.connect(self._unlink_terms)
-        self.str_chooser.str_list_accepted.connect(self.link_terms)
-        self.str_remover.str_list_accepted.connect(self.unlink_terms)
+        self.term_chooser.str_list_accepted.connect(self.link_terms)
+        self.term_remover.str_list_accepted.connect(self.unlink_terms)
+
+        #Linking of files
+        self.term_linker.add_file.connect(self._link_files)
+        self.term_linker.remove_files.connect(self._unlink_files)
+        self.file_remover.str_list_accepted.connect(self.unlink_files)
 
         self.add_term_button.clicked.connect(self._create_new_term)
         self.edit_term_button.clicked.connect(self._edit_current_term)
@@ -127,13 +143,18 @@ class MainWidget(QWidget):
     def _set_current_term(self, term: Term):
         self.term_str_browser.set_current_str(term.term)
         self.term_display.set_current_term(term)
-        self.term_linker.set_current_term(term)
+        self.term_linker.update_item_group("Term", term.related_terms)
+        self.term_linker.update_item_group("Image", [path.name for path in term.linked_images])
+        self.term_linker.update_item_group("File", [path.name for path in term.linked_files])
+        self.term_editor.set_term(term)
+        self.term_related_terms.set_current_html(term.related_terms_as_html)
         self.current_term = term
 
     def _show_term_editor(self):
         if self.term_display.isVisible():
-            self.term_linker.show()
             self.term_display.hide()
+            self.term_related_terms.hide()
+            self.term_linker.show()
             self.term_editor.show()
             self.add_term_button.setEnabled(False)
             self.remove_term_button.setEnabled(False)
@@ -149,6 +170,7 @@ class MainWidget(QWidget):
             self.term_linker.hide()
             self.term_editor.hide()
             self.term_display.show()
+            self.term_related_terms.show()
             self.add_term_button.setEnabled(True)
             self.view_term_button.setEnabled(False)
             self.edit_term_button.setEnabled(True)
@@ -164,8 +186,12 @@ class MainWidget(QWidget):
     @pyqtSlot(tuple, Term)
     def initialize_a_project(self, terms: tuple, term: Term):
         self.term_str_browser.set_list(list(terms))
-        self._set_current_term(term)
         self._show_term_display()
+        self._set_current_term(term)
+
+    @pyqtSlot()
+    def unmark(self):
+        self.term_str_browser.unmark()
 
     @pyqtSlot(Term)
     def change_term(self, term: Term):
@@ -175,8 +201,6 @@ class MainWidget(QWidget):
     @pyqtSlot(Term)
     def term_has_been_updated(self, term: Term):
         self.term_str_browser.mark_str(term.term)
-        self.term_display.set_current_term(term)
-        self.term_linker.set_current_term(term)
 
     @pyqtSlot(Term)
     def added_a_term(self, term: Term):
@@ -196,6 +220,11 @@ class MainWidget(QWidget):
     def unlink_terms(self, str_list):
         if len(str_list) > 0:
             self.remove_links_from_term.emit(self.current_term.term, str_list)
+
+    @pyqtSlot(list)
+    def unlink_files(self, str_list):
+        if len(str_list) > 0:
+            self.remove_files_from_term.emit(self.current_term.term, str_list)
 
     # Slots for inner signals and triggering of events to be passed on to parent
     # module.
@@ -233,21 +262,32 @@ class MainWidget(QWidget):
     @pyqtSlot()
     def _link_terms(self):
         a_list = self.term_str_browser.get_list()
-        black_list = self.current_term.related_terms
-        black_list.append(self.current_term.term)
+        black_list = [self.current_term.term]
+
+        if self.current_term.related_terms:
+            [black_list.append(term_str) for term_str in self.current_term.related_terms]
+
         [a_list.remove(item) for item in black_list]
-        self.str_chooser.set_list(a_list)
-        self.str_chooser.show()
+
+        self.term_chooser.set_list(a_list)
+        self.term_chooser.show()
 
     @pyqtSlot()
     def _unlink_terms(self):
-        self.str_remover.set_list(self.current_term.related_terms)
-        self.str_remover.show()
+        self.term_remover.set_list(self.current_term.related_terms)
+        self.term_remover.show()
 
     @pyqtSlot()
-    def _link_file(self):
-        pass
+    def _link_files(self):
+        file_names = self.file_chooser.getOpenFileNames(
+            self, "Select a file", '', "All Files (*)", '')
+        if file_names is not None and file_names[0] is not None and self.current_term is not None:
+            self.add_files_to_term.emit(self.current_term.term, file_names[0])
 
     @pyqtSlot()
-    def _unlink_file(self):
-        pass
+    def _unlink_files(self):
+        all_files = list()
+        [all_files.append(file.name) for file in self.current_term.linked_files]
+        [all_files.append(image.name) for image in self.current_term.linked_images]
+        self.file_remover.set_list(all_files)
+        self.file_remover.show()

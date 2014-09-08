@@ -15,7 +15,6 @@ class DefinatorButton(QWidget):
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        #sizePolicy.setHeightForWidth(QSizePolicy.hasHeightForWidth())
 
         self.layout = QVBoxLayout(self)
         self.button = QPushButton(self)

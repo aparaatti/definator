@@ -25,9 +25,8 @@ class AttachedImage(object):
 
         :param string: string representation of object
         """
-        print("parsing image from string: " + string)
         matches = self.match_attribute.findall(string)
-        if not matches[0]:
+        if len(matches) < 1:
             return None
 
         self._path = Path(matches[0].strip('"'))
@@ -38,7 +37,6 @@ class AttachedImage(object):
             self._title = str(self._path.stem)
 
         self._tag = string
-        print("Parsed img tag: " + self._tag + " " + self._title + " " + str(self._path))
         return self
 
     @property

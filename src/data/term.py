@@ -59,34 +59,32 @@ class Term(object):
             "</head><body><code>" +\
             "<h1>" + self.term + "</h1>" +\
             self._description.content_html +\
-            self._make_html_list_of_images() +\
             self._make_html_list_of_files() +\
             "</code></body></html>"
-            #self._make_html_list_of_related_terms() +\
         return html
 
-    def _make_html_list_of_images(self):
-        image_names = list()
+    def _make_html_list_of_files(self):
+        file_names = list()
         added_names = set()
         for path in self._description.added_image_paths:
-            image_names.append('<a href="' + str(path) + '" target="_blank">' + path.name + '</a>')
+            file_names.append(
+                '<a href="' + str(path) + '" target="_blank" class="image">'
+                + path.name + '</a>')
             added_names.add(path.name)
 
         for path in self._links.linked_images:
             if path.name not in added_names:
-                image_names.append('<a href="' + path.name + '" target="_blank">' + path.name + '</a>')
+                file_names.append(
+                    '<a href="' + path.name + '" target="_blank" class="image">'
+                    + path.name + '</a>')
 
-        if len(image_names) > 0:
-            return "<h2>Attached images: </h2><ul>" + "<br/>".join(image_names) + "</ul>"
-        return ""
-
-    def _make_html_list_of_files(self):
-        file_names = list()
         for path in self._links.linked_files:
-            file_names.append('<a href="' + path.name + '" target="_blank">' + path.name + '</a>')
+            file_names.append(
+                '<a href="' + path.name + '" target="_blank" class="file">'
+                + path.name + '</a>')
 
         if len(file_names) > 0:
-            return "<h2>Attached files: </h2><ul>" + "<br/>".join(file_names) + "</ul>"
+            return "<br/><br/><h3>Attached files: </h3><ul>" + "<br/>".join(file_names) + "</ul>"
         return ""
 
     @property
@@ -98,8 +96,12 @@ class Term(object):
         return self._description.content_text
 
     @property
-    def links(self):
-        return self._links
+    def linked_images(self):
+        return self._links.linked_images
+
+    @property
+    def linked_files(self):
+        return self._links.linked_files
 
     @property
     def related_terms(self):
@@ -150,7 +152,10 @@ class Term(object):
         self._links.unlink_term(term.term)
 
     def link_file(self, path: Path):
-        self._links.link_file(path)
+        return self._links.link_file_on_mime(path)
+
+    def unlink_file(self, path: Path):
+        return self._links.unlink_file(path)
 
     def load(self, path):
         self._links = Links()
