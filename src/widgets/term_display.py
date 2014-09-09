@@ -22,7 +22,7 @@ class TermDisplay(QWidget):
         self.ui.contentWebView.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
 
     @pyqtSlot(Term)
-    def set_current_term(self, term: Term):
+    def set_term(self, term: Term):
         self.ui.contentWebView.setHtml(term.term_as_html, QUrl("file://"))
 
     @pyqtSlot(QUrl)

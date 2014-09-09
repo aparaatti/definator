@@ -10,19 +10,12 @@
 #   -combine file and image linking (add file, rem file), add tag to end of editor when image is added.
 # TODO signal when editor has saveable term --> view button activation
 # TODO: All menu items
-#   -Save term (ctrl + s) + save project + save project as
-#   -copy/paste
-#   -about, help
 #   -settings
 # TODO: Translations
 # TODO: Settings:
 #   -language
 #   -remember opened projects
 #   -load last opened project on startup
-# TODO: Make linking UI:s better (combine to term editor)
-#   -Files and images as list on the term display
-#   -Files and images as separate web display on term editor
-#   -buttons/icons to add tags
 # TODO Later:
 #   -str-browser as own widget to left side and MainWidget contains term display and editor.
 #   -Maybe open terms in tabs, with editor/term --> proper undo/redo

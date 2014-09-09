@@ -90,7 +90,11 @@ class MainWidget(QWidget):
         self.act_add_term.setEnabled(False)
         self.act_rem_term.setEnabled(False)
         self.act_edit_term.setEnabled(False)
-        self.act_view_term.setEnabled(True)
+        self.act_view_term.setEnabled(False)
+        self.act_link_terms.setEnabled(False)
+        self.act_unlink_terms.setEnabled(False)
+        self.act_link_files.setEnabled(False)
+        self.act_unlink_files.setEnabled(False)
         self.term_linker.edit_mode()
         self.term_display.hide()
         self.related_terms.hide()
@@ -107,11 +111,11 @@ class MainWidget(QWidget):
         self.term_editor.signal_stopped_editing.connect(self._stopped_editing)
         self.term_editor.signal_stopped_editing_new_term.connect(
             self._stopped_editing_new_term)
-        self.term_editor.signal_valid.connect(self._linkin_enabled)
+        self.term_editor.signal_valid.connect(self.act_view_term.setEnabled)
 
         self.term_str_browser.str_selected.connect(self._change_term)
         self.related_terms.link_selected.connect(self._change_term)
-        self.term_str_browser.list_is_empty.connect(self.create_new_term)
+        self.term_str_browser.list_is_empty.connect(self.reset)
 
         #Linking of terms
         self.term_linker.linkTermsClicked.connect(self.link_terms)
@@ -126,10 +130,11 @@ class MainWidget(QWidget):
 
     def _set_current_term(self, term: Term):
         self.term_str_browser.set_current_str(term.term)
-        self.term_display.set_current_term(term)
+        self.term_display.set_term(term)
         self.term_linker.update_item_group("Term", term.related_terms)
         self.term_linker.update_item_group("Image", [path.name for path in term.linked_images])
         self.term_linker.update_item_group("File", [path.name for path in term.linked_files])
+        self.term_linker.populate()
         self.term_editor.set_term(term)
         self.related_terms.set_current_html(term.related_terms_as_html)
         self.current_term = term
@@ -142,9 +147,6 @@ class MainWidget(QWidget):
 
     def _editing_enabled(self, boolean: bool):
         self.act_edit_term.setEnabled(boolean)
-
-    def _view_term_enabled(self, boolean: bool):
-        self.act_view_term.setEnabled(boolean)
 
     def _linkin_enabled(self, boolean: bool):
         self.act_link_terms.setEnabled(boolean)
@@ -165,7 +167,7 @@ class MainWidget(QWidget):
             self._adding_enabled(False)
             self._removing_enabled(False)
             self._editing_enabled(False)
-            self._view_term_enabled(True)
+            self.act_view_term.setEnabled(True)
 
     @pyqtSlot()
     def show_term_display(self):
@@ -178,7 +180,7 @@ class MainWidget(QWidget):
             self.term_display.show()
             self.related_terms.show()
             self._adding_enabled(True)
-            self._view_term_enabled(False)
+            self.act_view_term.setEnabled(False)
             self._editing_enabled(True)
             self._removing_enabled(True)
 
@@ -201,8 +203,8 @@ class MainWidget(QWidget):
 
     @pyqtSlot(Term)
     def change_term(self, term: Term):
-        self.show_term_display()
         self._set_current_term(term)
+        self.show_term_display()
 
     @pyqtSlot(Term)
     def term_has_been_updated(self, term: Term):
@@ -231,7 +233,7 @@ class MainWidget(QWidget):
 
     @pyqtSlot()
     def link_terms(self):
-        self.show_term_display()
+        self._ugly_fix_to_catch_edits()
         a_list = self.term_str_browser.get_list()
         black_list = [self.current_term.term]
 
@@ -251,7 +253,7 @@ class MainWidget(QWidget):
 
     @pyqtSlot()
     def link_files(self):
-        self.show_term_display()
+        self._ugly_fix_to_catch_edits()
         file_names = self.file_chooser.getOpenFileNames(
             self, "Select a file", '', "All Files (*)", '')
         if file_names is not None and file_names[0] is not None and self.current_term is not None:
@@ -275,6 +277,11 @@ class MainWidget(QWidget):
         self.term_linker.clear()
         self.term_linker.setEnabled(False)
         self._show_term_editor()
+        self.act_view_term.setEnabled(False)
+        self.act_link_files.setEnabled(False)
+        self.act_link_terms.setEnabled(False)
+        self.act_unlink_terms.setEnabled(False)
+        self.act_unlink_files.setEnabled(False)
 
     @pyqtSlot()
     def edit_current_term(self):
@@ -296,6 +303,7 @@ class MainWidget(QWidget):
 
     @pyqtSlot(Term)
     def _stopped_editing(self, term: Term):
+        self._set_current_term(term)
         self.term_display.show()
         self.update_term.emit(term)
 
@@ -359,3 +367,8 @@ class MainWidget(QWidget):
         self.act_redo = make_action_helper(
             self, "Redo", "Redo undone change", QKeySequence.Redo, QIcon.fromTheme('edit-redo'))
         self.act_redo.triggered.connect(self._redo)
+
+    def _ugly_fix_to_catch_edits(self):
+        self.show_term_display()
+        self.term_editor.set_term(self.current_term)
+        self._show_term_editor()

@@ -259,6 +259,13 @@ class MainWindow(QMainWindow):
         self.toolBar.addAction(self.main_widget.act_view_term)
         self.toolBar.addAction(self.main_widget.act_edit_term)
         self.toolBar.addAction(self.main_widget.act_rem_term)
+        self.toolBar.addSeparator()
+        self.toolBar.addAction(self.main_widget.act_link_terms)
+        self.toolBar.addAction(self.main_widget.act_unlink_terms)
+        self.toolBar.addSeparator()
+        self.toolBar.addAction(self.main_widget.act_link_files)
+        self.toolBar.addAction(self.main_widget.act_unlink_files)
+
 
     def _make_actions(self):
         self.act_new_project = make_action_helper(

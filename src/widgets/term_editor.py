@@ -24,6 +24,7 @@ class TermEditor(QWidget):
         self._current_term = None
         self.ui.addImageToolButton.clicked.connect(self.add_image_tag)
         self.ui.addTitleToolButton.clicked.connect(self.add_title_tag)
+        self.ui.lineEditTitle.textChanged.connect(self._validate_term)
 
     def _clear(self):
         self.ui.lineEditTitle.clear()
@@ -64,3 +65,9 @@ class TermEditor(QWidget):
         [white_space_removed.append(line.strip()) for line in text.splitlines()]
         term.description = os.linesep.join(white_space_removed)
         return term
+
+    def _validate_term(self):
+        if self.ui.lineEditTitle.displayText() is "":
+            self.signal_valid.emit(False)
+        else:
+            self.signal_valid.emit(True)
