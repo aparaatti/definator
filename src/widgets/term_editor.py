@@ -13,11 +13,16 @@ class TermEditor(QWidget):
     signal_stopped_editing = pyqtSignal(Term)
     signal_stopped_editing_new_term = pyqtSignal(Term)
 
+    signal_can_undo = pyqtSignal(bool)
+    signal_can_redo = pyqtSignal(bool)
+
     signal_valid = pyqtSignal(bool)
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self._valid = None
+        self._redo_count = 0
+        self._undo_count = 0
         self.ui = Ui_TermEditor()
         self.ui.setupUi(self)
         self.ui.lineEditTitle.text = ""
@@ -25,6 +30,15 @@ class TermEditor(QWidget):
         self.ui.addImageToolButton.clicked.connect(self.add_image_tag)
         self.ui.addTitleToolButton.clicked.connect(self.add_title_tag)
         self.ui.lineEditTitle.textChanged.connect(self._validate_term)
+
+        #We do not provied undo in editor window for term title, it
+        #will be undone when textEdit runs out of undoes.
+        #Othervice one should keep track of the order of edits to term title
+        #and description text --> would not behave logically anyway.
+        #self.ui.lineEditTitle.redoAvailable.connect(self._send_redo_available)
+        self.ui.textEditContent.redoAvailable.connect(self._send_redo_availabe)
+        #self.ui.lineEditTitle.undoAvailable.connect(self._send_undo_available)
+        self.ui.textEditContent.undoAvailable.connect(self._send_undo_availabe)
 
     def _clear(self):
         self.ui.lineEditTitle.clear()
@@ -44,8 +58,9 @@ class TermEditor(QWidget):
             self.signal_stopped_editing_new_term.emit(self._fill_term(Term()))
             self._clear()
         else:
-            self._fill_term(self._current_term)
-            self.signal_stopped_editing.emit(self._current_term)
+            #Undo-redo linked list built here:
+            self._current_term.next_term = self._fill_term(Term())
+            self.signal_stopped_editing.emit(self._current_term.next_term)
             self._clear()
 
         super().hide()
@@ -57,6 +72,24 @@ class TermEditor(QWidget):
     @pyqtSlot()
     def add_title_tag(self):
         self.ui.textEditContent.insertPlainText("##Title##")
+
+    @pyqtSlot(bool)
+    def _send_undo_available(self, boolean):
+        if boolean:
+            self._undo_count += 1
+        else:
+            self._undo_count -= 1
+
+        self._send_undo_available(self._undo_count is 2)
+
+    @pyqtSlot(bool)
+    def _send_redo_available(self, boolean):
+        if boolean:
+            self._redo_count += 1
+        else:
+            self._redo_count -= 1
+
+        self.signal_can_redo.emit(self._redo_count is 2)
 
     def _fill_term(self, term: Term):
         term.term = self.ui.lineEditTitle.displayText()
@@ -71,3 +104,6 @@ class TermEditor(QWidget):
             self.signal_valid.emit(False)
         else:
             self.signal_valid.emit(True)
+
+#    void dropEvent( QDropEvent * e ):
+#        super().
