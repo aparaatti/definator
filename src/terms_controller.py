@@ -38,8 +38,8 @@ class TermsController(object):
         self._project_path = Path('')
         self._terms_list = []
         self._terms = {}
-        self._deleted_terms = {}
         self._changed_terms = {}
+        self._deleted_terms = {}
         self._has_changed = False
 
     def get_term(self, term_str):

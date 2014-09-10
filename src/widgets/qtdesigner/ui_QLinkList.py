@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'QLinkList.ui'
 #
-# Created: Mon Sep  8 19:54:26 2014
+# Created: Wed Sep 10 16:25:40 2014
 #      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!

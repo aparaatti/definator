@@ -36,7 +36,7 @@ class StrBrowser(QWidget):
         else:
             filtered_list = [filtered_string for filtered_string
                              in self._str_2_item.keys()
-                             if filtered_string.startswith(string)]
+                             if filtered_string.lower().startswith(string.lower())]
             self.ui.listWidget.clear()
             for string in filtered_list:
                 self._add_a_str(string)

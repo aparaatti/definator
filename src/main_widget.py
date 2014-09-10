@@ -70,42 +70,9 @@ class MainWidget(QWidget):
         self.setMinimumSize(QSize(750, 200))
 
         self._init_actions()
-
-        #Set layout
-        layout_h = QHBoxLayout()
-
-        layout_v_term_view = QVBoxLayout()
-        layout_v_term_browser = QVBoxLayout()
-
-        #Term browser area:
-        layout_h.addLayout(layout_v_term_browser)
-        layout_v_term_browser.addWidget(self.term_str_browser)
-
-        layout_v_term_view.addWidget(self.term_editor)
-        layout_v_term_view.addWidget(self.term_linker)
-        layout_v_term_view.addWidget(self.term_display)
-        layout_v_term_view.addWidget(self.related_terms)
-
+        self._init_layout()
         #New project state:
-        self.act_add_term.setEnabled(False)
-        self.act_rem_term.setEnabled(False)
-        self.act_edit_term.setEnabled(False)
-        self.act_view_term.setEnabled(False)
-        self.act_link_terms.setEnabled(False)
-        self.act_unlink_terms.setEnabled(False)
-        self.act_link_files.setEnabled(False)
-        self.act_unlink_files.setEnabled(False)
-        self.term_linker.edit_mode()
-        self.term_display.hide()
-        self.related_terms.hide()
-        #self.term_editor.hide()
-        #self.term_linker.hide()
-
-        #Add editor area to browser layout
-        layout_h.addLayout(layout_v_term_view)
-        self.setLayout(layout_h)
-
-        self.term_str_browser.setFocus()
+        self._init_state()
 
         # Inner interaction logic:
         self.term_editor.signal_stopped_editing.connect(self._stopped_editing)
@@ -128,6 +95,10 @@ class MainWidget(QWidget):
         self.term_linker.remove_files.connect(self.unlink_files)
         self.file_remover.str_list_accepted.connect(self._unlink_files_accepted)
 
+        #Undo - redo
+        self.term_editor.signal_can_undo.connect(self._undo_available_in_text_edit)
+        self.term_editor.signal_can_redo.connect(self._redo_available_in_text_edit)
+
     def _set_current_term(self, term: Term):
         self.term_str_browser.set_current_str(term.term)
         self.term_display.set_term(term)
@@ -138,6 +109,8 @@ class MainWidget(QWidget):
         self.term_editor.set_term(term)
         self.related_terms.set_current_html(term.related_terms_as_html)
         self.current_term = term
+        self.act_undo.setEnabled((self.current_term.previous_term is not None))
+        self.act_redo.setEnabled((self.current_term.next_term is not None))
 
     def _adding_enabled(self, boolean: bool):
         self.act_add_term.setEnabled(boolean)
@@ -184,11 +157,18 @@ class MainWidget(QWidget):
             self._editing_enabled(True)
             self._removing_enabled(True)
 
+    def refresh_current_view(self):
+        if self.term_editor.isVisible():
+            self._show_term_editor()
+        else:
+            self.show_term_display()
+
     # In coming slots from outside:
     @pyqtSlot()
     def reset(self):
         self.term_str_browser.set_list([])
         self.current_term = None
+        self._init_state()
         self.create_new_term()
 
     @pyqtSlot(tuple, Term)
@@ -220,13 +200,43 @@ class MainWidget(QWidget):
     def term_has_been_removed(self, term: Term):
         self.term_str_browser.rem_a_str(term.term)
 
+    @pyqtSlot(bool)
+    def _redo_available_in_text_edit(self, boolean):
+        self._redo_text_edit = boolean
+        if boolean:
+            self.act_redo.setEnabled(True)
+        elif not self.current_term or not self.current_term.can_redo:
+            self.act_redo.setEnabled(False)
+
+    @pyqtSlot(bool)
+    def _undo_available_in_text_edit(self, boolean):
+        self._undo_text_edit = boolean
+        if boolean:
+            self.act_undo.setEnabled(True)
+        elif not self.current_term or not self.current_term.can_undo:
+            self.act_undo.setEnabled(False)
+
     @pyqtSlot()
     def _undo(self):
-        pass
+        if self._undo_text_edit:
+            self.term_editor.undo()
+        else:
+            self._set_current_term(self.current_term.previous_term)
+            self.refresh_current_view()
+
+        if not self.current_term or not self.current_term.can_undo:
+            self.act_undo.setEnabled(False)
 
     @pyqtSlot()
     def _redo(self):
-        pass
+        if self._redo_text_edit:
+            self.term_editor.redo()
+        else:
+            self._set_current_term(self.current_term.next_term)
+            self.refresh_current_view()
+
+        if not self.current_term or not self.current_term.can_redo:
+            self.act_redo.setEnabled(False)
 
     def save_current_term(self):
         pass
@@ -243,6 +253,7 @@ class MainWidget(QWidget):
         [a_list.remove(item) for item in black_list]
 
         self.term_chooser.set_list(a_list)
+        #IF accepted, will return to _link_terms_accepted method
         self.term_chooser.show()
 
     @pyqtSlot()
@@ -303,6 +314,8 @@ class MainWidget(QWidget):
 
     @pyqtSlot(Term)
     def _stopped_editing(self, term: Term):
+        # Tässä liitetään muokattu termi edelliseen termiin.
+        self.current_term.next_term = term
         self._set_current_term(term)
         self.term_display.show()
         self.update_term.emit(term)
@@ -367,6 +380,45 @@ class MainWidget(QWidget):
         self.act_redo = make_action_helper(
             self, "Redo", "Redo undone change", QKeySequence.Redo, QIcon.fromTheme('edit-redo'))
         self.act_redo.triggered.connect(self._redo)
+
+    def _init_layout(self):
+        #Set layout
+        layout_h = QHBoxLayout()
+
+        layout_v_term_view = QVBoxLayout()
+        layout_v_term_browser = QVBoxLayout()
+
+        #Term browser area:
+        layout_h.addLayout(layout_v_term_browser)
+        layout_v_term_browser.addWidget(self.term_str_browser)
+
+        layout_v_term_view.addWidget(self.term_editor)
+        layout_v_term_view.addWidget(self.term_linker)
+        layout_v_term_view.addWidget(self.term_display)
+        layout_v_term_view.addWidget(self.related_terms)
+
+        #Add editor area to browser layout
+        layout_h.addLayout(layout_v_term_view)
+        self.setLayout(layout_h)
+
+    def _init_state(self):
+        self.term_str_browser.setFocus()
+        self.act_add_term.setEnabled(False)
+        self.act_rem_term.setEnabled(False)
+        self.act_edit_term.setEnabled(False)
+        self.act_view_term.setEnabled(False)
+        self.act_link_terms.setEnabled(False)
+        self.act_unlink_terms.setEnabled(False)
+        self.act_link_files.setEnabled(False)
+        self.act_unlink_files.setEnabled(False)
+        self.act_undo.setEnabled(False)
+        self.act_redo.setEnabled(False)
+        self.act_save_term.setEnabled(False)
+        self._redo_text_edit = False
+        self._undo_text_edit = False
+        self.term_linker.edit_mode()
+        self.term_display.hide()
+        self.related_terms.hide()
 
     def _ugly_fix_to_catch_edits(self):
         self.show_term_display()

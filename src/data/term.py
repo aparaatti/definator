@@ -4,6 +4,8 @@
 # and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
 __author__ = 'Niko Humalamäki'
 
+import copy
+
 from .description import *
 from .term_links import *
 
@@ -40,9 +42,39 @@ class Term(object):
         self._term_on_init = term
         self._description = Description()
         self._links = Links()
+        self._previous_term = None
+        self._next_term = None
 
     def __contains__(self, related_term):
         return related_term in self._links.linked_terms()
+
+    @property
+    def can_undo(self):
+        return self.previous_term is not None
+
+    @property
+    def can_redo(self):
+        return self.next_term is not None
+
+    @property
+    def next_term(self):
+        return self._next_term
+
+    @next_term.setter
+    def next_term(self, term):
+        self._links = copy.deepcopy(self._links)
+        self._description = copy.deepcopy(self._description)
+        self._next_term = term
+        term.previous_term = self
+
+    @property
+    def previous_term(self):
+        return self._previous_term
+
+    @previous_term.setter
+    def previous_term(self, term):
+        if not self._previous_term:
+            self._previous_term = term
 
     @property
     def term_on_init(self):
@@ -127,6 +159,12 @@ class Term(object):
 
     @term.setter
     def term(self, term: str):
+        """
+        On term change the copying of the term is not needed since str are immutable.
+
+        :param term:
+        :return:
+        """
         if term == "":
             self.term = None
         elif term != self._term:
@@ -135,26 +173,37 @@ class Term(object):
     @description.setter
     def description(self, description_text: str):
         """
+        New Description object is created. The previous version of the term
+        will reference the previous version of _description.
+
         :param description_text: text version of the description. Description
             object has to be able to parse this.
 
         :return:
         """
+        self._description = Description()
         self._description.content_text = description_text
 
     def link_term(self, term):
         """
+        New links object is created. The previous version of the term
+        will reference the previous version of _links
+
         :param term: Term object
         """
+        self._links = copy.deepcopy(self._links)
         self._links.link_term(term.term)
 
     def unlink_term(self, term):
+        self._links = copy.deepcopy(self._links)
         self._links.unlink_term(term.term)
 
     def link_file(self, path: Path):
+        self._links = copy.deepcopy(self._links)
         return self._links.link_file_on_mime(path)
 
     def unlink_file(self, path: Path):
+        self._links = copy.deepcopy(self._links)
         return self._links.unlink_file(path)
 
     def load(self, path):
@@ -166,15 +215,26 @@ class Term(object):
         return self
 
     def save(self, path: Path):
+        """
+        Saves the current term into given path.
+        Set _previous_term and _next_term to None, eg. forgets undo/redo
+        history.
+
+        :param path: path to project folder
+        :return: None
+        """
         path /= self.term
         if not path.exists():
             path.mkdir()
         self._links.save(path, self._description.added_image_paths)
         self._description.save(path)
+        self._previous_term = None
+        self._next_term = None
 
     def delete(self, path):
         self._links.delete(path / self.term)
         self._description.delete(path / self.term)
+        os.remove(str(path / self.term))
 
     def __str__(self):
         return "Term object: " + self.term + " " + str(id(self))
@@ -227,4 +287,4 @@ class Term(object):
         :param other:
         :return:
         """
-        return self.term == other.term
+        return self.term.lower() == other.term.lower()

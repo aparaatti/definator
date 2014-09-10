@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'QTermLinks.ui'
 #
-# Created: Mon Sep  8 19:54:27 2014
+# Created: Wed Sep 10 16:25:41 2014
 #      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -116,6 +116,7 @@ class Ui_QTermLinks(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.buttonAddFile.sizePolicy().hasHeightForWidth())
         self.buttonAddFile.setSizePolicy(sizePolicy)
+        self.buttonAddFile.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedKingdom))
         self.buttonAddFile.setObjectName("buttonAddFile")
         self.verticalLayout.addWidget(self.buttonAddFile)
         self.buttonRemoveFiles = QtWidgets.QPushButton(self.groupBoxTermLinker)
@@ -141,6 +142,6 @@ class Ui_QTermLinks(object):
         self.labelKeys.setText(_translate("QTermLinks", "Key: "))
         self.buttonLinkTerms.setText(_translate("QTermLinks", "&Link terms"))
         self.buttonUnlinkTerms.setText(_translate("QTermLinks", "&Unlink terms"))
-        self.buttonAddFile.setText(_translate("QTermLinks", "&Add a files"))
+        self.buttonAddFile.setText(_translate("QTermLinks", "&Add files"))
         self.buttonRemoveFiles.setText(_translate("QTermLinks", "&Remove files"))
 

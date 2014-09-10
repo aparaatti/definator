@@ -93,7 +93,7 @@ class MainWindow(QMainWindow):
     def _check_for_unsaved_changes(self):
         if self.terms_controller.unsaved_changes:
             save = QMessageBox.question(
-                self, "QMessageBox.question()",
+                self, "Unsaved changes",
                 "There are unsaved changes in the current project!"
                 + " Do you want to save the project?",
                 QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
@@ -148,9 +148,6 @@ class MainWindow(QMainWindow):
     def _save_project_as(self):
         self.terms_controller.save_project_as(self._choose_a_folder())
 
-    def _remove_current_term(self):
-        self.remove_term(self.current_term)
-
     def _open_help(self):
         pass
 
@@ -174,6 +171,7 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(Term)
     def remove_term(self, term: Term):
+        self._warning_dialog("Are you sure you want to delete term " + term.term + "?\nIt Can't be undone.", "Warning")
         if self.terms_controller.remove_term(term):
             self.signal_removed_a_term.emit(term)
 
@@ -266,7 +264,6 @@ class MainWindow(QMainWindow):
         self.toolBar.addAction(self.main_widget.act_link_files)
         self.toolBar.addAction(self.main_widget.act_unlink_files)
 
-
     def _make_actions(self):
         self.act_new_project = make_action_helper(
             self, "&New project", "Create a new project", None, QIcon.fromTheme('document-new'))
@@ -274,7 +271,7 @@ class MainWindow(QMainWindow):
             self, "&Open project", "Open a project", QKeySequence.Open, QIcon.fromTheme('document-open'))
         self.act_save_project = make_action_helper(
             self, "&Save project", "Save the project", QKeySequence.Save, QIcon.fromTheme('document-save'))
-        self.act_save_project_as = make_action_helper(self, "Save project &As...","Save project as...", QKeySequence.SaveAs, QIcon.fromTheme('document-save-as'))
+        self.act_save_project_as = make_action_helper(self, "Save project &As...", "Save project as...", QKeySequence.SaveAs, QIcon.fromTheme('document-save-as'))
         self.act_quit = make_action_helper(self, "Quit", "Exit application", QKeySequence.Quit, QIcon.fromTheme('application-exit'))
         self.act_quit.triggered.connect(self._quit)
 
@@ -291,6 +288,10 @@ class MainWindow(QMainWindow):
         self.menu["file"].addSeparator()
         self.menu["file"].addAction(self.act_quit)
 
+        self.menu["edit"].addAction(self.main_widget.term_editor.act_copy)
+        self.menu["edit"].addAction(self.main_widget.term_editor.act_paste)
+        self.menu["edit"].addAction(self.main_widget.term_editor.act_cut)
+        self.menu["edit"].addSeparator()
         self.menu["edit"].addAction(self.main_widget.act_undo)
         self.menu["edit"].addAction(self.main_widget.act_redo)
 

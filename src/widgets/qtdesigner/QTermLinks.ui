@@ -236,8 +236,11 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="locale">
+             <locale language="English" country="UnitedKingdom"/>
+            </property>
             <property name="text">
-             <string>&amp;Add a files</string>
+             <string>&amp;Add files</string>
             </property>
            </widget>
           </item>
