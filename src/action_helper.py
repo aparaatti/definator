@@ -1,4 +1,5 @@
 __author__ = 'aparaatti'
+import logging
 from PyQt5.QtWidgets import QAction, QShortcut
 from PyQt5.QtGui import QIcon
 
@@ -17,6 +18,6 @@ def make_action_helper(self, text, help_text, shortcut: QShortcut=None,
 
     action.setToolTip(help_text)
     action.setStatusTip(help_text)
-    print("Action set: " + text + " " + str(shortcut))
+    logging.debug("Action set for " + str(type(self)) + ": " + text + " " + str(shortcut))
 
     return action

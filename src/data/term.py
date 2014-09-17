@@ -11,7 +11,6 @@ from .term_links import *
 
 
 class Term(object):
-    termId = 0
     """
     Term object. Is given a term string on initialization and tells
     its attributes self._description and self.__links to initialize.
@@ -37,9 +36,8 @@ class Term(object):
     """
 
     def __init__(self, term: str=None):
-        self._termId = 0
-        self._term = term
-        self._term_on_init = term
+        self._term = None
+        self.term = term
         self._description = Description()
         self._links = Links()
         self._previous_term = None
@@ -62,10 +60,8 @@ class Term(object):
 
     @next_term.setter
     def next_term(self, term):
-        self._links = copy.deepcopy(self._links)
-        self._description = copy.deepcopy(self._description)
         self._next_term = term
-        term.previous_term = self
+        term._previous_term = self
 
     @property
     def previous_term(self):
@@ -73,12 +69,8 @@ class Term(object):
 
     @previous_term.setter
     def previous_term(self, term):
-        if not self._previous_term:
-            self._previous_term = term
-
-    @property
-    def term_on_init(self):
-        return self._term_on_init
+        self._previous_term = term
+        term.next_term = self._previous_term
 
     @property
     def term_as_html(self):
@@ -95,37 +87,40 @@ class Term(object):
             "</code></body></html>"
         return html
 
-    def _make_html_list_of_files(self):
-        file_names = list()
-        added_names = set()
-        for path in self._description.added_image_paths:
-            file_names.append(
-                '<a href="' + str(path) + '" target="_blank" class="image">'
-                + path.name + '</a>')
-            added_names.add(path.name)
-
-        for path in self._links.linked_images:
-            if path.name not in added_names:
-                file_names.append(
-                    '<a href="' + path.name + '" target="_blank" class="image">'
-                    + path.name + '</a>')
-
-        for path in self._links.linked_files:
-            file_names.append(
-                '<a href="' + path.name + '" target="_blank" class="file">'
-                + path.name + '</a>')
-
-        if len(file_names) > 0:
-            return "<br/><br/><h3>Attached files: </h3><ul>" + "<br/>".join(file_names) + "</ul>"
-        return ""
-
     @property
     def term(self):
         return self._term
 
+    @term.setter
+    def term(self, term: str):
+        """
+        Sets the term string for this Term object. IF "" is given, the Term.term is set
+        to None.
+
+        :param term: The term as a string.
+        """
+        if term == "":
+            self.term = None
+        elif term != self._term:
+            self._term = term
+
     @property
     def description(self):
         return self._description.content_text
+
+    @description.setter
+    def description(self, description_text: str):
+        """
+        New Description object is created. The previous version of the term
+        will reference the previous version of _description.
+
+        :param description_text: text version of the description. Description
+            object has to be able to parse this.
+
+        :return:
+        """
+        self._description = Description()
+        self._description.content_text = description_text
 
     @property
     def linked_images(self):
@@ -157,53 +152,53 @@ class Term(object):
 
         return "".join(html)
 
-    @term.setter
-    def term(self, term: str):
-        """
-        On term change the copying of the term is not needed since str are immutable.
+    @property
+    def links(self):
+        return copy.deepcopy(self._links)
 
-        :param term:
-        :return:
-        """
-        if term == "":
-            self.term = None
-        elif term != self._term:
-            self._term = term
+    def deepcopy_links_from_previous(self):
+        if self._previous_term:
+            self._links = self._previous_term.links
 
-    @description.setter
-    def description(self, description_text: str):
-        """
-        New Description object is created. The previous version of the term
-        will reference the previous version of _description.
+    def _make_html_list_of_files(self):
+        file_names = list()
+        added_names = set()
+        for path in self._description.added_image_paths:
+            file_names.append(
+                '<a href="' + str(path) + '" target="_blank" class="image">'
+                + path.name + '</a>')
+            added_names.add(path.name)
 
-        :param description_text: text version of the description. Description
-            object has to be able to parse this.
+        for path in self._links.linked_images:
+            if path.name not in added_names:
+                file_names.append(
+                    '<a href="' + path.name + '" target="_blank" class="image">'
+                    + path.name + '</a>')
 
-        :return:
-        """
-        self._description = Description()
-        self._description.content_text = description_text
+        for path in self._links.linked_files:
+            file_names.append(
+                '<a href="' + path.name + '" target="_blank" class="file">'
+                + path.name + '</a>')
+
+        if len(file_names) > 0:
+            return "<br/><br/><h3>Attached files: </h3><ul>" + "<br/>".join(file_names) + "</ul>"
+        return ""
 
     def link_term(self, term):
         """
-        New links object is created. The previous version of the term
-        will reference the previous version of _links
+        Links a term to this term with Links object.
 
         :param term: Term object
         """
-        self._links = copy.deepcopy(self._links)
         self._links.link_term(term.term)
 
     def unlink_term(self, term):
-        self._links = copy.deepcopy(self._links)
         self._links.unlink_term(term.term)
 
     def link_file(self, path: Path):
-        self._links = copy.deepcopy(self._links)
         return self._links.link_file_on_mime(path)
 
     def unlink_file(self, path: Path):
-        self._links = copy.deepcopy(self._links)
         return self._links.unlink_file(path)
 
     def load(self, path):
@@ -211,7 +206,6 @@ class Term(object):
         self._links.load(path / self.term)
         self._description = Description()
         self._description.load(path / self.term)
-        self._term_on_init = self.term
         return self
 
     def save(self, path: Path):
@@ -234,7 +228,10 @@ class Term(object):
     def delete(self, path):
         self._links.delete(path / self.term)
         self._description.delete(path / self.term)
-        os.remove(str(path / self.term))
+        try:
+            os.removedirs(str(path / self.term))
+        except OSError as e:
+            print("The term was removed, referenced files where not removed. " + os.linesep + str(e))
 
     def __str__(self):
         return "Term object: " + self.term + " " + str(id(self))

@@ -40,31 +40,30 @@ class TermsController(object):
         self._terms = {}
         self._changed_terms = {}
         self._deleted_terms = {}
-        self._has_changed = False
 
     def get_term(self, term_str):
         self._lazy_load_term(term_str)
         return deepcopy(self._terms[term_str])
 
-    def remove_term(self, term: Term):
+    def remove_term(self, term_str):
         """
         Removes a term given as a string by moving it to deleted terms. The term
         disappears when the project is saved.
 
         :param term: type Term
         """
-        if term not in self._terms.values():
+        if term_str not in self._terms.keys():
             return False
 
-        if self._deleted_terms.get(term.term) is None:
-            self._deleted_terms[term.term] = list()
+        if self._deleted_terms.get(term_str) is None:
+            self._deleted_terms[term_str] = list()
 
-        self._deleted_terms[term.term].append(self._terms.pop(term.term))
-        self._terms_list.remove(term.term)
-        self._has_changed = True
+        self._deleted_terms[term_str].append(self._terms.pop(term_str))
+        self._terms_list.remove(term_str)
+        #Täällä pitäisi hoittaa viittausten poisto muista termeistä
         return True
 
-    def add_term(self, term_to_add: Term):
+    def add_term(self, term: Term):
         """
         Adds a term to the project.
 
@@ -72,96 +71,74 @@ class TermsController(object):
         :return bool: If the term already exist, returns false if term is added
         successfully returns true.
         """
-        term = deepcopy(term_to_add)
         if term.term not in self._terms_list:
             self._terms[term.term] = term
             if self._changed_terms.get(term.term) is None:
                 self._changed_terms[term.term] = list()
             self._changed_terms[term.term].append(term)
             self._terms_list.append(term.term)
-
-            self._has_changed = True
             return True
         else:
             #Term already exists
             return False
 
-    def update_term(self, term: Term):
+    def update_term(self, term: Term, skip_name_change_test: bool=False):
         """
         Update terms assumes that it is given a copy of the terms object
         TermsController already has.
 
-        :param term:
+        :param term: updated Term object
         :return bool: Returns True if the name of the term has changed.
         """
-        if term.term_on_init != term.term and term.term not in self._terms_list:
-            #We add the term that has changed it's term string as a new Term
-            #objet.
-            self.add_term(term)
+        if not skip_name_change_test:
+            previous_term_str = term.previous_term.term
 
-            #We remove the old term str from terms_list, which contains all
-            #terms as str
-            self._terms_list.remove(term.term_on_init)
-            if self._deleted_terms.get(term.term_on_init) is None:
-                self._deleted_terms[term.term_on_init] = list()
+            #If term has next term the previous name for term
+            #is the next term so we change the next term to previous
+            #term
+            if term.next_term and term.next_term.next_term_str:
+                previous_term_str = term.next_term.next_term_str
+                term.previous_term = term.next_term
 
-            #The original unchanged Term object is removed from self._terms
-            #dictionary and added to a list in delete dictionary:
-            self._deleted_terms[term.term_on_init].append(
-                self._terms.pop(term.term_on_init))
-            self._has_changed = True
-            return True
-        else:
-            #We put the old version of Term in to a list in changed terms
-            #dictionary, and replace the older version in self._terms
-            #This could be replaced with references from term object to previous
-            #term object, eg. linked list.
-            if self._changed_terms.get(term.term) is None:
-                self._changed_terms[term.term] = list()
+            if term.term not in self._terms_list:
+                #We add the term that has changed it's term string as a new Term
+                #objet.
+                self.add_term(term)
+                #And remove the old version if it had one.
+                if previous_term_str != term.term:
+                    #We remove the old term str from terms_list
+                    self._terms_list.remove(previous_term_str)
 
-            self._changed_terms[term.term].append(self._terms.pop(term.term))
-            self._terms[term.term] = term
-            self._has_changed = True
-            return False
+                    #The original unchanged Term object is removed from self._terms
+                    #dictionary and added to a list in delete dictionary:
+                    self._deleted_terms[previous_term_str] = self._terms.pop(previous_term_str)
 
-    def link_terms(self, term_str: str, str_related_terms: list):
-        target1 = self.get_term(term_str)
+                    #Tässä pitäisi hallita temien linkkausten vaihto jos termin nimi muuttuu
+                    self.get_term(term.li)
+                    return True
+
+        self._changed_terms[term.term] = term
+        self._terms[term.term] = term
+        return False
+
+    def link_terms(self, target1: Term, str_related_terms: list):
         for str_related_term in str_related_terms:
             target2 = self.get_term(str_related_term)
             target1.link_term(target2)
             target2.link_term(target1)
-            self.update_term(target2)
+            self.update_term(target2, True)
             print("-------[" + str(target1) + " <==> " + str(target2) + "]-------")
 
         self.update_term(target1)
-        return True
 
-    def unlink_terms(self, term_str: str, str_related_terms: list):
-        target1 = self.get_term(term_str)
+    def unlink_terms(self, target1: Term, str_related_terms: list):
         for str_related_term in str_related_terms:
             target2 = self.get_term(str_related_term)
             target1.unlink_term(target2)
             target2.unlink_term(target1)
-            self.update_term(target2)
+            self.update_term(target2, True)
 
         self.update_term(target1)
-        return True
-
-    def link_files(self, term_str: str, file_paths_str: list):
-        target = self.get_term(term_str)
-        results = [target.link_file(Path(file_path)) for file_path in file_paths_str]
-        if True in results:
-            self.update_term(target)
-            return True
-        return False
-
-    def unlink_files(self, term_str: str, str_files: list):
-        target = self.get_term(term_str)
-        results = [target.unlink_file(Path(str_file)) for str_file in str_files]
-        if True in results:
-            self.update_term(target)
-            return True
-        return False
 
     def _lazy_load_term(self, term_str):
         if term_str not in self._terms.keys() and term_str in self._terms_list:
@@ -184,7 +161,6 @@ class TermsController(object):
             self._terms = {}
             self._terms_list = list(terms_list)
             self._terms_list.sort()
-            self._has_changed = False
             return self._terms_list.copy()
         else:
             return None
@@ -205,7 +181,7 @@ class TermsController(object):
             self._save_terms()
             self._changed_terms = {}
             self._deleted_terms = {}
-            self._has_changed = False
+            self._terms = {}
 
     def save_project_as(self, path: Path=None):
         """
@@ -221,7 +197,6 @@ class TermsController(object):
 
             self._changed_terms = {}
             self._deleted_terms = {}
-            self._has_changed = False
             self._project_path = path
             self._save_terms()
 
@@ -233,11 +208,7 @@ class TermsController(object):
 
     @property
     def unsaved_changes(self):
-        return self._has_changed
-
-    @property
-    def list_of_terms(self):
-        return self._terms.keys()
+        return len(self._changed_terms)
 
     @property
     def project_path(self):

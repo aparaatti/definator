@@ -17,7 +17,9 @@ class Links(object):
         self._linked_images = dict()
 
     def __str__(self):
-        return str(self._linked_terms) + " Type: " + str(type(self._linked_terms))
+        return "linked terms: " + str(self._linked_terms) + os.linesep \
+            + "linked files: " + str(self._linked_files) + os.linesep \
+            + "linked images: " + str(self._linked_images) + os.linesep
 
     def link_term(self, term_str):
         if term_str not in self._linked_terms:

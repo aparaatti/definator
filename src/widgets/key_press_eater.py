@@ -18,4 +18,5 @@ class KeyPressEater(QObject):
             if event.matches(self.sequence):
                 print("nom nom nom")
                 self.sender._trigger_event(self.sequence)
+                return True
         return super().eventFilter(object, event)

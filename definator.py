@@ -8,17 +8,16 @@
 #   -make StrChooser to adjust its cols and line count on size change
 #   -make StrChooser item draggable on term editor and drop text at drop location (tags)
 #   -combine file and image linking (add file, rem file), add tag to end of editor when image is added.
-#   -merge term linker into term editor
-# TODO signal when editor has saveable term --> view button activation
+#   -on double click launch os app for file...
 # TODO: All menu items
 #   -settings
-# TODO: Translations
 # TODO: Settings:
 #   -language
 #   -remember opened projects
 #   -load last opened project on startup
 #   -colors of files in linked things
 # TODO Later:
+#   -Translations
 #   -str-browser as own widget to left side and MainWidget contains term display and editor.
 #   -Maybe open terms in tabs, with editor/term --> proper undo/redo
 #   -Writing of unit tests
@@ -26,10 +25,10 @@
 #   -show tags bold on term editor, show references to images bold on term display
 # TODO: Use python built in serialization/deserialization for saving stuff
 # TODO: Generic tag class, that can be used to define a tag and html representation for it.
+# TODO: File copy doesn't work on windows
 #
-# FIX: create new term when term str has changed!
 # FIX: after removal of terms a term editor with last edited term is opened
-#from PyQt5.QtWidgets import QApplication
+# FIX: after saving a project the project name isn't set to the window title
 import PyQt5
 from PyQt5.QtCore import QTextCodec
 import sys

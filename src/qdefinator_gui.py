@@ -4,6 +4,7 @@
 # and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
 #
 import os
+import logging
 from pathlib import Path
 from PyQt5.QtWidgets import QMainWindow, QLabel, QFrame, QErrorMessage, \
     QApplication, QFileDialog, QMessageBox
@@ -18,7 +19,7 @@ from .terms_controller import TermsController
 
 
 __author__ = "Niko Humalamäki"
-__ver__ = "0.01"
+__ver__ = "0.015"
 
 
 class MainWindow(QMainWindow):
@@ -37,18 +38,14 @@ class MainWindow(QMainWindow):
     signal_started_a_new_project = pyqtSignal()
     signal_project_saved = pyqtSignal()
 
-    #Signals to command Gui widgets:
-    signal_save_current_term = pyqtSignal()
-
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
         self._current_term = None
         self.terms_controller = TermsController()
         self.main_widget = MainWidget()
-        self.q_error_message = QErrorMessage(self)
 
         self.menu = self._init_menu()
-        self._make_actions()
+        self._init_actions()
         self._init_event_listeners()
         self._init_toolbar()
 
@@ -84,7 +81,8 @@ class MainWindow(QMainWindow):
         self._initialize_new_project()
 
     def _initialize_new_project(self):
-        print("Initializing a new project...")
+        logging.info("Initializing a new project...")
+        self.terms_controller = TermsController()
         self._current_term = None
         self.setWindowTitle(
             self.terms_controller.project_name + " - " + "Definator " + __ver__)
@@ -110,6 +108,26 @@ class MainWindow(QMainWindow):
         if project_path is not Path(""):
             self._initialize_project(project_path)
 
+    def _save_project(self):
+        if self.terms_controller.project_path == Path(""):
+            self._save_project_as()
+        else:
+            self.terms_controller.save_project()
+            self.signal_project_saved.emit()
+
+    def _save_project_as(self):
+        self.terms_controller.save_project_as(self._choose_a_folder())
+
+    def _open_help(self):
+        pass
+
+    def _quit(self):
+        if self._check_for_unsaved_changes():
+            QApplication.quit()
+
+    ############
+    # DIALOGS: #
+    ############
     def _choose_a_folder(self):
         options = QFileDialog.DontResolveSymlinks | QFileDialog.ShowDirsOnly
         string = QFileDialog.getExistingDirectory(
@@ -138,27 +156,13 @@ class MainWindow(QMainWindow):
         warning_message.addButton("&Ok", QMessageBox.RejectRole)
         warning_message.exec_()
 
-    def _save_project(self):
-        if self.terms_controller.project_path == Path(""):
-            self._save_project_as()
-        else:
-            self.terms_controller.save_project()
-            self.signal_project_saved.emit()
-
-    def _save_project_as(self):
-        self.terms_controller.save_project_as(self._choose_a_folder())
-
-    def _open_help(self):
-        pass
-
-    def _quit(self):
-        if self._check_for_unsaved_changes():
-            QApplication.quit()
-
+    ##################################
+    # Slots for operations on terms: #
+    ##################################
     @pyqtSlot(Term)
     def update_term(self, term: Term):
         if self.terms_controller.update_term(term):
-            self.signal_removed_a_term.emit(Term(term.term_on_init))
+            self.signal_removed_a_term.emit(term.previous_term)
             self.signal_added_a_term.emit(term)
         else:
             self.signal_updated_a_term.emit(term)
@@ -170,10 +174,9 @@ class MainWindow(QMainWindow):
             self.signal_added_a_term.emit(term)
 
     @pyqtSlot(Term)
-    def remove_term(self, term: Term):
-        self._warning_dialog("Are you sure you want to delete term " + term.term + "?\nIt Can't be undone.", "Warning")
-        if self.terms_controller.remove_term(term):
-            self.signal_removed_a_term.emit(term)
+    def remove_term(self, term_str: str):
+        if self.terms_controller.remove_term(term_str):
+            self.signal_removed_a_term.emit(Term(term_str))
 
     @pyqtSlot(str)
     def get_term(self, term_str: str):
@@ -181,29 +184,18 @@ class MainWindow(QMainWindow):
         self.signal_current_term.emit(self._current_term)
 
     @pyqtSlot(str, list)
-    def link_terms(self, term_str: str, str_terms: list):
-        if self.terms_controller.link_terms(term_str, str_terms):
-            self.signal_updated_a_term.emit(
-                self.terms_controller.get_term(term_str))
+    def link_terms(self, term: Term, str_terms: list):
+        self.terms_controller.link_terms(term, str_terms)
+        self.signal_updated_a_term.emit(term)
 
     @pyqtSlot(str, list)
-    def unlink_terms(self, term_str: str, str_terms: list):
-        if self.terms_controller.unlink_terms(term_str, str_terms):
-            self.signal_updated_a_term.emit(
-                self.terms_controller.get_term(term_str))
+    def unlink_terms(self, term: Term, str_terms: list):
+        self.terms_controller.unlink_terms(term, str_terms)
+        self.signal_updated_a_term.emit(term)
 
-    @pyqtSlot(str, str)
-    def link_files(self, term_str: str, file_paths_str: list):
-        if self.terms_controller.link_files(term_str, file_paths_str):
-            self.signal_updated_a_term.emit(
-                self.terms_controller.get_term(term_str))
-
-    @pyqtSlot(str, list)
-    def unlink_files(self, term_str: str, file_paths: list):
-        if self.terms_controller.unlink_files(term_str, file_paths):
-            self.signal_updated_a_term.emit(
-                self.terms_controller.get_term(term_str))
-
+    ###########################
+    # Initialization methods: #
+    ###########################
     def _init_menu(self):
         menu_bar = self.menuBar()
         menu = dict()
@@ -228,12 +220,8 @@ class MainWindow(QMainWindow):
         self.main_widget.update_term.connect(self.update_term)
 
         #Link terms
-        self.main_widget.add_links_to_term.connect(self.link_terms)
-        self.main_widget.remove_links_from_term.connect(self.unlink_terms)
-
-        #Add files
-        self.main_widget.add_files_to_term.connect(self.link_files)
-        self.main_widget.remove_files_from_term.connect(self.unlink_files)
+        self.main_widget.term_editor.add_links_to_term.connect(self.link_terms)
+        self.main_widget.term_editor.remove_links_from_term.connect(self.unlink_terms)
 
         #When term content has changed, we update the term to termController
         #and pass updated term to MainWidget:
@@ -263,8 +251,11 @@ class MainWindow(QMainWindow):
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.main_widget.act_link_files)
         self.toolBar.addAction(self.main_widget.act_unlink_files)
+        self.toolBar.addSeparator()
+        self.toolBar.addAction(self.main_widget.act_undo)
+        self.toolBar.addAction(self.main_widget.act_redo)
 
-    def _make_actions(self):
+    def _init_actions(self):
         self.act_new_project = make_action_helper(
             self, "&New project", "Create a new project", None, QIcon.fromTheme('document-new'))
         self.act_open_project = make_action_helper(
