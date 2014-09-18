@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'QStrChooser.ui'
 #
-# Created: Fri Sep 12 17:21:06 2014
-#      by: PyQt5 UI code generator 5.3.1
+# Created: Thu Sep 18 09:31:32 2014
+#      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,23 +12,35 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_QStrChooser(object):
     def setupUi(self, QStrChooser):
         QStrChooser.setObjectName("QStrChooser")
-        QStrChooser.resize(166, 210)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        QStrChooser.resize(250, 300)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(QStrChooser.sizePolicy().hasHeightForWidth())
         QStrChooser.setSizePolicy(sizePolicy)
-        QStrChooser.setMinimumSize(QtCore.QSize(166, 200))
-        QStrChooser.setMaximumSize(QtCore.QSize(166, 16777215))
+        QStrChooser.setMinimumSize(QtCore.QSize(250, 300))
         self.verticalLayout = QtWidgets.QVBoxLayout(QStrChooser)
         self.verticalLayout.setObjectName("verticalLayout")
         self.widget = QtWidgets.QWidget(QStrChooser)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.widget.sizePolicy().hasHeightForWidth())
+        self.widget.setSizePolicy(sizePolicy)
         self.widget.setObjectName("widget")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.widget)
         self.verticalLayout_2.setSpacing(0)
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.label = QtWidgets.QLabel(self.widget)
+        self.label.setObjectName("label")
+        self.verticalLayout_2.addWidget(self.label)
         self.lineEdit = QtWidgets.QLineEdit(self.widget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.lineEdit.sizePolicy().hasHeightForWidth())
+        self.lineEdit.setSizePolicy(sizePolicy)
         self.lineEdit.setObjectName("lineEdit")
         self.verticalLayout_2.addWidget(self.lineEdit)
         self.listWidget = QtWidgets.QListWidget(self.widget)
@@ -39,6 +51,7 @@ class Ui_QStrChooser(object):
         self.verticalLayout.addWidget(self.widget)
 
         self.retranslateUi(QStrChooser)
+        QStrChooser.windowTitleChanged['QString'].connect(self.label.setText)
         QtCore.QMetaObject.connectSlotsByName(QStrChooser)
 
     def retranslateUi(self, QStrChooser):

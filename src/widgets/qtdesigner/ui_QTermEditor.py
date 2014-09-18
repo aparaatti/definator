@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'QTermEditor.ui'
 #
-# Created: Fri Sep 12 17:21:07 2014
-#      by: PyQt5 UI code generator 5.3.1
+# Created: Thu Sep 18 09:31:32 2014
+#      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,6 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_TermEditor(object):
     def setupUi(self, TermEditor):
         TermEditor.setObjectName("TermEditor")
+        TermEditor.resize(251, 181)
         TermEditor.setAutoFillBackground(False)
         self.verticalLayout = QtWidgets.QVBoxLayout(TermEditor)
         self.verticalLayout.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)
@@ -72,7 +73,7 @@ class Ui_TermEditor(object):
         self.groupBox.setTitle(_translate("TermEditor", "Editor"))
         self.lineEditTitle.setPlaceholderText(_translate("TermEditor", "Term name"))
         self.textEditContent.setPlaceholderText(_translate("TermEditor", "Description of the term."))
-        self.addTitleToolButton.setText(_translate("TermEditor", "title"))
+        self.addTitleToolButton.setText(_translate("TermEditor", "tit&le"))
         self.addImageToolButton.setText(_translate("TermEditor", "image"))
         self.addTagLabel.setText(_translate("TermEditor", "Add a tag:"))
 

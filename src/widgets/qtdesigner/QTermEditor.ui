@@ -3,6 +3,14 @@
  <author>Niko Humalamäki</author>
  <class>TermEditor</class>
  <widget class="QWidget" name="TermEditor">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>251</width>
+    <height>181</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -84,7 +92,7 @@
         <item row="0" column="2">
          <widget class="QToolButton" name="addTitleToolButton">
           <property name="text">
-           <string>title</string>
+           <string>tit&amp;le</string>
           </property>
           <property name="arrowType">
            <enum>Qt::NoArrow</enum>

@@ -51,6 +51,9 @@ class TermEditor(QWidget):
         self.term_remover = StrChooser(self)
         self.file_chooser = QFileDialog()
         self.file_remover = StrChooser(self)
+        self.file_remover.set_title("Unlinkable files")
+        self.term_chooser.set_title("Linkable terms")
+        self.term_remover.set_title("Unlinkable terms")
 
         self.term_linker = TermLinker()
         self.ui.verticalLayout.addWidget(self.term_linker)
@@ -79,15 +82,30 @@ class TermEditor(QWidget):
         """
         self._clear()
         self._current_term = copy.copy(term)
+        self._check_undo_redo()
         self._old_term = term
         if self._old_term.term is "":
+            logging.debug("new term")
             self.signal_current_term_is_valid.emit(False)
             self.term_linker.term_linking_enabled(False)
+            self.ui.lineEditTitle.setFocus()
         else:
+            logging.debug("old term")
             self.term_linker.update_links(term)
             self.term_linker.term_linking_enabled(True)
             self.ui.lineEditTitle.setText(term.term)
             self.ui.textEditContent.setText(term.description)
+            self.ui.textEditContent.setFocus()
+
+    def show(self):
+        """
+        Hooks in to the super class show method and enables
+        file linking and unlinking actions when term editor
+        is shown.
+        """
+        self.act_link_files.setEnabled(True)
+        self.act_unlink_files.setEnabled(True)
+        super().show()
 
     def hide(self):
         """
@@ -100,15 +118,18 @@ class TermEditor(QWidget):
 
         If we are editing already existing term, term editor sets a
         _current_term_has_changed to True if the content, term string or linked
-        things have changed. signal_term_was_changed(Term) is emitted if the
-        term has changes. Also the undo-redo history of the editing session
+        things have changed. Signal signal_term_was_changed(Term) is emitted if the
+        term has changed. Also the undo-redo history of the editing session
         is forgotten and the undo is set to the version of the term that existed
         before the start of the editing session.
 
+        Before hiding term editing related actions are enabled (undo, redo, linking/unlinking
+        of files and linking/unlinking of terms).
         """
         if self._old_term.term is "":
             self._current_term = self._fill_term(Term())
-            self.signal_stopped_editing_new_term.emit(self._current_term)
+            if self._current_term.term is not "":
+                self.signal_stopped_editing_new_term.emit(self._current_term)
             self._clear()
         else:
             self._increment_term_version()
@@ -117,6 +138,11 @@ class TermEditor(QWidget):
                 self.signal_term_was_changed.emit(self._current_term)
             self._clear()
 
+        self.act_undo.setEnabled(False)
+        self.act_redo.setEnabled(False)
+        self.act_link_files.setEnabled(False)
+        self.act_unlink_files.setEnabled(False)
+        self.term_linker.term_linking_enabled(False)
         super().hide()
 
     def _increment_term_version(self, force: bool=False):
@@ -139,6 +165,10 @@ class TermEditor(QWidget):
         return False
 
     def _clear(self):
+        """
+        This method clears all the text in term editor, linked things in term_linker
+        and set's _current_term to an empty Term object.
+        """
         self.ui.lineEditTitle.clear()
         self.ui.textEditContent.clear()
         self.term_linker.clear()
@@ -146,6 +176,13 @@ class TermEditor(QWidget):
         self._current_term_has_changed = False
 
     def _fill_term(self, term: Term):
+        """
+        This method read the content of Term.term input field and Term.description
+        editor to a Term object.
+
+        :param term: Term to fill
+        :return: filled term
+        """
         term.term = self.ui.lineEditTitle.displayText()
         text = self.ui.textEditContent.toPlainText()
         white_space_removed = list()
@@ -155,20 +192,27 @@ class TermEditor(QWidget):
 
     def _trigger_event(self, sequence: QKeySequence):
         """
-        This is triggered when KeyPressEater filter has cached undo or redo key combination
-        on term line editor or term description editor.
+        This is triggered when KeyPressEater filter has caught undo or redo key combination
+        on term line editor or term description editor and delegates the undo/redo
+        action to this class's undo/redo methods.
 
-        :param sequence:
-        :return:
+        :param sequence: captured key combination as QKeySequence
         """
         if sequence is QKeySequence.Undo:
-            self.signal_undo_event.emit()
+            self.undo()
 
         if sequence is QKeySequence.Redo:
-            self.signal_redo_event.emit()
+            self.redo()
 
     @pyqtSlot()
     def _validate_term(self):
+        """
+        This slot checks the validity of the filled term on term editor e.g.
+        it ensures that the filled value for Term.term is not "".
+
+        If Term is valid signal_current_term_is_valid(True) is emitted and
+        if it's not signal_current_term_is_valid(False) is emitted.
+        """
         logging.debug("Validating term: " + self.ui.lineEditTitle.displayText())
         if self.ui.lineEditTitle.displayText() is "":
             self.signal_current_term_is_valid.emit(False)
@@ -188,7 +232,7 @@ class TermEditor(QWidget):
         """
         if group_name == "Image":
             self.add_image_tag(self._current_term.get_file_path(item_str))
-        #other tags aren't available.
+        #other tags for files aren't available for now.
 
     @pyqtSlot()
     def add_image_tag(self, path: Path=Path("/path/to/image"), str_title: str="Image title"):
@@ -203,7 +247,14 @@ class TermEditor(QWidget):
 
     @pyqtSlot()
     def add_title_tag(self, str_title: str="Title"):
-        self.ui.textEditContent.insertPlainText("##" + str_title + "##")
+        """
+        This adds an title tag to term description editor at the current position
+        of the caret.
+
+        :param str_title: text for title.
+        """
+        self.ui.textEditContent.insertPlainText(
+            "##" + str_title + "##" + os.linesep + os.linesep)
 
     ##############################
     # LINKING OF TERMS AND FILES #
@@ -211,7 +262,10 @@ class TermEditor(QWidget):
     @pyqtSlot()
     def link_terms(self):
         """
-        Qt-slot links terms to current term.
+        A slot that invokes linking of terms to current term.
+
+        When raised term_chooser dialog (StrChooser) is accepted execution continues
+        from _link_terms_accepted method.
         """
         a_list = self.parent().term_str_browser.get_list()
         black_list = []
@@ -227,19 +281,57 @@ class TermEditor(QWidget):
         #IF accepted, will return to _link_terms_accepted method
         self.term_chooser.show()
 
+    @pyqtSlot(list)
+    def _link_terms_accepted(self, str_list):
+        """
+        Links terms given as a list of strings to current term.
+        When list of terms to add is given the linking is delegated
+        by emitting add_links_to_term(Term, str_list of terms) signal.
+        When terms have been linked the list of linked
+        things is updated by invoking term_linker.update_links(current_term).
+
+        :param str_list: list of terms as a string to link
+        """
+        if len(str_list) > 0:
+            self._increment_term_version(True)
+            self.add_links_to_term.emit(self._current_term, str_list)
+            self.term_linker.update_links(self._current_term)
+
     @pyqtSlot()
     def unlink_terms(self):
         """
-        Qt-slot. Unlinks terms from current term.
+        A slot that invokes unlinking of terms from current term.
+
+        When raised term_remover dialog (StrChooser) is accepted execution continues
+        from _unlink_terms_accepted method.
         """
         self.term_remover.set_list(self._current_term.related_terms)
         self.term_remover.show()
 
+    @pyqtSlot(list)
+    def _unlink_terms_accepted(self, str_list):
+        """
+        Un links terms given as a list of strings to current term.
+        When list of terms to remove is given the un linking is delegated
+        by emitting remove_links_from_term(Term, str_list of terms) signal.
+        When terms have been un linked the list of linked
+        things is updated by invoking term_linker.update_links(current_term).
+
+        :param str_list: list of terms as a string to link
+        """
+        if len(str_list) > 0:
+            self._increment_term_version(True)
+            #TermController handles the linking between Terms so we emit a signal.
+            self.remove_links_from_term.emit(self._current_term, str_list)
+            self.term_linker.update_links(self._current_term)
+
     @pyqtSlot()
     def unlink_files(self):
         """
-        Qt-slot. Unlinks files from term.
-        :return:
+        A slot that invokes unlinking of files from current term.
+
+        When raised file_remover dialog (StrChooser) is accepted execution continues
+        from _unlink_files_accepted method.
         """
         all_files = list()
         [all_files.append(file.name) for file in self._current_term.linked_files]
@@ -247,10 +339,27 @@ class TermEditor(QWidget):
         self.file_remover.set_list(all_files)
         self.file_remover.show()
 
+    @pyqtSlot(list)
+    def _unlink_files_accepted(self, str_list):
+        """
+        Unlinks files given as a list of strings containing the filename
+        from current term. When files have been removed the list of linked
+        things is updated by invoking term_linker.update_links(current_term).
+
+        :param str_list: list of file names as a string to unlink.
+        """
+        if len(str_list) > 0:
+            self._increment_term_version(True)
+            [self._current_term.unlink_file(Path(str_file)) for str_file in str_list]
+            self.term_linker.update_links(self._current_term)
+
     @pyqtSlot()
     def link_files(self):
         """
-        Qt-slot. Links files to term.
+        A slot that invoke linking of files to current term.
+
+        After the files have been linked to current term the term_linker is
+        updated by invoking term_linker.update_links(current_term) method.
         """
         file_names = self.file_chooser.getOpenFileNames(
             self, "Select a file", '', "All Files (*)", '')
@@ -259,33 +368,15 @@ class TermEditor(QWidget):
             [self._current_term.link_file(Path(file_name)) for file_name in file_names[0]]
             self.term_linker.update_links(self._current_term)
 
-    @pyqtSlot(list)
-    def _link_terms_accepted(self, str_list):
-        if len(str_list) > 0:
-            self._increment_term_version(True)
-            self.add_links_to_term.emit(self._current_term, str_list)
-            self.term_linker.update_links(self._current_term)
-
-    @pyqtSlot(list)
-    def _unlink_terms_accepted(self, str_list):
-        if len(str_list) > 0:
-            self._increment_term_version(True)
-            #TermController handles the linking between Terms so we emit a signal.
-            self.remove_links_from_term.emit(self._current_term, str_list)
-            self.term_linker.update_links(self._current_term)
-
-    @pyqtSlot(list)
-    def _unlink_files_accepted(self, str_list):
-        if len(str_list) > 0:
-            self._increment_term_version(True)
-            [self._current_term.unlink_file(Path(str_file)) for str_file in str_list]
-            self.term_linker.update_links(self._current_term)
-
     ####################################
     # UNDO - REDO and COPY, CUT, PASTE #
     ####################################
     @pyqtSlot()
     def _copy(self):
+        """
+        This slot routes copying to right widget when copy action is invoked (when copy is chosen
+        from main window menu).
+        """
         if self.ui.textEditContent.hasFocus():
             self.ui.textEditContent.copy()
         if self.ui.lineEditTitle.hasFocus():
@@ -293,6 +384,10 @@ class TermEditor(QWidget):
 
     @pyqtSlot()
     def _paste(self):
+        """
+        This slot routes paste to right widget when paste action is invoked (when paste is chosen
+        from main window menu).
+        """
         if self.ui.textEditContent.hasFocus():
             self.ui.textEditContent.paste()
         if self.ui.lineEditTitle.hasFocus():
@@ -300,6 +395,10 @@ class TermEditor(QWidget):
 
     @pyqtSlot()
     def _cut(self):
+        """
+        This slot routes cut to right widget when cut action is invoked (when cut is chosen
+        from main window menu).
+        """
         if self.ui.textEditContent.hasFocus():
             self.ui.textEditContent.cut()
         if self.ui.lineEditTitle.hasFocus():
@@ -311,8 +410,8 @@ class TermEditor(QWidget):
         Undoes edit.
 
         If undo is available in text editor for term content, it is undone. If undo is not available in text editor
-        for content it is checked if the term title field has undo available. If it has, term title edits are undone.
-        When term field runs out of undoes it is checked if the term it self has newer version
+        for content it is checked if the title field for Term.term has undo available. If it has, term title edits are
+        undone. When term field runs out of undoes it is checked if the term it self has older version
         linked to it. When we run out of undo for current term signal_can_undo(False) is emitted.
         """
         if self._undo_text_edit:
@@ -320,7 +419,7 @@ class TermEditor(QWidget):
         elif self.ui.lineEditTitle.isUndoAvailable():
             self.ui.lineEditTitle.undo()
         elif not self._current_term or not self._current_term.can_undo:
-            self.signal_can_undo.emit(False)
+            self.act_undo.setEnabled(False)
         else:
             self.set_term(self._current_term.previous_term)
         self.check_if_can_undo()
@@ -331,8 +430,8 @@ class TermEditor(QWidget):
         Redoes undone edit.
 
         If redo is available in term title field for term, it is redone. If redo is not available in term title field
-        for content it is checked if the term text editor for term content has redo available. If it has, content edits
-        are redone. When term text editor runs out of redoes it is checked if the term it self has newer version
+        for Term.term, it is checked if the term text editor for term content has redo available. If it has, content
+        edits are redone. When term text editor runs out of redoes it is checked if the term it self has newer version
         linked to it. When we run out of redo for current term signal_can_redo(False) is emitted.
         """
         if self.ui.lineEditTitle.isRedoAvailable():
@@ -340,7 +439,7 @@ class TermEditor(QWidget):
         elif self._redo_text_edit:
             self.ui.textEditContent.redo()
         elif not self._current_term or not self._current_term.can_redo:
-            self.signal_can_redo.emit(False)
+            self.act_redo.setEnabled(False)
         else:
             self.set_term(self._current_term.next_term)
         self.check_if_can_redo()
@@ -369,42 +468,42 @@ class TermEditor(QWidget):
 
     @pyqtSlot()
     def _check_undo_redo(self):
+        """
+        This is a helper method to check if there are undoes and redoes left.
+        """
         self.check_if_can_undo()
         self.check_if_can_redo()
 
     def check_if_can_undo(self):
         """
-        If term text editor or term title line edit can undo signal_can_undo(True) is emitted.
-        if they can't undo it is checked if the current term is None and if so the signal_can_undo(False)
-        is emitted. If current term is not None the term is queried if undo is available and
-        the boolean value for the query is emitted as signal_can_undo(boolean).
+        If term text editor or term title line edit can undo undo (action act_undo) is enabled.
+        if they can't undo it is checked if the current term is None and if so undo action is disabled.
+        If current term is not None the term is queried if undo is available and
+        the boolean value for the query is set for action undo availability.
         """
 
         if self._undo_text_edit or self.ui.lineEditTitle.isUndoAvailable():
-            self.signal_can_undo.emit(True)
-        elif not self._current_term:
-            self.signal_can_undo.emit(False)
+            self.act_undo.setEnabled(True)
         else:
-            self.signal_can_undo.emit(self._current_term.can_undo)
+            self.act_undo.setEnabled(self._current_term.can_undo)
 
     def check_if_can_redo(self):
         """
-        If term text editor or term title line edit can redo signal_can_redo(True) is emitted.
-        if they can't redo it is checked if the current term is None and if so the signal_can_redo(False)
-        is emitted. If current term is not None the term is queried if redo is available and
-        the boolean value for the query is emitted as signal_can_redo(boolean).
+        If term text editor or term title line edit can redo action act_redo for redo is enabled.
+        if they can't redo it is checked if the current term is None and if so the redo action
+        is disabled. If current term is not None the term is queried if redo is available and
+        the boolean value for the query set as the value of availability of redo.
         """
         if self._redo_text_edit or self.ui.lineEditTitle.isRedoAvailable():
-            self.signal_can_redo.emit(True)
-        elif not self._current_term:
-            self.signal_can_redo.emit(False)
+            self.act_redo.setEnabled(True)
         else:
-            self.signal_can_redo.emit(self._current_term.can_redo)
+            self.act_redo.setEnabled(self._current_term.can_redo)
 
     ##########################
     # INITIALIZATION METHODS #
     ##########################
     def _init_actions(self):
+        #Edit
         self.act_copy = make_action_helper(
             self, "Copy", "Copy to clipboard", QKeySequence.Copy, QIcon.fromTheme('edit-copy'))
         self.act_copy.triggered.connect(self._copy)
@@ -414,6 +513,19 @@ class TermEditor(QWidget):
         self.act_cut = make_action_helper(
             self, "Cut", "Cut to clipboard", QKeySequence.Cut, QIcon.fromTheme('edit-cut'))
         self.act_cut.triggered.connect(self._cut)
+        self.act_undo = make_action_helper(
+            self, "Undo", "Undo previous change", QKeySequence.Undo, QIcon.fromTheme('edit-undo'))
+        self.act_undo.triggered.connect(self.undo)
+        self.act_redo = make_action_helper(
+            self, "Redo", "Redo undone change", QKeySequence.Redo, QIcon.fromTheme('edit-redo'))
+        self.act_redo.triggered.connect(self.redo)
+
+        #Linking of files
+        self.act_link_files = make_action_helper(self, "Link &files", "Link files to current term", "alt+k", QIcon.fromTheme('list-add'))
+        self.act_link_files.triggered.connect(self.link_files)
+        self.act_unlink_files = make_action_helper(
+            self, "U&nlink files", "Unlink files from current term", "alt+y", QIcon.fromTheme('list-remove'))
+        self.act_unlink_files.triggered.connect(self.unlink_files)
 
     def _init_term_linker(self):
         self.term_linker.ui_link_list.add_item_group("Term", "Yellow", "Black")
@@ -425,8 +537,10 @@ class TermEditor(QWidget):
         self.ui.addImageToolButton.clicked.connect(self.add_image_tag)
         self.ui.addTitleToolButton.clicked.connect(self.add_title_tag)
         self.ui.lineEditTitle.textChanged.connect(self._validate_term)
+
         self.ui.lineEditTitle.textChanged.connect(self._check_undo_redo)
         self.ui.textEditContent.textChanged.connect(self._check_undo_redo)
+
         self.ui.textEditContent.redoAvailable.connect(self._redo_available_in_text_edit)
         self.ui.textEditContent.undoAvailable.connect(self._undo_available_in_text_edit)
 

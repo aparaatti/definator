@@ -23,16 +23,6 @@ class Term(object):
 
     Todo:
         handle missing folder and missing or empty files.
-
-    Tests:
-    >>> term = Term("doctest")
-    >>> term.add_paragraph("doctest is a python testing helper utility.")
-    >>> term.add_image_to_text("/usr/share/wv/patterns/battributes.jpg")
-    >>> term.add_paragraph("it is straight forward")
-    >>> term.add_sub_section("end")
-    >>> term.add_paragraph("Paragraph under 'end' -subtitle.")
-    >>> term2 = Term("another")
-    >>> term.link_term(term2)
     """
 
     def __init__(self, term: str=None):

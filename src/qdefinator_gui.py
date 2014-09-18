@@ -8,17 +8,18 @@ import logging
 from pathlib import Path
 
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QUrl, Qt
-from PyQt5.QtGui import QKeySequence, QIcon, QDesktopServices
+from PyQt5.QtGui import QKeySequence, QIcon, QDesktopServices, QCursor
 from PyQt5.QtWidgets import QMainWindow, QLabel, QFrame, QApplication, \
     QFileDialog, QMessageBox
-from .widgets.qt_helper_functions import make_action_helper, warning_dialog
+from .widgets.qt_helper_functions import make_action_helper, warning_dialog, info_dialog
 from .data.term import Term
 from .widgets.main_widget import MainWidget
-from .data.terms_controller import TermsController
+from .terms_controller import TermsController
 
 
 __author__ = "Niko Humalamäki"
-__ver__ = "0.017"
+__ver__ = "0.018"
+__date__ = "18.9.2014"
 
 
 class MainWindow(QMainWindow):
@@ -36,6 +37,7 @@ class MainWindow(QMainWindow):
     signal_opened_a_project = pyqtSignal(list, Term)
     signal_started_a_new_project = pyqtSignal()
     signal_project_saved = pyqtSignal()
+    signal_edit_term = pyqtSignal(Term)
 
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
@@ -59,15 +61,18 @@ class MainWindow(QMainWindow):
         status = self.statusBar()
         status.setSizeGripEnabled(False)
         status.addPermanentWidget(self.size_label)
-        self._initialize_new_project()
+        self._create_a_new_project()
         status.showMessage("Ready", 5000)
 
     def _initialize_project(self, project_path):
+        """
+        This method initializes a project based on given project_path eg. loads a project.
+        """
         try:
             list_of_terms = self.terms_controller.load_project(project_path)
         except FileNotFoundError:
             warning_dialog(
-                "Could not open.",
+                self, "Could not open.",
                 "Could not open project from " + str(project_path) + ".")
             return
         self._set_window_title()
@@ -75,22 +80,29 @@ class MainWindow(QMainWindow):
             list_of_terms, self.terms_controller.get_term(list_of_terms[0]))
 
     def _set_window_title(self):
+        """
+        This method sets the title for window based on the name of the project root folder.
+        """
         self.setWindowTitle(self.terms_controller.project_name + " - " + "Definator " + __ver__)
 
     def _create_a_new_project(self):
+        """
+        This method creates a new project and asks for saving changes if there are unsaved changes.
+        """
         if not self._check_for_unsaved_changes():
             return
-        self._initialize_new_project()
-
-    def _initialize_new_project(self):
         logging.info("Initializing a new project...")
         self.terms_controller = TermsController()
         self._current_term = None
-        self.setWindowTitle(
-            self.terms_controller.project_name + " - " + "Definator " + __ver__)
+        self._set_window_title()
         self.signal_started_a_new_project.emit()
 
     def _check_for_unsaved_changes(self):
+        """
+        This method checks if there are unsaved changes and asks if user
+        wants to save them. If No is given, the changes are lost.
+        :return: False if Cancel is given, True if No or Yes is given in the dialog.
+        """
         if self.terms_controller.unsaved_changes:
             save = QMessageBox.question(
                 self, "Unsaved changes",
@@ -104,6 +116,10 @@ class MainWindow(QMainWindow):
         return True
 
     def _open_project(self):
+        """
+        This raises the open project dialog. If we get a path from dialog
+        setting up of the project is delegated to _initialize_project() method.
+        """
         if not self._check_for_unsaved_changes():
             return
         project_path = self._choose_a_folder()
@@ -111,29 +127,61 @@ class MainWindow(QMainWindow):
             self._initialize_project(project_path)
 
     def _save_project(self):
+        """
+        This method saves the project. If current project doesn't
+        have a project_path saving is delegated to _save_project_as
+        method.
+
+        After saving an info dialog is shown, that tells that the project was saved.
+        """
         if self.terms_controller.project_path == Path(""):
             self._save_project_as()
         else:
             self.terms_controller.save_project()
             self.signal_project_saved.emit()
+            info_dialog(self, "Project saved", "Project saved at " + str(self.terms_controller.project_path) + ".")
 
     def _save_project_as(self):
+        """
+        This method saves the project to a new location. User chooses a folder with raised dialog. If the
+        path from dialog is sane the project is saved and an information dialog is shown.
+        """
         project_path = self._choose_a_folder()
         if project_path is not Path(""):
             self.terms_controller.save_project_as(project_path)
             self._set_window_title()
+            info_dialog(self, "Project saved", "Project saved at " + str(self.terms_controller.project_path) + ".")
 
     def _open_help(self):
+        """
+        This method opens the help documentation for the app.
+        """
         QDesktopServices.openUrl(QUrl("help/index.html"))
 
     def _quit(self):
+        """
+        This method maps the quit action to actual quit. Before quitting
+        it checks for unsave changes.
+        """
         if self._check_for_unsaved_changes():
             QApplication.quit()
+
+    def closeEvent(self, event):
+        """
+        This method hooks into window being closed. Before allowing
+        the window to be closed it is checked if there are
+        unsaved changes.
+        """
+        if self._check_for_unsaved_changes():
+            super().closeEvent(event)
 
     ############
     # DIALOGS: #
     ############
     def _choose_a_folder(self):
+        """
+        This method raises standar qt directory dialog
+        """
         options = QFileDialog.DontResolveSymlinks | QFileDialog.ShowDirsOnly
         string = QFileDialog.getExistingDirectory(
             self,
@@ -144,12 +192,16 @@ class MainWindow(QMainWindow):
         return Path(string)
 
     def _show_about(self):
+        """
+        This method raises an message box showing some information on definator.
+        It is triggered from act_show_about action.
+        """
         QMessageBox.about(
             self, "About Definator",
-            "Definator v. " + __ver__ + os.linesep + os.linesep +
+            "Definator v. " + __ver__ + " (" + __date__ + ")" + os.linesep + os.linesep +
             "Definator is intended to be useful for writing up definitions for terms. "
             "It can link them and attach files to them. "
-            "It is mostly written as a tool for making up notes of concepts on a lecture "
+            "It is mostly written to be a tool for making up notes of concepts on a lecture "
             "and thus help creating a picture of a new topic. Definator can also "
             "be used for other purposes." +
             os.linesep + os.linesep +
@@ -160,6 +212,13 @@ class MainWindow(QMainWindow):
     ##################################
     @pyqtSlot(Term)
     def update_term(self, term: Term):
+        """
+        This slot delegates a term to TermsController to be updated.
+        If TermsContoller updates the term signal_updated_a_term
+        is emitted. If terms controller detects that the Term.term
+        string of the term has changed signal_removed_a_term(Term.previous_term)
+        is emitted and after that signal_added_a_term(term) is emitted.
+        """
         if self.terms_controller.update_term(term):
             self.signal_removed_a_term.emit(term.previous_term)
             self.signal_added_a_term.emit(term)
@@ -168,33 +227,70 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(Term)
     def add_term(self, term: Term):
+        """
+        This slot delegates a recieved term to be added to TermsController term
+        set. If term is added a signal_added_a_term(Term) is emitted. If the term
+        could not be added a warning dialog is raised warning the user
+        that the term already exists and signal_edit_term(Term) is emitted.
+        """
         if self.terms_controller.add_term(term):
             self._current_term = term
             self.signal_added_a_term.emit(term)
+        else:
+            warning_dialog(
+                self, "Term already exists.", 'The term "' +
+                term.term + '" already exists in the project.')
+            self.signal_edit_term.emit(term)
 
     @pyqtSlot(Term)
     def remove_term(self, term_str: str):
+        """
+        This slots delegates recieved term_str to TermsController to be
+        removed from its term set. If the removal succeeds signal_removed_a_term(Term)
+        is emitted.
+        """
+        #TODO Maybe needs error handling?
         if self.terms_controller.remove_term(term_str):
             self.signal_removed_a_term.emit(Term(term_str))
 
     @pyqtSlot(str)
     def get_term(self, term_str: str):
+        """
+        This slot delegates fetching of the actual Term object
+        for recieved term_str. If the TermsControlled succeeds
+        signal_curret_term(Term) is emitted.
+
+        If Term corresponding the term_str is not found a warning_dialog
+        is raised with information on missing Term.
+        """
         try:
             term = self.terms_controller.get_term(term_str)
-        except KeyError:
-            logging.info("No such key: " + term_str)
-        else:
             self._current_term = term
-
-        self.signal_current_term.emit(self._current_term)
+            self.signal_current_term.emit(self._current_term)
+        except KeyError:
+            logging.warning("KeyError", "No such key: " + term_str)
+            warning_dialog(self, "No such term", 'Current project does not have term "' + term_str + '".')
 
     @pyqtSlot(str, list)
     def link_terms(self, term: Term, str_terms: list):
+        """
+        This slot delegates linking of terms (recieved as string list) to
+        a recieved Term object to TermsController. When linking is done
+        signal_updated_a_term(Term) is emitted.
+
+        """
+        #TODO Maybe needs error handling?
         self.terms_controller.link_terms(term, str_terms)
         self.signal_updated_a_term.emit(term)
 
     @pyqtSlot(str, list)
     def unlink_terms(self, term: Term, str_terms: list):
+        """
+        This slot delegates unlinking of terms (recieved as string list)
+        from a recieved Term object to TermsController. When unlinking
+        is done signal_updated_a_term(Term) is raised.
+        """
+        #TODO Maybe needs error handling?
         self.terms_controller.unlink_terms(term, str_terms)
         self.signal_updated_a_term.emit(term)
 
@@ -202,9 +298,18 @@ class MainWindow(QMainWindow):
     # Initialization methods: #
     ###########################
     def _init_settings(self):
+        """
+        Here are some settings deffering from the default Qt settings. These
+        could be made configurable. Also the colors in StrBrowser and KeyList
+        (set from TermEditor) could be made configurable.
+        """
         self.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        self.setCursor(QCursor(0))
 
     def _init_menu(self):
+        """
+        Here is the initialization of the menu. It is filled in _init_actions
+        """
         menu_bar = self.menuBar()
         menu = dict()
         menu["file"] = menu_bar.addMenu("&File")
@@ -227,7 +332,7 @@ class MainWindow(QMainWindow):
         self.main_widget.add_new_term.connect(self.add_term)
         self.main_widget.update_term.connect(self.update_term)
 
-        #Link terms
+        #Link terms, these has to be done at TermsController.
         self.main_widget.term_editor.add_links_to_term.connect(self.link_terms)
         self.main_widget.term_editor.remove_links_from_term.connect(self.unlink_terms)
 
@@ -243,8 +348,12 @@ class MainWindow(QMainWindow):
         self.signal_removed_a_term.connect(self.main_widget.term_has_been_removed)
         self.signal_started_a_new_project.connect(self.main_widget.reset)
         self.signal_project_saved.connect(self.main_widget.unmark)
+        self.signal_edit_term.connect(self.main_widget.edit_current_term)
 
     def _init_actions(self):
+        """
+        All the actions are defined and/or bind here.
+        """
         self.act_new_project = make_action_helper(
             self, "&New project", "Create a new project", None, QIcon.fromTheme('document-new'))
         self.act_open_project = make_action_helper(
@@ -272,8 +381,8 @@ class MainWindow(QMainWindow):
         self.menu["edit"].addAction(self.main_widget.term_editor.act_paste)
         self.menu["edit"].addAction(self.main_widget.term_editor.act_cut)
         self.menu["edit"].addSeparator()
-        self.menu["edit"].addAction(self.main_widget.act_undo)
-        self.menu["edit"].addAction(self.main_widget.act_redo)
+        self.menu["edit"].addAction(self.main_widget.term_editor.act_undo)
+        self.menu["edit"].addAction(self.main_widget.term_editor.act_redo)
 
         self.menu["term"].addAction(self.main_widget.act_view_term)
         self.menu["term"].addAction(self.main_widget.act_edit_term)
@@ -282,8 +391,8 @@ class MainWindow(QMainWindow):
         self.menu["term"].addAction(self.main_widget.act_link_terms)
         self.menu["term"].addAction(self.main_widget.act_unlink_terms)
         self.menu["term"].addSeparator()
-        self.menu["term"].addAction(self.main_widget.act_link_files)
-        self.menu["term"].addAction(self.main_widget.act_unlink_files)
+        self.menu["term"].addAction(self.main_widget.term_editor.act_link_files)
+        self.menu["term"].addAction(self.main_widget.term_editor.act_unlink_files)
         self.menu["term"].addSeparator()
         self.menu["term"].addAction(self.main_widget.act_save_term)
         self.menu["term"].addAction(self.main_widget.act_rem_term)
@@ -300,6 +409,9 @@ class MainWindow(QMainWindow):
         self.menu["help"].addAction(self.act_about_qt)
 
     def _init_toolbar(self):
+        """
+        Here is the building of the toolbar.
+        """
         self.toolBar = self.addToolBar("Main")
         self.toolBar.addAction(self.act_open_project)
         self.toolBar.addAction(self.act_save_project)
@@ -317,9 +429,9 @@ class MainWindow(QMainWindow):
         self.toolBar2.addAction(self.main_widget.act_unlink_terms)
 
         self.toolBarLinking2 = self.addToolBar("Linking files")
-        self.toolBarLinking2.addAction(self.main_widget.act_link_files)
-        self.toolBarLinking2.addAction(self.main_widget.act_unlink_files)
+        self.toolBarLinking2.addAction(self.main_widget.term_editor.act_link_files)
+        self.toolBarLinking2.addAction(self.main_widget.term_editor.act_unlink_files)
 
         self.toolBarEdit = self.addToolBar("Edit")
-        self.toolBarEdit.addAction(self.main_widget.act_undo)
-        self.toolBarEdit.addAction(self.main_widget.act_redo)
+        self.toolBarEdit.addAction(self.main_widget.term_editor.act_undo)
+        self.toolBarEdit.addAction(self.main_widget.term_editor.act_redo)

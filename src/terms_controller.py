@@ -5,10 +5,8 @@
 #
 __author__ = 'Niko Humalamäki'
 
-import logging
-from copy import deepcopy, copy
-
-from .term import *
+from copy import deepcopy
+from .data.term import *
 
 
 class TermsController(object):
@@ -51,7 +49,7 @@ class TermsController(object):
         Removes a term given as a string by moving it to deleted terms. The term
         disappears when the project is saved.
 
-        :param term: type Term
+        :param term_str: term to remove as a str
         """
         if term_str not in self._terms.keys():
             return False
@@ -59,9 +57,10 @@ class TermsController(object):
         if self._deleted_terms.get(term_str) is None:
             self._deleted_terms[term_str] = list()
 
-        self._deleted_terms[term_str].append(self._terms.pop(term_str))
+        term_to_be_deleted = self._terms.pop(term_str)
+        self._deleted_terms[term_str].append(term_to_be_deleted)
+        self._unlink_terms(term_to_be_deleted, term_to_be_deleted.related_terms)
         self._terms_list.remove(term_str)
-        #Täällä pitäisi hoittaa viittausten poisto muista termeistä
         return True
 
     def add_term(self, term: Term):
@@ -72,11 +71,9 @@ class TermsController(object):
         :return bool: If the term already exist, returns false if term is added
         successfully returns true.
         """
-        if term.term not in self._terms_list:
+        if term.term not in self._terms_list and term.term is not "":
             self._terms[term.term] = term
-            if self._changed_terms.get(term.term) is None:
-                self._changed_terms[term.term] = list()
-            self._changed_terms[term.term].append(term)
+            self._changed_terms[term.term] = term
             self._terms_list.append(term.term)
             return True
         else:
@@ -146,8 +143,6 @@ class TermsController(object):
             target2.unlink_term(target1)
             self.update_term(target2, True)
             logging.debug("-------[" + str(target1) + " |   | " + str(target2) + "]-------")
-
-
 
     def _lazy_load_term(self, term_str):
         if term_str not in self._terms.keys() and term_str in self._terms_list:
