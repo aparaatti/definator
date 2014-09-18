@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
-#Based on:
-#http://qt-project.org/doc/qt-4.8/qobject.html#installEventFilter
-#and
-#http://codeprogress.com/python/libraries/pyqt/showPyQTExample.php?key=QApplicationInstallEventFiler&index=379
+#
+# This file is a part of Definator (https://github.com/aparaatti/definator)
+# and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
+#
+# Based on:
+# http://qt-project.org/doc/qt-4.8/qobject.html#installEventFilter
+# and
+# http://codeprogress.com/python/libraries/pyqt/showPyQTExample.php?key=QApplicationInstallEventFiler&index=379
 import logging
 from PyQt5.QtCore import QObject, QEvent
 from PyQt5.QtGui import QKeySequence
