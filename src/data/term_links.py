@@ -2,6 +2,7 @@ import os
 import copy
 import shutil
 import mimetypes
+import logging
 from .json_helpers import *
 from pathlib import Path
 
@@ -91,14 +92,14 @@ class Links(object):
                 if files.is_file and files.name not in ["links.json", "description.json"]:
                     self.link_file_on_mime(files)
 
-        print("links after load: " + str(self.linked_images) + " " + str(self.linked_files) + " " + str(self.linked_terms))
+        logging.debug("links after load: " + str(self.linked_images) + " " + str(self.linked_files) + " " + str(self.linked_terms))
 
     def link_file_on_mime(self, path: Path):
         type_tuple = mimetypes.guess_type(str(path))
         if type_tuple[0] is not None and type_tuple[0].startswith('image'):
-            return self._link_image(Path(path.name))
+            return self._link_image(path)
         else:
-            return self._link_file(Path(path.name))
+            return self._link_file(path)
 
     def delete(self, path: Path):
         os.remove(str(path / "links.json"))
@@ -114,6 +115,16 @@ class Links(object):
     @property
     def linked_files(self):
         return list(self._linked_files.values())
+
+    def get_file_path(self, file_name: str):
+        fn = self._linked_files.get(file_name)
+        if fn:
+            return fn
+        fi = self._linked_images.get(file_name)
+        if fi:
+            return fi
+
+        raise FileNotFoundError
 
 
 class LinksEncoder(json.JSONEncoder):

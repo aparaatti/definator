@@ -1,6 +1,6 @@
 __author__ = 'aparaatti'
 import logging
-from PyQt5.QtWidgets import QAction, QShortcut
+from PyQt5.QtWidgets import QAction, QShortcut, QMessageBox
 from PyQt5.QtGui import QIcon
 
 
@@ -21,3 +21,10 @@ def make_action_helper(self, text, help_text, shortcut: QShortcut=None,
     logging.debug("Action set for " + str(type(self)) + ": " + text + " " + str(shortcut))
 
     return action
+
+
+def warning_dialog(self, title: str, message: str):
+    warning_message = QMessageBox(
+            QMessageBox.Warning, title, message, QMessageBox.NoButton, self)
+    warning_message.addButton("&Ok", QMessageBox.RejectRole)
+    warning_message.exec_()

@@ -1,9 +1,10 @@
 import os
 import re
+import logging
 from .json_helpers import *
 from .items import Title, AttachedImage, Paragraph
 
-#TODO: ensimmäisen latauksen ohjaus tagifiltterin läpi.
+
 class Description(object):
     _img_tag_pattern = re.compile('#img\([^)]*\)')
 
@@ -75,9 +76,9 @@ class Description(object):
                         '" alt="' + str(item) + '"/><br/>' +
                         '<b>' + str(item.title) + '</b></center>')
             else:
-                print("Could not find type, where are the types?")
-                print("Type: " + str(type(item)))
-                print("Item: " + str(item))
+                logging.debug("Could not find type, where are the types?")
+                logging.debug("Type: " + str(type(item)))
+                logging.debug("Item: " + str(item))
 
         content_html = "".join(content)
         for ip in self._attached_images.values():
@@ -96,9 +97,9 @@ class Description(object):
             elif type(item) is AttachedImage:
                 pass
             else:
-                print("Could not find type, where are the types?")
-                print("Type: " + str(type(item)))
-                print("Item: " + str(item))
+                logging.debug("Could not find type, where are the types?")
+                logging.debug("Type: " + str(type(item)))
+                logging.debug("Item: " + str(item))
 
         return "".join(content_text_list).strip(os.linesep)
 

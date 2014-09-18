@@ -6,20 +6,19 @@
 import os
 import logging
 from pathlib import Path
-from PyQt5.QtWidgets import QMainWindow, QLabel, QFrame, QErrorMessage, \
-    QApplication, QFileDialog, QMessageBox
 
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
-from PyQt5.QtGui import QKeySequence, QIcon
-
-from .action_helper import make_action_helper
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QUrl, Qt
+from PyQt5.QtGui import QKeySequence, QIcon, QDesktopServices
+from PyQt5.QtWidgets import QMainWindow, QLabel, QFrame, QApplication, \
+    QFileDialog, QMessageBox
+from .widgets.qt_helper_functions import make_action_helper, warning_dialog
 from .data.term import Term
-from .main_widget import MainWidget
-from .terms_controller import TermsController
+from .widgets.main_widget import MainWidget
+from .data.terms_controller import TermsController
 
 
 __author__ = "Niko Humalamäki"
-__ver__ = "0.015"
+__ver__ = "0.017"
 
 
 class MainWindow(QMainWindow):
@@ -40,10 +39,13 @@ class MainWindow(QMainWindow):
 
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
+
         self._current_term = None
+
         self.terms_controller = TermsController()
         self.main_widget = MainWidget()
 
+        self._init_settings()
         self.menu = self._init_menu()
         self._init_actions()
         self._init_event_listeners()
@@ -64,16 +66,16 @@ class MainWindow(QMainWindow):
         try:
             list_of_terms = self.terms_controller.load_project(project_path)
         except FileNotFoundError:
-            self._warning_dialog(
+            warning_dialog(
                 "Could not open.",
                 "Could not open project from " + str(project_path) + ".")
             return
-
-        self.setWindowTitle(
-            self.terms_controller.project_name
-            + " - " + "Definator " + __ver__)
+        self._set_window_title()
         self.signal_opened_a_project.emit(
             list_of_terms, self.terms_controller.get_term(list_of_terms[0]))
+
+    def _set_window_title(self):
+        self.setWindowTitle(self.terms_controller.project_name + " - " + "Definator " + __ver__)
 
     def _create_a_new_project(self):
         if not self._check_for_unsaved_changes():
@@ -116,10 +118,13 @@ class MainWindow(QMainWindow):
             self.signal_project_saved.emit()
 
     def _save_project_as(self):
-        self.terms_controller.save_project_as(self._choose_a_folder())
+        project_path = self._choose_a_folder()
+        if project_path is not Path(""):
+            self.terms_controller.save_project_as(project_path)
+            self._set_window_title()
 
     def _open_help(self):
-        pass
+        QDesktopServices.openUrl(QUrl("help/index.html"))
 
     def _quit(self):
         if self._check_for_unsaved_changes():
@@ -150,12 +155,6 @@ class MainWindow(QMainWindow):
             os.linesep + os.linesep +
             "Definator is licensed under GPLv3 and is written by " + __author__)
 
-    def _warning_dialog(self, title: str, message: str):
-        warning_message = QMessageBox(
-            QMessageBox.Warning, title, message, QMessageBox.NoButton, self)
-        warning_message.addButton("&Ok", QMessageBox.RejectRole)
-        warning_message.exec_()
-
     ##################################
     # Slots for operations on terms: #
     ##################################
@@ -180,7 +179,13 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(str)
     def get_term(self, term_str: str):
-        self._current_term = self.terms_controller.get_term(term_str)
+        try:
+            term = self.terms_controller.get_term(term_str)
+        except KeyError:
+            logging.info("No such key: " + term_str)
+        else:
+            self._current_term = term
+
         self.signal_current_term.emit(self._current_term)
 
     @pyqtSlot(str, list)
@@ -196,6 +201,9 @@ class MainWindow(QMainWindow):
     ###########################
     # Initialization methods: #
     ###########################
+    def _init_settings(self):
+        self.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+
     def _init_menu(self):
         menu_bar = self.menuBar()
         menu = dict()
@@ -235,25 +243,6 @@ class MainWindow(QMainWindow):
         self.signal_removed_a_term.connect(self.main_widget.term_has_been_removed)
         self.signal_started_a_new_project.connect(self.main_widget.reset)
         self.signal_project_saved.connect(self.main_widget.unmark)
-
-    def _init_toolbar(self):
-        self.toolBar = self.addToolBar("Main")
-        self.toolBar.addAction(self.act_open_project)
-        self.toolBar.addAction(self.act_save_project)
-        self.toolBar.addSeparator()
-        self.toolBar.addAction(self.main_widget.act_add_term)
-        self.toolBar.addAction(self.main_widget.act_view_term)
-        self.toolBar.addAction(self.main_widget.act_edit_term)
-        self.toolBar.addAction(self.main_widget.act_rem_term)
-        self.toolBar.addSeparator()
-        self.toolBar.addAction(self.main_widget.act_link_terms)
-        self.toolBar.addAction(self.main_widget.act_unlink_terms)
-        self.toolBar.addSeparator()
-        self.toolBar.addAction(self.main_widget.act_link_files)
-        self.toolBar.addAction(self.main_widget.act_unlink_files)
-        self.toolBar.addSeparator()
-        self.toolBar.addAction(self.main_widget.act_undo)
-        self.toolBar.addAction(self.main_widget.act_redo)
 
     def _init_actions(self):
         self.act_new_project = make_action_helper(
@@ -309,3 +298,28 @@ class MainWindow(QMainWindow):
         self.menu["help"].addSeparator()
         self.menu["help"].addAction(self.act_show_about)
         self.menu["help"].addAction(self.act_about_qt)
+
+    def _init_toolbar(self):
+        self.toolBar = self.addToolBar("Main")
+        self.toolBar.addAction(self.act_open_project)
+        self.toolBar.addAction(self.act_save_project)
+
+        self.toolBarTerm = self.addToolBar("Term")
+        self.toolBarTerm.addAction(self.main_widget.act_add_term)
+        self.toolBarTerm.addAction(self.main_widget.act_view_term)
+        self.toolBarTerm.addAction(self.main_widget.act_edit_term)
+        self.toolBarTerm.addAction(self.main_widget.act_rem_term)
+
+        self.addToolBarBreak()
+
+        self.toolBar2 = self.addToolBar("Linking terms")
+        self.toolBar2.addAction(self.main_widget.act_link_terms)
+        self.toolBar2.addAction(self.main_widget.act_unlink_terms)
+
+        self.toolBarLinking2 = self.addToolBar("Linking files")
+        self.toolBarLinking2.addAction(self.main_widget.act_link_files)
+        self.toolBarLinking2.addAction(self.main_widget.act_unlink_files)
+
+        self.toolBarEdit = self.addToolBar("Edit")
+        self.toolBarEdit.addAction(self.main_widget.act_undo)
+        self.toolBarEdit.addAction(self.main_widget.act_redo)

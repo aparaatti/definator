@@ -5,9 +5,10 @@
 #
 __author__ = 'Niko Humalamäki'
 
+import logging
 from copy import deepcopy, copy
 
-from .data.term import *
+from .term import *
 
 
 class TermsController(object):
@@ -84,8 +85,10 @@ class TermsController(object):
 
     def update_term(self, term: Term, skip_name_change_test: bool=False):
         """
-        Update terms assumes that it is given a copy of the terms object
-        TermsController already has.
+        Updates the term. Handles also Term.term changes. For Term.term changes
+        to be handled correctly it is assumed that the term will have the
+        unmodified version of the term to be updated in the previous_term
+        attribute.
 
         :param term: updated Term object
         :return bool: Returns True if the name of the term has changed.
@@ -112,9 +115,8 @@ class TermsController(object):
                     #The original unchanged Term object is removed from self._terms
                     #dictionary and added to a list in delete dictionary:
                     self._deleted_terms[previous_term_str] = self._terms.pop(previous_term_str)
-
-                    #Tässä pitäisi hallita temien linkkausten vaihto jos termin nimi muuttuu
-                    self.get_term(term.li)
+                    self._unlink_terms(term.previous_term, term.previous_term.related_terms)
+                    self._link_terms(term, term.related_terms)
                     return True
 
         self._changed_terms[term.term] = term
@@ -122,27 +124,34 @@ class TermsController(object):
         return False
 
     def link_terms(self, target1: Term, str_related_terms: list):
+        self._link_terms(target1, str_related_terms)
+        self.update_term(target1)
+
+    def _link_terms(self, target1: Term, str_related_terms: list):
         for str_related_term in str_related_terms:
             target2 = self.get_term(str_related_term)
             target1.link_term(target2)
             target2.link_term(target1)
             self.update_term(target2, True)
-            print("-------[" + str(target1) + " <==> " + str(target2) + "]-------")
-
-        self.update_term(target1)
+            logging.debug("-------[" + str(target1) + " <==> " + str(target2) + "]-------")
 
     def unlink_terms(self, target1: Term, str_related_terms: list):
+        self._unlink_terms(target1, str_related_terms)
+        self.update_term(target1)
+
+    def _unlink_terms(self, target1: Term, str_related_terms: list):
         for str_related_term in str_related_terms:
             target2 = self.get_term(str_related_term)
             target1.unlink_term(target2)
             target2.unlink_term(target1)
             self.update_term(target2, True)
+            logging.debug("-------[" + str(target1) + " |   | " + str(target2) + "]-------")
 
-        self.update_term(target1)
+
 
     def _lazy_load_term(self, term_str):
         if term_str not in self._terms.keys() and term_str in self._terms_list:
-            print("loading term " + term_str)
+            logging.debug("loading term " + term_str)
             term_to_load = Term(term_str)
             self._terms[term_str] = term_to_load.load(self._project_path)
 
@@ -195,10 +204,13 @@ class TermsController(object):
             for term in self._terms.values():
                 term.save(path)
 
+            self._project_path = path
             self._changed_terms = {}
             self._deleted_terms = {}
-            self._project_path = path
             self._save_terms()
+        else:
+            logging.debug("Could not save to: " + str(path))
+            raise Exception
 
     def _save_terms(self):
         """

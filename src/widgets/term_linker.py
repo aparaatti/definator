@@ -3,7 +3,7 @@
 #
 import collections
 
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget, QHBoxLayout
 
 from ..data.term import Term
@@ -32,8 +32,8 @@ class TermLinker(QWidget):
         layout_h.addWidget(self.ui_buttons)
         self.setLayout(layout_h)
 
-        self.ui_buttons.form.buttonLinkTerms.clicked.connect(self._link_term)
-        self.ui_buttons.form.buttonUnlinkTerms.clicked.connect(self._unlink_term)
+        self.ui_buttons.form.buttonLinkTerms.clicked.connect(self.linkTermsClicked)
+        self.ui_buttons.form.buttonUnlinkTerms.clicked.connect(self.unlinkTermsClicked)
         self.ui_buttons.form.buttonAddFile.clicked.connect(self.add_file)
         self.ui_buttons.form.buttonRemoveFiles.clicked.connect(self.remove_files)
 
@@ -43,10 +43,9 @@ class TermLinker(QWidget):
         self.ui_link_list.update_item_group("File", [path.name for path in term.linked_files])
         self.ui_link_list.populate()
 
-    @pyqtSlot()
-    def _link_term(self):
-        self.linkTermsClicked.emit()
+    def clear(self):
+        self.ui_link_list.clear()
 
-    @pyqtSlot()
-    def _unlink_term(self):
-        self.unlinkTermsClicked.emit()
+    def term_linking_enabled(self, boolean: bool):
+        self.ui_buttons.form.buttonLinkTerms.setEnabled(boolean)
+        self.ui_buttons.form.buttonUnlinkTerms.setEnabled(boolean)

@@ -14,7 +14,7 @@ from .key_press_eater import KeyPressEater
 
 
 class TermDisplay(QWidget):
-    link_clicked = pyqtSignal(str)
+    signal_link_clicked = pyqtSignal(str)
 
     signal_undo_event = pyqtSignal()
     signal_redo_event = pyqtSignal()
@@ -38,7 +38,7 @@ class TermDisplay(QWidget):
 
     @pyqtSlot(QUrl)
     def _map_to_signal(self, url: QUrl):
-        self.link_clicked.emit(url.toString())
+        self.signal_link_clicked.emit(url.toLocalFile().split("/")[-1])
 
     def _trigger_event(self, sequence: QKeySequence):
         if sequence is QKeySequence.Undo:

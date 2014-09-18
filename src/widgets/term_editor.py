@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
+#
 # This file is a part of Definator (https://github.com/aparaatti/definator)
 # and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
 #
 import os
+import logging
+import copy
 from pathlib import Path
+
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QFileDialog
 from PyQt5.QtGui import QKeySequence, QIcon
-
 from .term_linker import TermLinker
-from ..action_helper import make_action_helper
+from ..widgets.qt_helper_functions import make_action_helper
 from ..data.term import Term
 from .qtdesigner.ui_QTermEditor import Ui_TermEditor
 from .key_press_eater import KeyPressEater
@@ -31,7 +34,7 @@ class TermEditor(QWidget):
     add_links_to_term = pyqtSignal(Term, list)
     remove_links_from_term = pyqtSignal(Term, list)
 
-    signal_valid = pyqtSignal(bool)
+    signal_current_term_is_valid = pyqtSignal(bool)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -41,7 +44,7 @@ class TermEditor(QWidget):
         self.ui = Ui_TermEditor()
         self.ui.setupUi(self)
         #This is used for detecting if the term content has changed:
-        self._old_content = [None, ""]
+        self._old_term = Term()
 
         #Dialogs:
         self.term_chooser = StrChooser(self)
@@ -68,13 +71,53 @@ class TermEditor(QWidget):
         self._init_term_linker()
         self._init_signals()
 
-    def _clear(self):
-        self.ui.lineEditTitle.clear()
-        self.ui.textEditContent.clear()
-        self.term_linker.ui_link_list.clear()
-        #self.term_linker.setEnabled(False)
-        self._current_term = Term()
-        self._current_term_has_changed = False
+    def set_term(self, term: Term):
+        """
+        Sets the current term to be edited.
+
+        :param term: Term to edit
+        """
+        self._clear()
+        self._current_term = copy.copy(term)
+        self._old_term = term
+        if self._old_term.term is "":
+            self.signal_current_term_is_valid.emit(False)
+            self.term_linker.term_linking_enabled(False)
+        else:
+            self.term_linker.update_links(term)
+            self.term_linker.term_linking_enabled(True)
+            self.ui.lineEditTitle.setText(term.term)
+            self.ui.textEditContent.setText(term.description)
+
+    def hide(self):
+        """
+        When term editor is hidden the changes need to be saved. In other words
+        this is the place, that updates the content of a term or sends a new term
+        to the TermController.
+
+        A new term object is always emitted when editing a new term stops and
+        the term has non empty term string (Term.term).
+
+        If we are editing already existing term, term editor sets a
+        _current_term_has_changed to True if the content, term string or linked
+        things have changed. signal_term_was_changed(Term) is emitted if the
+        term has changes. Also the undo-redo history of the editing session
+        is forgotten and the undo is set to the version of the term that existed
+        before the start of the editing session.
+
+        """
+        if self._old_term.term is "":
+            self._current_term = self._fill_term(Term())
+            self.signal_stopped_editing_new_term.emit(self._current_term)
+            self._clear()
+        else:
+            self._increment_term_version()
+            if self._current_term_has_changed:
+                self._old_term.next_term = self._current_term
+                self.signal_term_was_changed.emit(self._current_term)
+            self._clear()
+
+        super().hide()
 
     def _increment_term_version(self, force: bool=False):
         """
@@ -85,8 +128,8 @@ class TermEditor(QWidget):
         :param force: increments version anyway if True
         :return: True if the version was incremented.
         """
-        if self.ui.lineEditTitle.displayText() != self._old_content[0] or \
-                self.ui.textEditContent.toPlainText() != self._old_content[1] or \
+        if self.ui.lineEditTitle.displayText() != self._old_term.term or \
+                self.ui.textEditContent.toPlainText() != self._old_term.description or \
                 force:
             self._current_term.next_term = self._fill_term(Term())
             self._current_term = self._current_term.next_term
@@ -94,6 +137,13 @@ class TermEditor(QWidget):
             self._current_term_has_changed = True
             return True
         return False
+
+    def _clear(self):
+        self.ui.lineEditTitle.clear()
+        self.ui.textEditContent.clear()
+        self.term_linker.clear()
+        self._current_term = Term()
+        self._current_term_has_changed = False
 
     def _fill_term(self, term: Term):
         term.term = self.ui.lineEditTitle.displayText()
@@ -104,65 +154,41 @@ class TermEditor(QWidget):
         return term
 
     def _trigger_event(self, sequence: QKeySequence):
+        """
+        This is triggered when KeyPressEater filter has cached undo or redo key combination
+        on term line editor or term description editor.
+
+        :param sequence:
+        :return:
+        """
         if sequence is QKeySequence.Undo:
             self.signal_undo_event.emit()
 
         if sequence is QKeySequence.Redo:
             self.signal_redo_event.emit()
 
-    def set_term(self, term: Term):
-        """
-        Sets the current term to be edited.
-
-        :param term: Term to edit
-        """
-        self._current_term = term
-        self._old_content = [term.term, term.description]
-        self._current_term_has_changed = False
-        self.ui.lineEditTitle.setText(term.term)
-        self.ui.textEditContent.setText(term.description)
-        self.term_linker.update_links(term)
-        self.term_linker.setEnabled(True)
-
-    def hide(self):
-        """
-        When term editor is hidden the changes need to be saved. In other words
-        this is the place, that updates the content of a term or sends a new term
-        to the TermController.
-
-        A new term object of the term is always created when editing of an
-        term stops and the term has non empty term string (Term.term).
-
-        If we are editing already existing term, term editor adds has_changed
-        parameter to the term if the content, term string or linked things have
-        changed. signal_term_was_changed(Term) is emitted if the term has changes.
-        """
-        if self._old_content[0] is None:
-            self._current_term = self._fill_term(Term())
-            if self._current_term.term is not None:
-                #If the new term has linked resources, we add the term without links
-                #as a version before the same term with links:
-                if self._current_term_has_changed:
-                    self._current_term.previous_term = self._fill_term(Term())
-                self.signal_stopped_editing_new_term.emit(self._current_term)
-            self._clear()
-        else:
-            self._increment_term_version()
-            if self._current_term_has_changed:
-                self.signal_term_was_changed.emit(self._current_term)
-            self._clear()
-
-        super().hide()
-
     @pyqtSlot()
     def _validate_term(self):
+        logging.debug("Validating term: " + self.ui.lineEditTitle.displayText())
         if self.ui.lineEditTitle.displayText() is "":
-            self.signal_valid.emit(False)
+            self.signal_current_term_is_valid.emit(False)
         else:
-            self.signal_valid.emit(True)
+            self.signal_current_term_is_valid.emit(True)
 
-        self.check_if_can_undo()
-        self.check_if_can_redo()
+    ########
+    # TAGS #
+    ########
+
+    @pyqtSlot(str, str)
+    def _add_tag(self, item_str: str, group_name: str):
+        """
+        This is triggered when an item in term linker is activated. We set
+        in _init_term_linker method the different item groups for the term linker.
+        So we can add the appropriate tag based on the group name we have given.
+        """
+        if group_name == "Image":
+            self.add_image_tag(self._current_term.get_file_path(item_str))
+        #other tags aren't available.
 
     @pyqtSlot()
     def add_image_tag(self, path: Path=Path("/path/to/image"), str_title: str="Image title"):
@@ -237,7 +263,6 @@ class TermEditor(QWidget):
     def _link_terms_accepted(self, str_list):
         if len(str_list) > 0:
             self._increment_term_version(True)
-            #TermController handles the linking between Terms, so we emit a signal.
             self.add_links_to_term.emit(self._current_term, str_list)
             self.term_linker.update_links(self._current_term)
 
@@ -342,6 +367,11 @@ class TermEditor(QWidget):
         self._undo_text_edit = boolean
         self.check_if_can_undo()
 
+    @pyqtSlot()
+    def _check_undo_redo(self):
+        self.check_if_can_undo()
+        self.check_if_can_redo()
+
     def check_if_can_undo(self):
         """
         If term text editor or term title line edit can undo signal_can_undo(True) is emitted.
@@ -395,6 +425,8 @@ class TermEditor(QWidget):
         self.ui.addImageToolButton.clicked.connect(self.add_image_tag)
         self.ui.addTitleToolButton.clicked.connect(self.add_title_tag)
         self.ui.lineEditTitle.textChanged.connect(self._validate_term)
+        self.ui.lineEditTitle.textChanged.connect(self._check_undo_redo)
+        self.ui.textEditContent.textChanged.connect(self._check_undo_redo)
         self.ui.textEditContent.redoAvailable.connect(self._redo_available_in_text_edit)
         self.ui.textEditContent.undoAvailable.connect(self._undo_available_in_text_edit)
 
@@ -408,3 +440,4 @@ class TermEditor(QWidget):
         self.term_linker.add_file.connect(self.link_files)
         self.term_linker.remove_files.connect(self.unlink_files)
         self.file_remover.str_list_accepted.connect(self._unlink_files_accepted)
+        self.term_linker.ui_link_list.signal_item_activated.connect(self._add_tag)

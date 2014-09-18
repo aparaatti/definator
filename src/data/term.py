@@ -4,7 +4,7 @@
 # and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
 __author__ = 'Niko Humalamäki'
 
-import copy
+import logging
 
 from .description import *
 from .term_links import *
@@ -36,7 +36,7 @@ class Term(object):
     """
 
     def __init__(self, term: str=None):
-        self._term = None
+        self._term = ""
         self.term = term
         self._description = Description()
         self._links = Links()
@@ -99,8 +99,8 @@ class Term(object):
 
         :param term: The term as a string.
         """
-        if term == "":
-            self.term = None
+        if term is None:
+            return
         elif term != self._term:
             self._term = term
 
@@ -155,6 +155,9 @@ class Term(object):
     @property
     def links(self):
         return copy.deepcopy(self._links)
+
+    def get_file_path(self, file_name: str):
+        return self._links.get_file_path(file_name)
 
     def deepcopy_links_from_previous(self):
         if self._previous_term:
@@ -231,7 +234,9 @@ class Term(object):
         try:
             os.removedirs(str(path / self.term))
         except OSError as e:
-            print("The term was removed, referenced files where not removed. " + os.linesep + str(e))
+            logging.info(
+                "The term " + self.term + " was removed, referenced files where not removed. "
+                + os.linesep + str(e))
 
     def __str__(self):
         return "Term object: " + self.term + " " + str(id(self))
@@ -261,27 +266,3 @@ class Term(object):
 
     def __hash__(self):
         return self.term.__hash__()
-
-    def __eq__(self, other):
-        """
-        Terms are thought as being immutable so if two
-        Term objects have same term string they represent the same
-        term, although the content may be different.
-
-        >>> term1 = Term("ABC")
-        >>> term2 = Term("ABC")
-        >>> term1 == term2
-        True
-        >>> term1.term = "DBC"
-        >>> term1 == term2
-        False
-        >>> term1.term = ""
-        >>> print(term1.term)
-        None
-        >>> term1 == term2
-        False
-
-        :param other:
-        :return:
-        """
-        return self.term.lower() == other.term.lower()
