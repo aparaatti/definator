@@ -32,6 +32,7 @@ class Term(object):
         self._links = Links()
         self._previous_term = None
         self._next_term = None
+        self._path = Path()
 
     def __contains__(self, related_term):
         return related_term in self._links.linked_terms()
@@ -51,7 +52,18 @@ class Term(object):
     @next_term.setter
     def next_term(self, term):
         self._next_term = term
-        term._previous_term = self
+        if term:
+            term._previous_term = self
+
+    @property
+    def path(self):
+        return self._path
+
+    @path.setter
+    def path(self, path: Path):
+        self._path = path
+        self._description.path = self._path / self.term
+        self._links.path = self._path / self.term
 
     @property
     def previous_term(self):
@@ -84,13 +96,13 @@ class Term(object):
     @term.setter
     def term(self, term: str):
         """
-        Sets the term string for this Term object. IF "" is given, the Term.term is set
-        to None.
+        Sets the term string for this Term object. If None is given, the
+        Term.term is set to "".
 
         :param term: The term as a string.
         """
         if term is None:
-            return
+            self._term = ""
         elif term != self._term:
             self._term = term
 
@@ -110,6 +122,7 @@ class Term(object):
         :return:
         """
         self._description = Description()
+        self._description.path = self._path / self.term
         self._description.content_text = description_text
 
     @property
@@ -127,16 +140,19 @@ class Term(object):
     @property
     def related_terms_as_html(self):
         html = list()
-        html.append('''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        html.append(
+            '''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
             "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
             <html xmlns="http://www.w3.org/1999/xhtml">
             <head>
-            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            <meta http-equiv="Content-Type" content="text/html;
+            charset=UTF-8"/>
             <title>Related terms</title>
             </head><body><code>''')
 
         for term in self._links.linked_terms:
-            html.append('<a href="' + term + '" target="_blank">' + term + '</a> ')
+            html.append(
+                '<a href="' + term + '" target="_blank">' + term + '</a> ')
 
         html.append("</code></body></html>")
 
@@ -144,14 +160,31 @@ class Term(object):
 
     @property
     def links(self):
-        return copy.deepcopy(self._links)
+        return self._links
+
+    def initialize_next_term(self):
+        """
+        This creates the next term object and initializes it with the previous
+        term content.
+        """
+        self._next_term = copy.deepcopy(self)
+        self._next_term._previous_term = self
+        logging.debug(
+            "-----Initialized next term:" + os.linesep
+            + "  term: " + self._next_term.term + os.linesep
+            + "  path: " + str(self._next_term._path) + os.linesep
+            )
 
     def get_file_path(self, file_name: str):
         return self._links.get_file_path(file_name)
 
-    def deepcopy_links_from_previous(self):
-        if self._previous_term:
-            self._links = self._previous_term.links
+    def get_non_project_file_path(self, file_name: str):
+        """
+        This returns the filepath for given file_name if it's different
+        than current project path. When file is in project path, only the
+        name of the file is returned.
+        """
+        return self._links.get_non_project_file_path(file_name)
 
     def _make_html_list_of_files(self):
         file_names = list()
@@ -165,8 +198,8 @@ class Term(object):
         for path in self._links.linked_images:
             if path.name not in added_names:
                 file_names.append(
-                    '<a href="' + path.name + '" target="_blank" class="image">'
-                    + path.name + '</a>')
+                    '<a href="' + path.name
+                    + '" target="_blank" class="image">' + path.name + '</a>')
 
         for path in self._links.linked_files:
             file_names.append(
@@ -174,7 +207,8 @@ class Term(object):
                 + path.name + '</a>')
 
         if len(file_names) > 0:
-            return "<br/><br/><h3>Attached files: </h3><ul>" + "<br/>".join(file_names) + "</ul>"
+            return "<br/><br/><h3>Attached files: </h3><ul>" + "<br/>".join(
+                file_names) + "</ul>"
         return ""
 
     def link_term(self, term):
@@ -195,6 +229,7 @@ class Term(object):
         return self._links.unlink_file(path)
 
     def load(self, path):
+        self._path = path
         self._links = Links()
         self._links.load(path / self.term)
         self._description = Description()
@@ -210,22 +245,25 @@ class Term(object):
         :param path: path to project folder
         :return: None
         """
+        self._path = path
         path /= self.term
         if not path.exists():
             path.mkdir()
+
         self._links.save(path, self._description.added_image_paths)
         self._description.save(path)
         self._previous_term = None
         self._next_term = None
 
-    def delete(self, path):
-        self._links.delete(path / self.term)
-        self._description.delete(path / self.term)
+    def delete(self):
+        self._links.delete()
+        self._description.delete()
         try:
             os.removedirs(str(path / self.term))
         except OSError as e:
             logging.info(
-                "The term " + self.term + " was removed, referenced files where not removed. "
+                "The term " + self.term
+                + " was removed, referenced files where not removed. "
                 + os.linesep + str(e))
 
     def __str__(self):

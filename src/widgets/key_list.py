@@ -15,8 +15,9 @@ from .qtdesigner.ui_QKeyList import Ui_Form
 
 class KeyList(QWidget):
     """
-    A table widget that can show groups of strings with chosen foreground and background color. Shows also
-    a key for the table, which contains the group name with chosen colors for the group.
+    A table widget that can show groups of strings with chosen foreground and
+    background color. Shows also a key for the table, which contains the group
+    name with chosen colors for the group.
     """
     signal_item_activated = pyqtSignal(str, str)
     color_map = collections.OrderedDict()
@@ -44,29 +45,35 @@ class KeyList(QWidget):
         self.ui.keyTableWidget_2.setColumnCount(3)
         max_height = self.ui.labelKeys_2.size().height()*0.70
         self.ui.keyTableWidget_2.setMaximumHeight(max_height)
-        self.ui.keyTableWidget_2.setMaximumWidth(self.ui.keyTableWidget_2.width()*3)
+        self.ui.keyTableWidget_2.setMaximumWidth(
+            self.ui.keyTableWidget_2.width()*3)
         self.ui.keyTableWidget_2.setRowHeight(0, max_height)
-        self.ui.keyTableWidget_2.columnWidth(self.ui.keyTableWidget_2.width()//3)
+        self.ui.keyTableWidget_2.columnWidth(
+            self.ui.keyTableWidget_2.width()//3)
         self.ui.keyTableWidget_2.setEnabled(False)
 
         self.ui.tableWidget_2.itemDoubleClicked.connect(self._item_activated)
 
     def add_item_group(self, group_name: str, fg_color: str, bg_color: str):
         """
-        This method creates and item group for chosen name and sets foreground
-        color and background color for the chosen name.
+        This method creates an item group for chosen name and sets foreground
+        color and background color for it.
 
         :param group_name: name for group of strings
-        :param fg_color: foreground color as a string, accepts same colors as QColor http://qt-project.org/doc/qt-5/QColor.html
-        :param bg_color: background color as a string, accepts same colors as QColor http://qt-project.org/doc/qt-5/QColor.html
+        :param fg_color: foreground color as a string, accepts same colors as
+            QColor http://qt-project.org/doc/qt-5/QColor.html
+        :param bg_color: background color as a string, accepts same colors as
+            QColor http://qt-project.org/doc/qt-5/QColor.html
         """
-        self.color_map[group_name] = [QColor(fg_color).name(), QColor(bg_color).name()]
+        self.color_map[group_name] = [QColor(fg_color).name(),
+                                      QColor(bg_color).name()]
 
     def update_item_group(self, group_name: str, items_str: list):
         """
         Updates the items for given group.
 
-        :param group_name: string, name of the group. If colors for the group have not been given, default colors are used.
+        :param group_name: string, name of the group. If colors for the group
+            have not been given, default colors are used.
         :param items_str: list of strings
         """
         self._item_dictionary[group_name] = items_str
@@ -88,15 +95,16 @@ class KeyList(QWidget):
     @pyqtSlot()
     def populate(self):
         """
-        Populates the table with given string groups.
+        Populates the table with given string groups
+        and sets the number of columns.
         """
-        columns = self.ui.tableWidget_2.width() // 150
+        columns = self.ui.tableWidget_2.width() // 140
         logging.debug("columns on resize: " + str(columns))
         self._items.clear()
         self.ui.tableWidget_2.clear()
-        self.ui.tableWidget_2.columnWidth(150)
+        self.ui.tableWidget_2.columnWidth(140)
 
-        #We build a list of items and set the colors for item.
+        # We build a list of items and set the colors for item.
         for key in self._item_dictionary:
             for str_item in self._item_dictionary[key]:
                 item = QTableWidgetItem(str_item)
@@ -108,16 +116,23 @@ class KeyList(QWidget):
             return
 
         self.ui.tableWidget_2.setRowCount(len(self._items)//columns+1)
+        self.ui.tableWidget_2.setColumnCount(columns)
+        i = 0
+        while i < columns:
+            self.ui.tableWidget_2.setColumnWidth(i, 140)
+            i += 1
 
-        #We set the items to the table.
+        # We set the items to the table.
         row = 0
         col = 0
         for item in self._items:
             self.ui.tableWidget_2.setItem(row, col, item)
-            col += 1
-            if col >= self.ui.tableWidget_2.columnCount():
+            if col+1 == columns:
                 col = 0
                 row += 1
+            else:
+                col += 1
+
         self._update_key()
 
     @pyqtSlot()
@@ -132,8 +147,8 @@ class KeyList(QWidget):
     @pyqtSlot(QTableWidgetItem)
     def _item_activated(self, item: QTableWidgetItem):
         """
-        When an item is activated in the table signal_item_activated containing the content string of the item
-         and the group name is emitted.
+        When an item is activated in the table signal_item_activated containing
+        the content string of the item and the group name is emitted.
 
         :param item: QTableWidget item from TableWidget
         """
@@ -142,13 +157,12 @@ class KeyList(QWidget):
         bg_color = item.background().color().name()
         group_name = ""
         for key, value in self.color_map.items():
-            logging.debug(key + " " + value[0] + " " + str(type(value[0])) + " " + value[1])
+            logging.debug(key + " " + value[0] + " " + str(type(value[0]))
+                          + " " + value[1])
             logging.debug(fg_color + " " + bg_color)
             if value[0] == fg_color and value[1] == bg_color:
                 group_name = key
-                logging.debug("FOUND!")
                 break
-            logging.debug("ITERATING!")
 
         self.signal_item_activated.emit(text, group_name)
 
@@ -158,4 +172,9 @@ class KeyList(QWidget):
         the string table is repopulated
         """
         self.populate()
-        super().show(arg)
+        super().show()
+
+    def resizeEvent(self, event):
+        self.populate()
+        logging.debug("Width: " + str(self.ui.tableWidget_2.width()))
+        super().resizeEvent(event)

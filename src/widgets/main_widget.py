@@ -25,10 +25,10 @@ class MainWidget(QWidget):
     events between them and to the parent widget. Also knows the current term
     being examined.
     """
-    #sent when a existing term content is updated (termEditor knows this)
+    # sent when a existing term content is updated (termEditor knows this)
     update_term = pyqtSignal(Term)
 
-    #sent when a new term has been created
+    # sent when a new term has been created
     add_new_term = pyqtSignal(Term)
     remove_term = pyqtSignal(str)
     save_changes = pyqtSignal()
@@ -39,15 +39,13 @@ class MainWidget(QWidget):
         super(MainWidget, self).__init__(parent)
         self._current_term = Term()
 
-        #Modules:
+        # Modules:
         self.term_str_browser = StrBrowser("Term browser")
         self.term_display = TermDisplay()
         self.related_terms = LinkList("Related terms")
         self.term_editor = TermEditor()
 
-        self.setMinimumSize(QSize(750, 300))
-
-        #Initialization methods:
+        # Initialization methods:
         self._init_actions()
         self._init_layout()
         self._init_signals()
@@ -86,7 +84,8 @@ class MainWidget(QWidget):
 
         self.term_str_browser.set_current_str(self._current_term.term)
         self.term_display.set_term(self._current_term)
-        self.related_terms.set_current_html(self._current_term.related_terms_as_html)
+        self.related_terms.set_current_html(
+            self._current_term.related_terms_as_html)
 
         self.act_add_term.setEnabled(True)
         self.act_rem_term.setEnabled(True)
@@ -113,6 +112,7 @@ class MainWidget(QWidget):
         :param terms: terms to show, a tuple containing strings
         :param term: term to show, a Term object
         """
+        self.term_editor.clear()
         self.term_str_browser.set_list(list(terms))
         self._set_current_term(term)
         self.show_term_display()
@@ -157,15 +157,15 @@ class MainWidget(QWidget):
             self, "Not implemented", "Saving current term is not implemented. "
             + os.linesep + "Saving the project saves all changed terms.")
 
-    # Slots for inner signals and triggering of events to be passed on to parent
-    # module.
+    # Slots for inner signals and triggering of events to be passed on to
+    # parent module.
     @pyqtSlot()
     def create_new_term(self):
         """
         This slot starts the creation of a new term.
         """
-        #If term editor is visible we show term display to save changes from
-        #term editor
+        # If term editor is visible we show term display to save changes from
+        # term editor
         if self.term_editor.isVisible:
             self.show_term_display()
 
@@ -191,15 +191,18 @@ class MainWidget(QWidget):
     @pyqtSlot(str)
     def open_in_desktop_default_app(self, file_name: str):
         """
-        This slot passes the opening of a file to desktop environment. If current
-        term doesn't have the current file a warning dialog is raised.
+        This slot passes the opening of a file to desktop environment. If
+        currentterm doesn't have the current file a warning dialog is raised.
         """
         logging.debug("File name @ os open: " + file_name)
         try:
             path = self._current_term.get_file_path(file_name)
         except FileNotFoundError:
-            logging.info('Could not open. No file "' + file_name + '" in project.')
-            warning_dialog(self, "Could not open.", 'Could not open No file "' + file_name + '" in project.')
+            logging.info(
+                'Could not open. No file "' + file_name + '" in project.')
+            warning_dialog(
+                self, "Could not open.", 'Could not open No file "' + file_name
+                + '" in project.')
         else:
             logging.debug("path: " + str(path))
             QDesktopServices.openUrl(QUrl("file://" + str(path)))
@@ -222,8 +225,8 @@ class MainWidget(QWidget):
     @pyqtSlot(Term)
     def _stopped_editing(self, term: Term):
         """
-        This slot is triggered when the term editor stops editing existing term.
-        The updated term is delegated with update_term signal.
+        This slot is triggered when the term editor stops editing existing
+        term. The updated term is delegated with update_term signal.
         """
         self._set_current_term(term)
         self.term_display.show()
@@ -246,22 +249,30 @@ class MainWidget(QWidget):
         self.term_str_selected.emit(term_str)
 
     def _init_actions(self):
-        #ACTIONS:
-        self.act_link_terms = make_action_helper(self, "&Link terms", "Link terms to current term", "alt+l", QIcon.fromTheme('list-add'))
+        # ACTIONS:
+        self.act_link_terms = make_action_helper(
+            self, "&Link terms", "Link terms to current term", "alt+l",
+            QIcon.fromTheme('list-add'))
         self.act_link_terms.triggered.connect(self.term_editor.link_terms)
-        self.act_unlink_terms = make_action_helper(self, "&Unlink terms", "Remove related terms from current term", "alt+u", QIcon.fromTheme('list-remove'))
+        self.act_unlink_terms = make_action_helper(
+            self, "&Unlink terms", "Remove related terms from current term",
+            "alt+u", QIcon.fromTheme('list-remove'))
         self.act_unlink_terms.triggered.connect(self.term_editor.unlink_terms)
         self.act_rem_term = make_action_helper(
-            self, "&Remove term", "Remove current term", QKeySequence.Delete, QIcon.fromTheme('edit-delete'))
+            self, "&Remove term", "Remove current term", QKeySequence.Delete,
+            QIcon.fromTheme('edit-delete'))
         self.act_rem_term.triggered.connect(self._remove_term)
         self.act_save_term = make_action_helper(
-            self, "&Save current term", "Save changes for term", None, QIcon.fromTheme('document-save'))
+            self, "&Save current term", "Save changes for term", None,
+            QIcon.fromTheme('document-save'))
         self.act_save_term.triggered.connect(self.save_current_term)
         self.act_view_term = make_action_helper(
-            self, "&View current term", "View current term", QKeySequence.Close, QIcon.fromTheme('document-revert'))
+            self, "&View current term", "View current term",
+            QKeySequence.Close, QIcon.fromTheme('document-revert'))
         self.act_view_term.triggered.connect(self.show_term_display)
         self.act_edit_term = make_action_helper(
-            self, "&Edit current term", "Edit current term", "ctrl+e", QIcon.fromTheme('accessories-text-editor'))
+            self, "&Edit current term", "Edit current term", "ctrl+e",
+            QIcon.fromTheme('accessories-text-editor'))
         self.act_edit_term.triggered.connect(self.edit_current_term)
         self.act_add_term = make_action_helper(
             self, "&Add term", "Add new term to project.",
@@ -269,13 +280,13 @@ class MainWidget(QWidget):
         self.act_add_term.triggered.connect(self.create_new_term)
 
     def _init_layout(self):
-        #Set layout
+        # Set layout
         layout_h = QHBoxLayout()
 
         layout_v_term_view = QVBoxLayout()
         layout_v_term_browser = QVBoxLayout()
 
-        #Term browser area:
+        # Term browser area:
         layout_h.addLayout(layout_v_term_browser)
         layout_v_term_browser.addWidget(self.term_str_browser)
 
@@ -283,20 +294,24 @@ class MainWidget(QWidget):
         layout_v_term_view.addWidget(self.term_display)
         layout_v_term_view.addWidget(self.related_terms)
 
-        #Add editor area to browser layout
+        # Add editor area to browser layout
         layout_h.addLayout(layout_v_term_view)
         self.setLayout(layout_h)
 
     def _init_signals(self):
-        #Inner interaction logic:
+        # Inner interaction logic:
         self.term_editor.signal_term_was_changed.connect(self._stopped_editing)
-        self.term_editor.signal_stopped_editing_new_term.connect(self._stopped_editing_new_term)
-        self.term_editor.signal_current_term_is_valid.connect(self.act_view_term.setEnabled)
-        self.term_editor.signal_current_term_is_valid.connect(self.act_add_term.setEnabled)
+        self.term_editor.signal_stopped_editing_new_term.connect(
+            self._stopped_editing_new_term)
+        self.term_editor.signal_current_term_is_valid.connect(
+            self.act_view_term.setEnabled)
+        self.term_editor.signal_current_term_is_valid.connect(
+            self.act_add_term.setEnabled)
 
         self.term_str_browser.str_selected.connect(self._change_term)
         self.related_terms.link_selected.connect(self._change_term)
         self.term_str_browser.list_is_empty.connect(self.reset)
 
-        #Delegate file to os default app:
-        self.term_display.signal_link_clicked.connect(self.open_in_desktop_default_app)
+        # Delegate file to os default app:
+        self.term_display.signal_link_clicked.connect(
+            self.open_in_desktop_default_app)

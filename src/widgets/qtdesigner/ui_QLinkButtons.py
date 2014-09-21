@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'QLinkButtons.ui'
 #
-# Created: Thu Sep 18 09:31:31 2014
+# Created: Sun Sep 21 06:31:35 2014
 #      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(102, 138)
+        Form.resize(122, 146)
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.verticalLayout = QtWidgets.QVBoxLayout()
@@ -58,8 +58,8 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
-        self.buttonLinkTerms.setText(_translate("Form", "&Link terms"))
-        self.buttonUnlinkTerms.setText(_translate("Form", "&Unlink terms"))
-        self.buttonAddFile.setText(_translate("Form", "&Add files"))
-        self.buttonRemoveFiles.setText(_translate("Form", "&Remove files"))
+        self.buttonLinkTerms.setText(_translate("Form", "Li&nk terms"))
+        self.buttonUnlinkTerms.setText(_translate("Form", "Unlink te&rms"))
+        self.buttonAddFile.setText(_translate("Form", "Link file&s"))
+        self.buttonRemoveFiles.setText(_translate("Form", "Unlin&k files"))
 

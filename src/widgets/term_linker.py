@@ -6,7 +6,7 @@
 import collections
 
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QWidget, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QGroupBox
 
 from ..data.term import Term
 from .link_buttons import LinkButtons
@@ -20,8 +20,9 @@ class TermLinker(QWidget):
     remove_files = pyqtSignal()
 
     """
-    Wrapper widget that contains triggers for linking/unlinking of terms and files for a Term and
-    a table widget that shows currently linked things for a Term.
+    Wrapper widget that contains triggers for linking/unlinking of terms and
+    files for a Term and a table widget that shows currently linked things for
+    a Term.
     """
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -33,22 +34,35 @@ class TermLinker(QWidget):
         layout_h = QHBoxLayout()
         layout_h.addWidget(self.ui_link_list)
         layout_h.addWidget(self.ui_buttons)
-        self.setLayout(layout_h)
 
-        self.ui_buttons.form.buttonLinkTerms.clicked.connect(self.linkTermsClicked)
-        self.ui_buttons.form.buttonUnlinkTerms.clicked.connect(self.unlinkTermsClicked)
-        self.ui_buttons.form.buttonAddFile.clicked.connect(self.add_file)
-        self.ui_buttons.form.buttonRemoveFiles.clicked.connect(self.remove_files)
+        group_box = QGroupBox("Linked terms and files")
+        group_box.setLayout(layout_h)
+
+        layout_h_b = QHBoxLayout()
+        layout_h_b.addWidget(group_box)
+        self.setLayout(layout_h_b)
+
+        self.ui_buttons.form.buttonLinkTerms.clicked.connect(
+            self.linkTermsClicked)
+        self.ui_buttons.form.buttonUnlinkTerms.clicked.connect(
+            self.unlinkTermsClicked)
+        self.ui_buttons.form.buttonAddFile.clicked.connect(
+            self.add_file)
+        self.ui_buttons.form.buttonRemoveFiles.clicked.connect(
+            self.remove_files)
 
     def update_links(self, term: Term):
         """
-        Updates the linked term, file and image names to be displayed for the term.
+        Updates the linked term, file and image names to be displayed for the
+        term.
 
         :param term: Term object that the linked things are shown for
         """
         self.ui_link_list.update_item_group("Term", term.related_terms)
-        self.ui_link_list.update_item_group("Image", [path.name for path in term.linked_images])
-        self.ui_link_list.update_item_group("File", [path.name for path in term.linked_files])
+        self.ui_link_list.update_item_group("Image", [path.name for path
+                                                      in term.linked_images])
+        self.ui_link_list.update_item_group("File", [path.name for path
+                                                     in term.linked_files])
         self.ui_link_list.populate()
 
     def clear(self):

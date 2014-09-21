@@ -12,10 +12,11 @@ class Links(object):
     Handles linked terms and files.
     """
 
-    def __init__(self, links: list=[]):
+    def __init__(self):
         self._linked_terms = []
         self._linked_files = dict()
         self._linked_images = dict()
+        self._path = None
 
     def __str__(self):
         return "linked terms: " + str(self._linked_terms) + os.linesep \
@@ -59,28 +60,30 @@ class Links(object):
 
     def _save_files_to_term_path(self, path: Path, added_images):
         """
-        Saving of external files happens because their path is different than "". It also
-        means that, one  can't add stuff from root folder (maybe).
+        Saving of external files happens because their path is different than
+        "". It also means that, one  can't add stuff from root folder (maybe).
 
-        The files that are in external paths are copied to term folder, from which they
-        are read on load.
+        The files that are in external paths are copied to term folder, from
+        which they are read on load.
 
         :param path:
         :param added_images:
         :return:
         """
+        saved_files = list()
+        [saved_files.append(path.name) for path in path.iterdir()]
+
+        logging.debug("SAVED FILES: " + str(type(saved_files)) + os.linesep + "    "+ str(saved_files))
         for file_path in self._linked_files.values():
-            if len(file_path.parent.parts) > 0:
-                self._copy_file_to(file_path, path)
+            if file_path.name not in saved_files:
+                _copy_file_to(file_path, path)
                 self._linked_files[file_path.name] = Path(file_path.name)
 
         for img_path in added_images:
-            if len(img_path.parent.parts) > 0:
-                self._copy_file_to(img_path, Path(path))
+            if img_path.name not in saved_files:
+                logging.debug("img name: " + img_path.name)
+                _copy_file_to(img_path, Path(path))
                 self._linked_images[img_path.name] = Path(img_path.name)
-
-    def _copy_file_to(self, src: Path, target: Path):
-        shutil.copy2(str(src), str(target / src.name))
 
     def load(self, path: Path):
         dictionary = load_json(path / "links.json", LinksDecoder())
@@ -88,11 +91,13 @@ class Links(object):
             self._linked_terms = dictionary.get("terms")
 
         if path.is_dir():
-            for files in path.iterdir():
-                if files.is_file and files.name not in ["links.json", "description.json"]:
-                    self.link_file_on_mime(files)
+            for file in path.iterdir():
+                if file.is_file and file.name not in ["links.json",
+                                                      "description.json"]:
+                    self.link_file_on_mime(Path(file.name))
 
-        logging.debug("links after load: " + str(self.linked_images) + " " + str(self.linked_files) + " " + str(self.linked_terms))
+        logging.debug("links after load: " + str(self.linked_images) + " "
+                      + str(self.linked_files) + " " + str(self.linked_terms))
 
     def link_file_on_mime(self, path: Path):
         type_tuple = mimetypes.guess_type(str(path))
@@ -101,8 +106,8 @@ class Links(object):
         else:
             return self._link_file(path)
 
-    def delete(self, path: Path):
-        os.remove(str(path / "links.json"))
+    def delete(self):
+        os.remove(str(self._path / "links.json"))
 
     @property
     def linked_terms(self):
@@ -119,12 +124,47 @@ class Links(object):
     def get_file_path(self, file_name: str):
         fn = self._linked_files.get(file_name)
         if fn:
+            # if the file is in project folder we add project path:
+            if len(fn.parents) == 0:
+                fn = self._path / fn
             return fn
+
+        fi = self._linked_images.get(file_name)
+        if fi:
+            # if the image is in project folder we add project path:
+            if len(fi.parents) == 0:
+                fi = self._path / fi
+            return fi
+
+        raise FileNotFoundError
+
+    def get_non_project_file_path(self, file_name: str):
+        """
+        This returns the filepath for given file_name if it's different
+        than current project path. When file is in project path, only the
+        name of the file is returned.
+        """
+        fn = self._linked_files.get(file_name)
+        if fn:
+            return fn
+
         fi = self._linked_images.get(file_name)
         if fi:
             return fi
 
         raise FileNotFoundError
+
+    @property
+    def path(self):
+        return self._path
+
+    @path.setter
+    def path(self, path: Path):
+        self._path = path
+
+
+def _copy_file_to(src: Path, target: Path):
+    shutil.copy2(str(src), str(target / src.name))
 
 
 class LinksEncoder(json.JSONEncoder):

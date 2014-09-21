@@ -23,6 +23,8 @@ def load_json(path: Path, decoder=json.JSONDecoder()):
 
 
 def save_json(path: Path, obj, encoder=json.JSONEncoder()):
+    """
+    """
     if not path.exists():
         path.touch()
     file = open(str(path), "w")
