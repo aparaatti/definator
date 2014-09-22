@@ -34,3 +34,16 @@ at the University of Jyväskylä. It is also developed to scratch an itch to hav
 this kind of a tool at hand, to learn python, to learn qt and for fun.
 
 Creator Niko Humalamäki (nikohuma at gmail.com).
+
+
+README
+=======
+
+## Most REST services do not use WSDL and SOAP. What could be reasons for this?
+
+## SOAP and WSDL use XML, would it be better if they would use something more 
+## modern like JSON?
+
+## How did you handle errors and how should it be done? Imagine that your 
+
+## application is running on a production server.
