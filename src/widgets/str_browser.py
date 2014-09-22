@@ -85,6 +85,7 @@ class StrBrowser(QWidget):
         :param str_list: a list that contains str objects
         """
         self.ui.listWidget.clear()
+        self._str_2_item.clear()
         for string in str_list:
             self._add_a_str(string)
 

@@ -14,11 +14,12 @@ class KeyPressEater(QObject):
     intercepts key sequence (QKeySequence) that was given to it on
     intialization.
 
-    This is heavily taken from qt documentation:
-    http://qt-project.org/doc/qt-4.8/qobject.html#installEventFilter
-    and
-    http://codeprogress.com/python/libraries/pyqt/showPyQTExample.php?key=QApplicationInstallEventFiler&index=379
-    was also studied.
+    This is heavily taken from `qt documentation`_ and `codeprogress.com`_ was
+    also looked into.
+
+    .. _qt documentation: http://qt-project.org/doc/qt-4.8/qobject.html#installEventFilter
+    .. _codeprogress.com: http://codeprogress.com/python/libraries/pyqt/showPyQTExample.php?key=QApplicationInstallEventFiler&index=379
+
 
     :param: sequence, a QKeySequence object containing the key combination(s)
         to filter.
