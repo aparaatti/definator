@@ -36,11 +36,11 @@ based on a short test and it should also run in a Mac.
 
 On the development machine Definator uses PyQt 5.3.2, Qt 5.3.2 and Python 3.4.1.
 It would be nice to hear how it runs in other environments. PyQt5 and Qt5 bundle
-can be downloaded for example from here: [PyQt5 binaries ](http://www.riverbankcomputing.co.uk/software/pyqt/download5 "download PyQt 5"), which should be fairly easy to
+can be downloaded for example from here: [Download PyQt5](http://www.riverbankcomputing.co.uk/software/pyqt/download5 "PyQt 5 binarieds"), which should be fairly easy to
 install. On windows python 3 needs to be also installed, before it can run the
 application.
 
-The application can be run by starting definator.py in the root of the project.
+The application can be run by starting definator.py located at the root of the project.
 
 ## Mailing list
 
