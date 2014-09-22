@@ -11,7 +11,6 @@ class Links(object):
     """
     Handles linked terms and files.
     """
-    # TODO: Re factor TermLinks as a subclass of description class
     # TODO: Re factor all path changes through path property, now
     #       path gets set on load and save
     def __init__(self):
@@ -73,7 +72,7 @@ class Links(object):
     def _delete_removed_files(self, description_images: list()):
         """
         We delete the files, that are marked for deletion, are not in
-        term_files anymore and are in TERM FOLDER.
+        term_files anymore and are in **term folder**.
         """
         term_folder_files = set()
         [term_folder_files.add(path.name) for path in self._path.iterdir()]
@@ -142,6 +141,7 @@ class Links(object):
             return self._link_file(path)
 
     def delete(self):
+<<<<<<< HEAD
         # TODO delete attached files
         os.remove(str(self._path / "links.json"))
 
@@ -199,7 +199,6 @@ class Links(object):
     @property
     def path(self):
         return self._path
-
 
 def _remove_file(file_path: Path):
     logging.debug('Removing file: ' + str(file_path) + '!')

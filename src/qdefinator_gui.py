@@ -21,7 +21,7 @@ from .terms_controller import TermsController
 
 __author__ = "Niko Humalamäki"
 __ver__ = "0.02"
-__date__ = "21.9.2014"
+__date__ = "22.9.2014"
 
 
 class MainWindow(QMainWindow):
@@ -72,7 +72,6 @@ class MainWindow(QMainWindow):
         loads a project.
         """
         logging.debug("Initializing project from: " + str(project_path))
-
         try:
             list_of_terms = self.terms_controller.load_project(project_path)
         except FileNotFoundError:

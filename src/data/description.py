@@ -34,6 +34,7 @@ class Description(object):
         save_json(path / "description.json", self, DescriptionEncoder())
 
     def delete(self):
+        # TODO remove files too.
         os.remove(str(self._path / "description.json"))
 
     @property
@@ -69,7 +70,7 @@ class Description(object):
 
     @property
     def content_text(self):
-        logging.debug("-----------------GETTING DESCRIPTION TEXT-------------")
+        logging.debug("  -----------------GETTING DESCRIPTION TEXT-------------")
         content_text_list = list()
 
         for item in self._content:
@@ -95,20 +96,22 @@ class Description(object):
         Text chunk that stars with "##LIST##" and ends in "##END##" is a
         BulletList.
 
-        Text that start with "##ASCII##" and ends in "##ASCII##" is an ASCII
+        Text that start with "##ASCII##" and ends in "##END##" is an ASCII
         art field.
 
-        Text that starts isn't BulletList or ASCII and starts with a "##" and
-        ends in "##" is a Title.
+        Text that isn't a BulletList or ASCII and starts with "##" and
+        ends in a "##" is a Title.
 
-        Text inside chunk that starts with '#img(' and ends with ')' is an
-        AttachedImage. Between image tags is path to image and optionally a
-        title for image '"/path/to/image","Image title"'. If title is not
-        given, the file name stem is used as reference in paragraph.
+        Text inside chunk that starts with '#img(' and ends with ')' is
+        potentially an AttachedImage. Between image tags is path to image and
+        optionally a title for image '"/path/to/image","Image title"'. If title
+        is not given, the file name stem is used as reference in paragraph.
+
+        Text that dosen't start and with a known tags is a Paragraph.
 
         :param text: Str containing text annotated with tags.
         """
-        logging.debug("----------------SETTING DESCRIPTION TEXT--------------")
+        logging.debug("  --------------SETTING DESCRIPTION TEXT--------------")
         self._content.clear()
         self._attached_images.clear()
         split_text = list()
@@ -132,7 +135,7 @@ class Description(object):
         """
         This parses tags that are inside the text (paragraphs) ie
         AttachedImages. Only the first occurrence is appended before
-        the paragraph it is first met.
+        in to the content list.
         """
         for ip in AttachedImage.parse_imgs_from_str(text, self._path):
             if not self._attached_images.get(str(ip.path.name)):
@@ -156,10 +159,11 @@ class DescriptionEncoder(json.JSONEncoder):
     """ Encodes a Description object to JSON eg. saves Description self.content
     str attributes as JSON array
 
-    Only Paragraphs and Titles are saved, since images can be parsed from
-    Paragraphs.
-
+    Only Paragraphs and Titles are saved, since in text objects can be parsed
+    from Paragraphs.
     """
+    # TODO It may make sense to parse all the objects already, tough the tags
+    # still need to be parsed from paragraph to make use of the content.
     def default(self, obj):
         if isinstance(obj, Description):
             str_list = list()

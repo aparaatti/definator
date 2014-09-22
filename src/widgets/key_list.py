@@ -186,11 +186,3 @@ class KeyList(QWidget):
         logging.debug("Width: " + str(self.ui.tableWidget_2.width()))
         super().resizeEvent(event)
 
-if __name__ == '__main__':
-    import PyQt5
-    import sys
-    app = PyQt5.QtWidgets.QApplication(sys.argv)
-
-    w = KeyList()
-    w.show()
-    app.exec_()

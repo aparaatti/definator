@@ -113,7 +113,6 @@ class MainWidget(QWidget):
         :param term: term to show, a Term object
         """
         logging.debug("INITIALIZING A PROJECT")
-        self.term_editor.clear()
         self.term_str_browser.set_list(list(terms))
         self._set_current_term(term)
         self.show_term_display()
@@ -194,6 +193,8 @@ class MainWidget(QWidget):
         """
         This slot passes the opening of a file to desktop environment. If
         currentterm doesn't have the current file a warning dialog is raised.
+
+        :parameter: file_name: str
         """
         logging.debug("File name @ os open: " + file_name)
         try:

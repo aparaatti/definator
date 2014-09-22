@@ -27,8 +27,6 @@
 # RE FACTOR:
 #   -TermDisplay to HtmlDisplay
 #
-# FIX: When project is opened, sometimes the first shown term gets updated with
-#   the term shown before open. Propably this happened from display mode
 import sys
 import os
 import logging
@@ -51,7 +49,7 @@ if aparser.parse_args().log:
     log_file.truncate()
     log_file.close()
     logging.basicConfig(
-        filename='definator.log', level=logging.DEBUG, format=FORMAT,
+        filename='definator.log', level=logging.INFO, format=FORMAT,
         datefmt='%y.%m.%d %I:%M:%S')
 else:
     logging.disable(logging.INFO)

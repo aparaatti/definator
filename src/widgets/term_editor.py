@@ -194,10 +194,10 @@ class TermEditor(QWidget):
         text = self.ui.textEditContent.toPlainText()
         white_space_removed = list()
 
-        [white_space_removed.append(line.rstrip())
-            for line in text.splitlines()]
-        term.description = os.linesep.join(white_space_removed)
+        for line in text.splitlines():
+            white_space_removed.append(line.rstrip())
 
+        term.description = os.linesep.join(white_space_removed)
         return term
 
     def _trigger_event(self, sequence: QKeySequence):

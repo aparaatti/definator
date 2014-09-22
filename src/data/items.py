@@ -7,10 +7,10 @@ from pathlib import Path
 
 class AttachedImage(object):
     """
-    This class represents and image tag. It provides method
-    parse_imgs_from_str to parse image tags from text. After running
-    a text through that method the AttachedImage class variable
+    This class represents an image tag. It provides method
+    parse_imgs_from_str to parse image tags from text.
     """
+
     _img_tag_pattern = re.compile('#img\([^)]*\)')
     _match_attribute = re.compile('"[^"]*"')
 
@@ -31,14 +31,13 @@ class AttachedImage(object):
                                 " no file specified.")
         return attached_images
 
-    def _parse(self, string: str):
         """
         Initializes the object from a string of form
         #img("path/string"[,"image title text"])
 
         :param string: string representation of object
-        :param parent_path: Path object, if only a file name is given this
-                            path is appended to filepath
+        :param parent_path: Path object, if only a file name is parsed from the
+            string this path is appended to filepath
         """
         matches = self._match_attribute.findall(string)
         logging.debug("matches: " + str(matches) + " len:" + str(len(matches)))
@@ -50,9 +49,6 @@ class AttachedImage(object):
         if len(self._path.parts) == 0:
             raise ValueError("Could not parse filename for image '" +
                              self._path.name + "'.")
-
-        if set(self._path.parents) == set(self._parent_path.parents):
-            self._path = self._path.name
 
         if len(matches) > 1:
             self._title = matches[1].strip('"')
