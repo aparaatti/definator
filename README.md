@@ -13,11 +13,11 @@ concepts, form a picture of their relations and to attach related data to it.
 A help project comes with the application, which can be opened from Help -->
 Open help menu.
 
-## Current status
+## Current release
 
-In current release (git tag v0.02) the application is functional, but very
-little tested. Probably there are bugs and also there are ideas not yet
-implemented.
+In current release ([download](https://dl.dropboxusercontent.com/u/15617513/definator-releases/definator-v0.02.zip))
+(git tag v0.02) the application is functional, but very little tested. Probably 
+there are bugs and also there are ideas not yet implemented.
 
 ## Screen shots
 
