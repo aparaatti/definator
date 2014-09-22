@@ -31,6 +31,7 @@ class AttachedImage(object):
                                 " no file specified.")
         return attached_images
 
+    def _parse(self, string):
         """
         Initializes the object from a string of form
         #img("path/string"[,"image title text"])
@@ -213,7 +214,7 @@ class BulletList(object):
         return False
 
     def __init__(self, str_list: list, escaped: bool=False):
-        escape = list()
+        escaped = list()
         if escaped:
             self._items = str_list
             self._un_escaped_items = list()

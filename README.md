@@ -1,11 +1,11 @@
 
 # Definator
 
-## What definator is
+## What Definator is
 
-Definator is a prog to write up terms, cross referencing them and writing
+Definator is a program to write up terms, cross referencing them and writing
 up a structured descriptions for them and to link files to them. It is
-supposed to be useful for example in a lecture or other vice to cather
+supposed to be useful for example in a lecture or other vice to gather
 concepts, form a picture of their relations and to attach related data to it.
 
 ## How to use it
@@ -19,11 +19,11 @@ In current release (git tag v0.02) the application is functional, but very
 little tested. Probably there are bugs and also there are ideas not yet
 implemented.
 
-## Screenshots
+## Screen shots
 
 Here is one shot of view mode:
 
-![A screen shot of view mode.](help-project/1. Startup/linked-terms-and-files-kf5.png "Viewing a term")
+![A screen shot of view mode.](help-project/2. View term/linked-terms-and-files-kf5.png "Viewing a term")
 
 and another one from edit mode:
 
@@ -31,15 +31,16 @@ and another one from edit mode:
 
 ## Operation systems and dependencies
 
-Definator is developed on linux and thus works best in it. It runs on windows
+Definator is developed on Linux and thus works best in it. It runs on windows
 based on a short test and it should also run in a Mac.
 
-On the development machine definator uses PyQt 5.3.2, Qt 5.3.2 and Python 3.4.1.
+On the development machine Definator uses PyQt 5.3.2, Qt 5.3.2 and Python 3.4.1.
 It would be nice to hear how it runs in other environments. PyQt5 and Qt5 bundle
-can be downloaded for example from here: [an example](http://www.riverbankcomputing.co.uk/software/pyqt/download5 "download PyQt 5"), which should be fairly easy to
-install. On windows python 3 needs to be also installed, before it can run the app.
+can be downloaded for example from here: [PyQt5 binaries ](http://www.riverbankcomputing.co.uk/software/pyqt/download5 "download PyQt 5"), which should be fairly easy to
+install. On windows python 3 needs to be also installed, before it can run the
+application.
 
-The app can be run by starting definator.py in the root of the project.
+The application can be run by starting definator.py in the root of the project.
 
 ## Mailing list
 
@@ -52,9 +53,9 @@ is in line with the [Qt 5](http://qt-project.org/doc/qt-5/licensing.html) and [P
 
 ## Context
 
-The app is developed as a part of
+The application is developed as a part of
 [graphical UI programming course TIEA212](http://appro.mit.jyu.fi/gko/) (2014)
 at the University of Jyväskylä. It is also developed to scratch an itch to have
 this kind of a tool at hand, to learn python, to learn qt and for fun.
 
-Creator Niko Humalamäki (nikohuma at gmail.com).
+Author Niko Humalamäki (nikohuma at gmail.com).
