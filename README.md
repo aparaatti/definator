@@ -1,25 +1,49 @@
 
 # Definator
 
-## Plan and description
+## What definator is
 
-With **Definator** you will be able to quickly save terms and write up
-definition for them. It will support cross-referencing the terms and also attachment
-of files to a term. It is a plan to save the data in such a form, that a definition project can be
-browsed in a web browser. It is will use
-[PyQt 5](http://www.riverbankcomputing.co.uk/software/pyqt/intro)
-and
-[Qt 5](http://qt-project.org/qt5).
-The definition area is planned to be implemented using
-[Qt WebKit](http://qt-project.org/doc/qt-5/qtwebkit-index.html)
-module.  App is developed on linux and as such it should be simplest to run on linux. Binaries for different operation
-systems could be achieved by using
-[pyqtdeploy](http://www.riverbankcomputing.com/software/pyqtdeploy/),
-which will be looked into at some point.
+Definator is a prog to write up terms, cross referencing them and writing
+up a structured descriptions for them and to link files to them. It is
+supposed to be useful for example in a lecture or other vice to cather
+concepts, form a picture of their relations and to attach related data to it.
 
-##Planning
+## How to use it
 
-[Pencil](http://pencil.evolus.vn/) mocup for "main" -window [here](https://github.com/aparaatti/definator/tree/master/mockups/main window.png). For PlantUml class diagrams click [here](https://github.com/aparaatti/definator/tree/master/models).
+A help project comes with the application, which can be opened from Help -->
+Open help menu.
+
+## Current status
+
+In current release (git tag v0.02) the application is functional, but very
+little tested. Probably there are bugs and also there are ideas not yet
+implemented.
+
+## Screenshots
+
+Here is one shot of view mode:
+
+![A screen shot of view mode.](help-project/1. Startup/linked-terms-and-files-kf5.png "Viewing a term")
+
+and another one from edit mode:
+
+![A screen shot of edit mode.](help-project/1. Startup/editing-with-links-and-files-kf5.png "Editing a term").
+
+## Operation systems and dependencies
+
+Definator is developed on linux and thus works best in it. It runs on windows
+based on a short test and it should also run in a Mac.
+
+On the development machine definator uses PyQt 5.3.2, Qt 5.3.2 and Python 3.4.1.
+It would be nice to hear how it runs in other environments. PyQt5 and Qt5 bundle
+can be downloaded for example from here: [an example](http://www.riverbankcomputing.co.uk/software/pyqt/download5 "download PyQt 5"), which should be fairly easy to
+install. On windows python 3 needs to be also installed, before it can run the app.
+
+The app can be run by starting definator.py in the root of the project.
+
+## Mailing list
+
+A mailing list will be set up for informing about developments.
 
 ## Licensing
 

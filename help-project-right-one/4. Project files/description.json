@@ -1,8 +1,0 @@
-[
-  "Paragraph:Project file structure is as follows:", 
-  "ASCII:[project_name]\n    |--terms.json\n    |\n    |\n    |---[term1_name]\n    |      |--description.json\n    |      |--links.json\n    |      |--file1.ext\n    |      `--file2.jpg\n    |\n    |\n    |---[term2_name]\n    |      |--description.json\n    |      |--links.json\n    |      `--file1\n   ...\n    |\n    `---[termN_name]\n           |--description.json\n           |--links.json\n           |--file1.jpg\n          ...\n           `--fileN.xyz", 
-  "Paragraph:In the diagram [xxx] is a folder and non bracket words are files. The file \"description.json\" contains the description of the term e.g. this text and various tags in it. \"links.json\" contains all the linked terms and files for the term. The files are actually read on load from the term folder, but they are also mapped to \"links.json\".", 
-  "Paragraph:", 
-  "Title:Saving", 
-  "Paragraph:When the project is saved, all the changed terms are saved, removed files are DELETED and all the newely linked files ARE MOVED to corresponding TERM FOLDERS. Purpose of this is to cather all the information in the same place."
-]

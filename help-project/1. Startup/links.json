@@ -1,1 +1,10 @@
-{"images": ["term-editing-with-links-and-files.png", "sh-startup.png", "editing-with-links-and-files.png", "startup.png"], "files": [], "terms": ["2. View term"]}
+{
+  "terms": [
+    "2. View term"
+  ], 
+  "files": [], 
+  "images": [
+    "editing-with-links-and-files-kf5.png", 
+    "startup-kf5.png"
+  ]
+}

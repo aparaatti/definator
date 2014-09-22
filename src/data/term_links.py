@@ -141,7 +141,6 @@ class Links(object):
             return self._link_file(path)
 
     def delete(self):
-<<<<<<< HEAD
         # TODO delete attached files
         os.remove(str(self._path / "links.json"))
 
@@ -199,6 +198,7 @@ class Links(object):
     @property
     def path(self):
         return self._path
+
 
 def _remove_file(file_path: Path):
     logging.debug('Removing file: ' + str(file_path) + '!')
