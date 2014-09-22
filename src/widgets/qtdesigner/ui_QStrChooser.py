@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'QStrChooser.ui'
 #
-# Created: Thu Sep 18 09:31:32 2014
+# Created: Mon Sep 22 02:50:25 2014
 #      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -33,6 +33,11 @@ class Ui_QStrChooser(object):
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.label = QtWidgets.QLabel(self.widget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
+        self.label.setSizePolicy(sizePolicy)
         self.label.setObjectName("label")
         self.verticalLayout_2.addWidget(self.label)
         self.lineEdit = QtWidgets.QLineEdit(self.widget)

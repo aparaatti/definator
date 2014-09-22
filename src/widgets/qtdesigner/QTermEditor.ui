@@ -7,8 +7,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>251</width>
-    <height>181</height>
+    <width>315</width>
+    <height>188</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -89,17 +89,24 @@
       </item>
       <item>
        <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="4">
+         <widget class="QToolButton" name="addBulletListToolButton">
+          <property name="text">
+           <string>&amp;bullet list</string>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="2">
          <widget class="QToolButton" name="addTitleToolButton">
           <property name="text">
-           <string>tit&amp;le</string>
+           <string>t&amp;itle</string>
           </property>
           <property name="arrowType">
            <enum>Qt::NoArrow</enum>
           </property>
          </widget>
         </item>
-        <item row="0" column="4">
+        <item row="0" column="6">
          <spacer name="horizontalSpacer">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -115,7 +122,7 @@
         <item row="0" column="3">
          <widget class="QToolButton" name="addImageToolButton">
           <property name="text">
-           <string>image</string>
+           <string>i&amp;mage</string>
           </property>
          </widget>
         </item>
@@ -123,6 +130,13 @@
          <widget class="QLabel" name="addTagLabel">
           <property name="text">
            <string>Add a tag:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="5">
+         <widget class="QToolButton" name="addASCIIToolButton">
+          <property name="text">
+           <string>AS&amp;CII</string>
           </property>
          </widget>
         </item>

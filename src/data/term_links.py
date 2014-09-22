@@ -11,11 +11,15 @@ class Links(object):
     """
     Handles linked terms and files.
     """
-
-    def __init__(self, links: list=[]):
+    # TODO: Re factor TermLinks as a subclass of description class
+    # TODO: Re factor all path changes through path property, now
+    #       path gets set on load and save
+    def __init__(self):
         self._linked_terms = []
         self._linked_files = dict()
         self._linked_images = dict()
+        self._to_delete = list()
+        self._path = None
 
     def __str__(self):
         return "linked terms: " + str(self._linked_terms) + os.linesep \
@@ -27,82 +31,119 @@ class Links(object):
             self._linked_terms.append(term_str)
 
     def _link_image(self, path):
-        if issubclass(type(path), Path) and path not in self._linked_images.values():
-            self._linked_images[path.name] = path
-            return True
+        if issubclass(type(path), Path) and\
+           path not in self._linked_images.values():
+                self._linked_images[path.name] = path
+                return True
         else:
             return False
 
     def _link_file(self, path):
-        if issubclass(type(path), Path) and path not in self._linked_files.values():
-            self._linked_files[path.name] = path
-            return True
+        if issubclass(type(path), Path) and\
+           path not in self._linked_files.values():
+                self._linked_files[path.name] = path
+                return True
         else:
             return False
 
     def unlink_term(self, term_str):
         self._linked_terms.remove(term_str)
 
-    def unlink_image(self, path: Path):
-        if self._linked_images.pop(path.name):
-            return True
-        return False
-
     def unlink_file(self, path: Path):
-        if self._linked_files.pop(path.name):
+        if self._linked_files.get(path.name):
+            self._to_delete.append(self._linked_files.pop(path.name))
             return True
-        return False
+        elif self._linked_images.get(path.name):
+            self._to_delete.append(self._linked_images.pop(path.name))
+            return True
+        raise FileNotFoundError("Coudn't remove file from term: " + path.name)
 
-    def save(self, path: Path, added_images: list()):
-        self._save_files_to_term_path(path, added_images)
+    def save(self, path: Path, description_images: list()):
+        """
+        This saves linked files and deletes unlinked files from the parent
+        term. Term object passes description_images list from the description
+        object, because links handler doesn't nesesscarily have information of
+        all shown images.
+        """
+        self._path = path
+        self._delete_removed_files(description_images)
+        self._save_files_to_term_path(description_images)
         save_json(path / "links.json", self, LinksEncoder())
 
-    def _save_files_to_term_path(self, path: Path, added_images):
+    def _delete_removed_files(self, description_images: list()):
         """
-        Saving of external files happens because their path is different than "". It also
-        means that, one  can't add stuff from root folder (maybe).
+        We delete the files, that are marked for deletion, are not in
+        term_files anymore and are in TERM FOLDER.
+        """
+        term_folder_files = set()
+        [term_folder_files.add(path.name) for path in self._path.iterdir()]
 
-        The files that are in external paths are copied to term folder, from which they
-        are read on load.
+        term_files = set()
+        [term_files.add(f.name) for f in self._linked_files.values()]
+        [term_files.add(f.name) for f in self._linked_images.values()]
+        [term_files.add(f.name) for f in description_images]
+
+        logging.debug("Files in term before save/delete: " + str(term_files))
+
+        for path in self._to_delete:
+            if path.name not in term_files and\
+               path.name in term_folder_files:
+                    _remove_file(self._path / path.name)
+
+    def _save_files_to_term_path(self, description_images: list):
+        """
+        Saving of external files happens because their path is different than
+        "". It also means that, one  can't add stuff from root folder (maybe).
+
+        The files that are in external paths are copied to term folder, from
+        which they are read on load.
 
         :param path:
         :param added_images:
         :return:
         """
+        term_folder_files = set()
+        [term_folder_files.add(path.name) for path in self._path.iterdir()]
+
         for file_path in self._linked_files.values():
-            if len(file_path.parent.parts) > 0:
-                self._copy_file_to(file_path, path)
+            if file_path.name not in term_folder_files:
+                _copy_file_to(file_path, self._path)
                 self._linked_files[file_path.name] = Path(file_path.name)
 
-        for img_path in added_images:
-            if len(img_path.parent.parts) > 0:
-                self._copy_file_to(img_path, Path(path))
+        for img_path in description_images:
+            if img_path.name not in term_folder_files:
+                _copy_file_to(img_path, Path(self._path))
                 self._linked_images[img_path.name] = Path(img_path.name)
 
-    def _copy_file_to(self, src: Path, target: Path):
-        shutil.copy2(str(src), str(target / src.name))
-
     def load(self, path: Path):
-        dictionary = load_json(path / "links.json", LinksDecoder())
+        self._path = path
+        dictionary = load_json(self._path / "links.json", LinksDecoder())
         if type(dictionary) is dict:
             self._linked_terms = dictionary.get("terms")
 
-        if path.is_dir():
-            for files in path.iterdir():
-                if files.is_file and files.name not in ["links.json", "description.json"]:
-                    self.link_file_on_mime(files)
+        if self._path.is_dir():
+            for file in self._path.iterdir():
+                if file.is_file and file.name not in ["links.json",
+                                                      "description.json"]:
+                    self.link_file_on_mime(Path(file.name))
 
-        logging.debug("links after load: " + str(self.linked_images) + " " + str(self.linked_files) + " " + str(self.linked_terms))
+        logging.debug("links after load: " + str(self.linked_images) + " "
+                      + str(self.linked_files) + " " + str(self.linked_terms))
 
     def link_file_on_mime(self, path: Path):
+        """
+        This links file paths based on its extension. If it is an image
+        it is added to image list, otherwise it is added to file list.
+        """
         type_tuple = mimetypes.guess_type(str(path))
         if type_tuple[0] is not None and type_tuple[0].startswith('image'):
             return self._link_image(path)
         else:
             return self._link_file(path)
 
-    def delete(self, path: Path):
-        os.remove(str(path / "links.json"))
+    def delete(self):
+        # TODO delete attached files
+        os.remove(str(self._path / "links.json"))
 
     @property
     def linked_terms(self):
@@ -117,14 +158,58 @@ class Links(object):
         return list(self._linked_files.values())
 
     def get_file_path(self, file_name: str):
+        """
+        This returns always the absolute path for the file. It relays on
+        self._path being set, which is the case when project is loaded.
+        Only when project is loaded there are files without a path
+        e.g. files located in the term folder.
+        """
+        fn = self._linked_files.get(file_name)
+        if fn:
+            # if the file is in project folder we add project path:
+            if len(fn.parents) == 1:
+                fn = self._path / fn
+            return fn
+
+        fi = self._linked_images.get(file_name)
+        if fi:
+            # if the image is in project folder we add project path:
+            if len(fi.parents) == 1:
+                fi = self._path / fi
+            return fi
+
+        raise FileNotFoundError
+
+    def get_non_project_file_path(self, file_name: str):
+        """
+        This returns the file path for given file_name if it's different
+        than current project path. When file is in project path, only the
+        name of the file is returned.
+        """
         fn = self._linked_files.get(file_name)
         if fn:
             return fn
+
         fi = self._linked_images.get(file_name)
         if fi:
             return fi
 
         raise FileNotFoundError
+
+    @property
+    def path(self):
+        return self._path
+
+
+def _remove_file(file_path: Path):
+    logging.debug('Removing file: ' + str(file_path) + '!')
+    os.remove(str(file_path))
+
+
+def _copy_file_to(src: Path, target: Path):
+    logging.debug('Copying file "' + str(src) + '" to term folder "'
+                  + str(target / src.name))
+    shutil.copy2(str(src), str(target / src.name))
 
 
 class LinksEncoder(json.JSONEncoder):

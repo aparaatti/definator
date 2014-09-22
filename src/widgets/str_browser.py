@@ -14,13 +14,22 @@ from .key_press_eater import KeyPressEater
 class StrBrowser(QWidget):
 
     """
-    This module can show a list of strings sorted alphabetically in increasing order, add and remove strings from
-    the shown list, mark strings in it and filter shown strings based on a string entered in an input field shown above
-    the list view.
+    This module can show a list of strings sorted alphabetically in increasing
+    order, add and remove strings from the shown list, mark strings in it and
+    filter shown strings based on a string entered in an input field shown
+    above the list view.
 
-    Module sends signal_undo_event or signal_redo_event when standard undo or redo key combination is
-    pressed while string list view or filter input text field is focused.
+    Module sends **signal_undo_event()** or **signal_redo_event()** when
+    standard undo or redo key combination is pressed while string list view or
+    filter input text field is focused.
 
+    Module sends **str_selected(str)** -signal, when an item is activated from
+    the list (double clicked or selected with keyboard).
+
+    Signal **list_is_empty()** is sent, when the list is empty.
+
+    :param: title, str the title of the widget, shown on surrounding group box.
+    :param: parent, parent QObject of this QObject.
     """
     str_selected = pyqtSignal(str)
     list_is_empty = pyqtSignal()
@@ -29,7 +38,7 @@ class StrBrowser(QWidget):
     signal_redo_event = pyqtSignal()
 
     def __init__(self, title: str="Str Browser", parent=None):
-        #Load QWidget
+        # Load QWidget
         super(StrBrowser, self).__init__(parent)
         self._selected_str = ""
         self._mark_color = ["White", "Black"]
@@ -38,16 +47,16 @@ class StrBrowser(QWidget):
         self._str_2_item = {}
         self.ui = Ui_QStrBrowser()
 
-        #Setup widgets from Ui_QStrBrowser (qtdesigner made ui):
+        # Setup widgets from Ui_QStrBrowser (qtdesigner made ui):
         self.ui.setupUi(self)
         self.ui.str_box.setTitle(title)
 
-        #Signals and slots:
+        # Signals and slots:
         self.ui.listWidget.itemActivated.connect(self._str_selected)
         self.ui.listWidget.setSortingEnabled(True)
         self.ui.lineEdit.textChanged.connect(self._filter)
 
-        #Hook into undo/redo of term_editor
+        # Hook into undo/redo of term_editor
         self.eventFilter = KeyPressEater(QKeySequence.Undo, self)
         self.eventFilter2 = KeyPressEater(QKeySequence.Redo, self)
         self.ui.listWidget.installEventFilter(self.eventFilter)
@@ -57,12 +66,14 @@ class StrBrowser(QWidget):
 
     @pyqtSlot(str)
     def _filter(self, string):
+        filtered_list = list()
         if string == "":
             self.set_list(list(self._str_2_item.keys()))
         else:
-            filtered_list = [filtered_string for filtered_string
-                             in self._str_2_item.keys()
-                             if filtered_string.lower().startswith(string.lower())]
+            for filtered_string in self._str_2_item.keys():
+                if filtered_string.lower().startswith(string.lower()):
+                    filtered_list.append(filtered_string)
+
             self.ui.listWidget.clear()
             for string in filtered_list:
                 self._add_a_str(string)
@@ -138,13 +149,14 @@ class StrBrowser(QWidget):
 
     def rem_a_str(self, string: str):
         """
-        This method removes a string from the shown list. The currently selected string is
-        set to the first string in the shown list.
+        This method removes a string from the shown list. The currently
+        selected string is set to the first string in the shown list.
 
         :param string: string to remove
         """
         self.ui.listWidget.takeItem(
-            self.ui.listWidget.indexFromItem(self._str_2_item.pop(string)).row())
+            self.ui.listWidget.indexFromItem(
+                self._str_2_item.pop(string)).row())
         if self.ui.listWidget.count() > 0:
             self.ui.listWidget.setCurrentRow(0)
         self._str_selected()
@@ -173,8 +185,8 @@ class StrBrowser(QWidget):
         This property sets the color of the marked strings in the list.
 
         :param str_colors: list that has the foreground color in cell [0] and
-            background color in [1]. Possible colors are the ones that QColor object
-            can take http://qt-project.org/doc/qt-5/QColor.html
+            background color in [1]. Possible colors are the ones that QColor
+            object can take http://qt-project.org/doc/qt-5/QColor.html
         """
         if len(str_colors) < 2:
             return

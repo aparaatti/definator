@@ -24,7 +24,8 @@ class TermsController(object):
     >>> tc.add_term(Term("New"))
     True
     >>> newTerm = tc.get_term("New")
-    >>> term_list = tc.load_project(Path("/home/aparaatti/Code/Python/definator/test-project"))
+    >>> term_list = tc.load_project(Path(
+        "/home/aparaatti/Code/Python/definator/test-project"))
     >>> "html5" in term_list
     True
     >>> "koira" in term_list
@@ -44,10 +45,14 @@ class TermsController(object):
         self._lazy_load_term(term_str)
         return deepcopy(self._terms[term_str])
 
+    @property
+    def count(self):
+        return len(self._terms_list)
+
     def remove_term(self, term_str):
         """
-        Removes a term given as a string by moving it to deleted terms. The term
-        disappears when the project is saved.
+        Removes a term given as a string by moving it to deleted terms. The
+        term is deleted from fs when the project is saved.
 
         :param term_str: term to remove as a str
         """
@@ -59,7 +64,8 @@ class TermsController(object):
 
         term_to_be_deleted = self._terms.pop(term_str)
         self._deleted_terms[term_str].append(term_to_be_deleted)
-        self._unlink_terms(term_to_be_deleted, term_to_be_deleted.related_terms)
+        self._unlink_terms(
+            term_to_be_deleted, term_to_be_deleted.related_terms)
         self._terms_list.remove(term_str)
         return True
 
@@ -77,7 +83,7 @@ class TermsController(object):
             self._terms_list.append(term.term)
             return True
         else:
-            #Term already exists
+            # Term already exists
             return False
 
     def update_term(self, term: Term, skip_name_change_test: bool=False):
@@ -88,34 +94,36 @@ class TermsController(object):
         attribute.
 
         :param term: updated Term object
+        :param skip_name_change_test: True/False whether the name change should
+                be checked.
         :return bool: Returns True if the name of the term has changed.
         """
         if not skip_name_change_test:
             previous_term_str = term.previous_term.term
 
-            #If term has next term the previous name for term
-            #is the next term so we change the next term to previous
-            #term
-            if term.next_term and term.next_term.next_term_str:
-                previous_term_str = term.next_term.next_term_str
-                term.previous_term = term.next_term
-
             if term.term not in self._terms_list:
-                #We add the term that has changed it's term string as a new Term
-                #objet.
+                # We add the term that has changed it's term string as a new
+                # Term objet.
                 self.add_term(term)
-                #And remove the old version if it had one.
-                if previous_term_str != term.term:
-                    #We remove the old term str from terms_list
+
+                # And remove the old version.
+                if previous_term_str in self._terms_list:
                     self._terms_list.remove(previous_term_str)
+                else:
+                    raise RuntimeError(
+                        "Changing a name of a term that doesn't exist!")
 
-                    #The original unchanged Term object is removed from self._terms
-                    #dictionary and added to a list in delete dictionary:
-                    self._deleted_terms[previous_term_str] = self._terms.pop(previous_term_str)
-                    self._unlink_terms(term.previous_term, term.previous_term.related_terms)
-                    self._link_terms(term, term.related_terms)
-                    return True
+                # The original unchanged Term object is removed from
+                # self._terms  dictionary and added to a list in delete
+                # dictionary:
+                self._deleted_terms[previous_term_str] = self._terms.pop(
+                    previous_term_str)
+                self._unlink_terms(
+                    term.previous_term, term.previous_term.related_terms)
+                self._link_terms(term, term.related_terms)
+                return True
 
+        # term is added to changed terms, to be saved later.
         self._changed_terms[term.term] = term
         self._terms[term.term] = term
         return False
@@ -177,8 +185,8 @@ class TermsController(object):
         """
         path = self._project_path
         if path.exists() and path is not Path(''):
-            for term_list in self._deleted_terms.values():
-                term_list[0].delete(path)
+            for deleted_term in self._deleted_terms.values():
+                deteted_term.delete(path)
             for changed_term in self._changed_terms.keys():
                 self.get_term(changed_term).save(path)
 
@@ -206,6 +214,12 @@ class TermsController(object):
         else:
             logging.debug("Could not save to: " + str(path))
             raise Exception
+
+    def clear(self):
+        self._changed_terms = {}
+        self._deleted_terms = {}
+        self._terms = {}
+        self._terms_list = []
 
     def _save_terms(self):
         """

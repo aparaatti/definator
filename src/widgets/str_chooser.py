@@ -11,8 +11,11 @@ from .qtdesigner.ui_QStrChooser import Ui_QStrChooser
 
 class StrChooser(QDialog):
     """
-    This dialog shows a list of strings. Can filter them and select multiple of them.
-    On accept dialog emits str_list_accept signal containing list of selected strings.
+    This dialog shows a list of strings. Can filter them and select multiple of
+    them. On accept dialog emits **str_list_accept signal(list)** containing
+    list of selected strings.
+
+    :param: parent, parent QObject of this QObject.
     """
     str_list_accepted = pyqtSignal(list)
 
@@ -22,7 +25,8 @@ class StrChooser(QDialog):
         self._str_2_item = dict()
         self.ui.setupUi(self)
 
-        buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttonBox = QDialogButtonBox(QDialogButtonBox.Ok |
+                                     QDialogButtonBox.Cancel)
         buttonBox.accepted.connect(self.accept)
         buttonBox.rejected.connect(self.reject)
 
@@ -33,9 +37,9 @@ class StrChooser(QDialog):
     @pyqtSlot(str)
     def _filter(self, string):
         """
-        Filtering. This is triggered when filter lineEdit field's content changes.
-        The content of the field is received as a parameter and a new filtered list
-        is set to be displayed based on received string.
+        Filtering. This is triggered when filter lineEdit field's content
+        changes. The content of the field is received as a parameter and a new
+        filtered list is set to be displayed based on received string.
 
         :param string: String from signal bind to the this slot
         """
@@ -51,8 +55,8 @@ class StrChooser(QDialog):
 
     def set_title(self, string: str):
         """
-        This set's the title for the dialog. It also set label for on top of dialog with the
-        same text.
+        This set's the title for the dialog. It also set label for on top of
+        dialog with the same text.
 
         :param string: tilte text as a string
         """
@@ -99,9 +103,9 @@ class StrChooser(QDialog):
 
     def accept(self):
         """
-        Hooks in to the super classes accept method and sends a
-        str_list_accepted signal containing list of selected strings
-        on the list widget on accept.
+        Hooks in to the super class accept method and sends a
+        **str_list_accepted** signal containing selected strings as a list
+        from the list widget on accept.
 
         :return: list of strings
         """

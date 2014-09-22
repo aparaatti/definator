@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'QTermEditor.ui'
 #
-# Created: Thu Sep 18 09:31:32 2014
+# Created: Mon Sep 22 02:50:26 2014
 #      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_TermEditor(object):
     def setupUi(self, TermEditor):
         TermEditor.setObjectName("TermEditor")
-        TermEditor.resize(251, 181)
+        TermEditor.resize(315, 188)
         TermEditor.setAutoFillBackground(False)
         self.verticalLayout = QtWidgets.QVBoxLayout(TermEditor)
         self.verticalLayout.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)
@@ -49,18 +49,24 @@ class Ui_TermEditor(object):
         self.verticalLayout_2.addWidget(self.textEditContent)
         self.gridLayout_2 = QtWidgets.QGridLayout()
         self.gridLayout_2.setObjectName("gridLayout_2")
+        self.addBulletListToolButton = QtWidgets.QToolButton(self.groupBox)
+        self.addBulletListToolButton.setObjectName("addBulletListToolButton")
+        self.gridLayout_2.addWidget(self.addBulletListToolButton, 0, 4, 1, 1)
         self.addTitleToolButton = QtWidgets.QToolButton(self.groupBox)
         self.addTitleToolButton.setArrowType(QtCore.Qt.NoArrow)
         self.addTitleToolButton.setObjectName("addTitleToolButton")
         self.gridLayout_2.addWidget(self.addTitleToolButton, 0, 2, 1, 1)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.gridLayout_2.addItem(spacerItem, 0, 4, 1, 1)
+        self.gridLayout_2.addItem(spacerItem, 0, 6, 1, 1)
         self.addImageToolButton = QtWidgets.QToolButton(self.groupBox)
         self.addImageToolButton.setObjectName("addImageToolButton")
         self.gridLayout_2.addWidget(self.addImageToolButton, 0, 3, 1, 1)
         self.addTagLabel = QtWidgets.QLabel(self.groupBox)
         self.addTagLabel.setObjectName("addTagLabel")
         self.gridLayout_2.addWidget(self.addTagLabel, 0, 1, 1, 1)
+        self.addASCIIToolButton = QtWidgets.QToolButton(self.groupBox)
+        self.addASCIIToolButton.setObjectName("addASCIIToolButton")
+        self.gridLayout_2.addWidget(self.addASCIIToolButton, 0, 5, 1, 1)
         self.verticalLayout_2.addLayout(self.gridLayout_2)
         self.verticalLayout.addWidget(self.groupBox)
 
@@ -73,7 +79,9 @@ class Ui_TermEditor(object):
         self.groupBox.setTitle(_translate("TermEditor", "Editor"))
         self.lineEditTitle.setPlaceholderText(_translate("TermEditor", "Term name"))
         self.textEditContent.setPlaceholderText(_translate("TermEditor", "Description of the term."))
-        self.addTitleToolButton.setText(_translate("TermEditor", "tit&le"))
-        self.addImageToolButton.setText(_translate("TermEditor", "image"))
+        self.addBulletListToolButton.setText(_translate("TermEditor", "&bullet list"))
+        self.addTitleToolButton.setText(_translate("TermEditor", "t&itle"))
+        self.addImageToolButton.setText(_translate("TermEditor", "i&mage"))
         self.addTagLabel.setText(_translate("TermEditor", "Add a tag:"))
+        self.addASCIIToolButton.setText(_translate("TermEditor", "AS&CII"))
 

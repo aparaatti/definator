@@ -23,10 +23,12 @@ def load_json(path: Path, decoder=json.JSONDecoder()):
 
 
 def save_json(path: Path, obj, encoder=json.JSONEncoder()):
+    """
+    """
     if not path.exists():
         path.touch()
     file = open(str(path), "w")
     file.truncate()
-    for encoded_line in encoder.encode(obj):
-        file.write(encoded_line)
+    encoder.indent = 2
+    file.write(encoder.encode(obj))
     file.close()
