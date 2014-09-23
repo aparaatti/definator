@@ -1,4 +1,7 @@
 #!/usr/bin/env xdg-open
+#
+#Not guaranteed to work every where
+#
 [Desktop Entry]
 Categories=Education;
 Comment=Define things
