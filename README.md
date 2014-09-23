@@ -3,15 +3,16 @@
 
 ## What Definator is
 
-Definator is a program to write up terms, cross referencing them and writing
-up a structured descriptions for them and to link files to them. It is
+Definator is a program to write up terms, cross reference them and write
+up structured descriptions for them. It can also link files to terms. It is
 supposed to be useful for example in a lecture or other vice to gather
-concepts, form a picture of their relations and to attach related data to it.
+concepts and form a picture of the area by mapping relations of concepts and 
+to attach related data to them.
 
 ## How to use it
 
-A help project comes with the application, which can be opened from Help -->
-Open help menu.
+A help project comes with the application, which can be opened from "Help -->
+Open help..." -menu.
 
 ## Current release
 
@@ -35,8 +36,7 @@ Definator is developed on Linux and thus works best in it. It runs on windows
 based on a short test and it should also run in a Mac.
 
 On the development machine Definator uses PyQt 5.3.2, Qt 5.3.2 and Python 3.4.1.
-It would be nice to hear how it runs in other environments. PyQt5 and Qt5 bundle
-can be downloaded for example from here: [Download PyQt5](http://www.riverbankcomputing.co.uk/software/pyqt/download5 "PyQt 5 binarieds"), which should be fairly easy to
+It would be nice to hear how it runs in other environments. PyQt5 and Qt5 bundle can be downloaded  from here: [Download PyQt5](http://www.riverbankcomputing.co.uk/software/pyqt/download5 "PyQt 5 binarieds"), which should be fairly easy to
 install. On windows python 3 needs to be also installed, before it can run the
 application.
 
@@ -48,8 +48,7 @@ A mailing list will be set up for informing about developments.
 
 ## Licensing
 
-**Definator** is licensed **[GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt)**, which
-is in line with the [Qt 5](http://qt-project.org/doc/qt-5/licensing.html) and [PyQt 5](http://www.riverbankcomputing.co.uk/software/pyqt/license) licensing options.
+**Definator** is licensed **[GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt)**, which is in line with the [Qt 5](http://qt-project.org/doc/qt-5/licensing.html) and [PyQt 5](http://www.riverbankcomputing.co.uk/software/pyqt/license) licensing options.
 
 ## Context
 
