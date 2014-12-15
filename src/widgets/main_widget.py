@@ -54,6 +54,7 @@ class MainWidget(QWidget):
         self.term_display.hide()
         self.related_terms.hide()
         self.term_editor.hide()
+        self._opening_another_term = False
 
     def _set_current_term(self, term: Term):
         self._current_term = term
@@ -124,7 +125,9 @@ class MainWidget(QWidget):
     @pyqtSlot(Term)
     def change_term(self, term: Term):
         self._set_current_term(term)
+        self._opening_another_term = True
         self.show_term_display()
+        self._opening_another_term = False
 
     @pyqtSlot(Term)
     def term_has_been_updated(self, term: Term):
@@ -140,7 +143,8 @@ class MainWidget(QWidget):
         """
         self.term_str_browser.add_a_str(term.term)
         self.term_str_browser.mark_str(term.term)
-        self._set_current_term(term)
+        if not self._opening_another_term:
+            self._set_current_term(term)
 
     @pyqtSlot(Term)
     def term_has_been_removed(self, term: Term):
@@ -230,8 +234,10 @@ class MainWidget(QWidget):
         This slot is triggered when the term editor stops editing existing
         term. The updated term is delegated with update_term signal.
         """
-        self._set_current_term(term)
-        self.term_display.show()
+        if not self._opening_another_term:
+            self._set_current_term(term)
+            self.term_display.show()
+
         self.update_term.emit(term)
 
     @pyqtSlot(Term)

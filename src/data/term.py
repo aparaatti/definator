@@ -51,8 +51,19 @@ class Term(object):
 
     @next_term.setter
     def next_term(self, term):
-        term._previous_term = self
+        if term:
+            term._previous_term = self
         self._next_term = term
+
+    @property
+    def previous_term(self):
+        return self._previous_term
+
+    @previous_term.setter
+    def previous_term(self, term):
+        if term:
+            self._previous_term = term
+        term.next_term = self._previous_term
 
     @property
     def path(self):
@@ -63,15 +74,6 @@ class Term(object):
         self._path = path
         self._description.path = self._path / self.term
         self._links.path = self._path / self.term
-
-    @property
-    def previous_term(self):
-        return self._previous_term
-
-    @previous_term.setter
-    def previous_term(self, term):
-        self._previous_term = term
-        term.next_term = self._previous_term
 
     @property
     def term_as_html(self):
