@@ -21,8 +21,8 @@ class Term(object):
     Term it self is saved, when it creates self named folder for
     description and links.
 
-    Todo:
-        handle missing folder and missing or empty files.
+    TODO: handle missing folder and missing or empty files.
+    TODO: Check from django, how they make html docs
     """
 
     def __init__(self, term: str=None):
@@ -51,9 +51,8 @@ class Term(object):
 
     @next_term.setter
     def next_term(self, term):
+        term._previous_term = self
         self._next_term = term
-        if term:
-            term._previous_term = self
 
     @property
     def path(self):
@@ -173,7 +172,7 @@ class Term(object):
             "-----Initialized next term:" + os.linesep
             + "  term: " + self._next_term.term + os.linesep
             + "  path: " + str(self._next_term._path) + os.linesep
-            )
+        )
 
     def get_file_path(self, file_name: str):
         """
@@ -263,7 +262,7 @@ class Term(object):
         self._links.delete()
         self._description.delete()
         try:
-            os.removedirs(str(path / self.term))
+            os.removedirs(str(self._path / self.term))
         except OSError as e:
             logging.info(
                 "The term " + self.term

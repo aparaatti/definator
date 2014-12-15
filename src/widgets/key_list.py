@@ -185,4 +185,3 @@ class KeyList(QWidget):
         self.populate()
         logging.debug("Width: " + str(self.ui.tableWidget_2.width()))
         super().resizeEvent(event)
-

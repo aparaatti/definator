@@ -6,7 +6,7 @@
 import logging
 import os
 
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QSize, QUrl
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QUrl
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QMessageBox
 from PyQt5.QtGui import QKeySequence, QIcon, QDesktopServices
 

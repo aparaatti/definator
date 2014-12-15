@@ -45,11 +45,12 @@ aparser.add_argument('--log', '-l', action='count',
 
 if aparser.parse_args().log:
     log_file = open('definator.log', 'w')
-    FORMAT = '%(msecs)d [%(module)s] %(levelname)s %(message)s'
     log_file.truncate()
     log_file.close()
+
+    FORMAT = '%(msecs)d [%(module)s] %(levelname)s %(message)s'
     logging.basicConfig(
-        filename='definator.log', level=logging.INFO, format=FORMAT,
+        filename='definator.log', level=logging.DEBUG, format=FORMAT,
         datefmt='%y.%m.%d %I:%M:%S')
 else:
     logging.disable(logging.INFO)

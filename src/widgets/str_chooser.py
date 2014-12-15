@@ -41,7 +41,7 @@ class StrChooser(QDialog):
         changes. The content of the field is received as a parameter and a new
         filtered list is set to be displayed based on received string.
 
-        :param string: String from signal bind to the this slot
+        :param string: String from signal bind to this slot
         """
         if string == "":
             self.set_list(list(self._str_2_item.keys()))
@@ -55,7 +55,7 @@ class StrChooser(QDialog):
 
     def set_title(self, string: str):
         """
-        This set's the title for the dialog. It also set label for on top of
+        This set's the title for the dialog. It also sets label on top of the
         dialog with the same text.
 
         :param string: tilte text as a string

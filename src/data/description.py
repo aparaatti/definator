@@ -1,5 +1,4 @@
 import os
-import re
 import logging
 from .json_helpers import *
 from .items import Title, AttachedImage, Paragraph, ASCII, BulletList
@@ -52,7 +51,9 @@ class Description(object):
         This makes a html repreasentation of this Description object.
         :return:
         """
-        logging.debug("-----------------GETTING DESCRIPTION HTML-------------")
+        logging.debug("                ,-------------------------,")
+        logging.debug("---------------( GETTING DESCRIPTION HTML )------------")
+        logging.debug("                `-------------------------'")
         content = list()
         for item in self._content:
             if type(item) in [Paragraph, Title, AttachedImage, BulletList,
@@ -70,7 +71,9 @@ class Description(object):
 
     @property
     def content_text(self):
-        logging.debug("  -----------------GETTING DESCRIPTION TEXT-------------")
+        logging.debug("                ,-------------------------,")
+        logging.debug("---------------( GETTING DESCRIPTION TEXT )-------------")
+        logging.debug("                `-------------------------'")
         content_text_list = list()
 
         for item in self._content:
@@ -107,9 +110,11 @@ class Description(object):
         optionally a title for image '"/path/to/image","Image title"'. If title
         is not given, the file name stem is used as reference in paragraph.
 
-        Text that dosen't start and with a known tags is a Paragraph.
+        Text chunk that dosen't start and end with a known tags is a Paragraph.
 
         :param text: Str containing text annotated with tags.
+
+        TODO: Using streams?
         """
         logging.debug("  --------------SETTING DESCRIPTION TEXT--------------")
         self._content.clear()
@@ -133,7 +138,7 @@ class Description(object):
 
     def _parse_tags_from_text(self, text: str):
         """
-        This parses tags that are inside the text (paragraphs) ie
+        This parses tags that are inside the text ie
         AttachedImages. Only the first occurrence is appended before
         in to the content list.
         """

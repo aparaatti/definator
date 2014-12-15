@@ -3,6 +3,7 @@
 # This file is a part of Definator (https://github.com/aparaatti/definator)
 # and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
 #
+
 import os
 import logging
 from pathlib import Path
@@ -45,7 +46,6 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__(parent)
 
         self._current_term = None
-
         self.terms_controller = TermsController()
         self.main_widget = MainWidget()
         self._init_settings()

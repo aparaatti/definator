@@ -8,11 +8,9 @@ import logging
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QUrl
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtWebKitWidgets import QWebPage
-from PyQt5.QtGui import QKeySequence
 
 from ..data.term import Term
 from .qtdesigner.ui_QTermDisplay import Ui_TermDisplay
-from .key_press_eater import KeyPressEater
 
 
 class TermDisplay(QWidget):
@@ -45,7 +43,7 @@ class TermDisplay(QWidget):
         """
         This slot delegates clicked link signal to show the same html as
         before (eg. link to a point in the term has been clicked)
-        or to delegate the filename given in the link as emitted
+        or to delegates the filename given in the link as emitted
         signal_link_clicked(filename) signal.
         """
         if url.fileName() == "" and url.path() == "/":
@@ -53,4 +51,3 @@ class TermDisplay(QWidget):
             self.ui.contentWebView.setHtml(self._html, url)
         else:
             self.signal_link_clicked.emit(url.toLocalFile().split("/")[-1])
-

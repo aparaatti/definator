@@ -80,8 +80,8 @@ class AttachedImage(object):
 
     @property
     def html_reference(self):
-        return '(Image: <a href="#' + str(id(self)) +\
-            '">' + self._title + '</a>)'
+        return '<strong>Image:</strong> <a href="#' + str(id(self)) +\
+            '">' + self._title + '</a>'
 
     @property
     def path(self):

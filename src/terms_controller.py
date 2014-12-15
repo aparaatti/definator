@@ -17,7 +17,7 @@ class TermsController(object):
     Has a set of Term objects. On initialization reads a list of term
     strings from terms.json file and creates Term objects using the
     string as an initializer and adds related links and description to the term
-    from the filesystem.
+    from the file system.
 
     Tests:
     >>> tc = TermsController()
@@ -42,8 +42,11 @@ class TermsController(object):
         self._deleted_terms = {}
 
     def get_term(self, term_str):
-        self._lazy_load_term(term_str)
-        return deepcopy(self._terms[term_str])
+        if term_str in self._terms_list:
+            self._lazy_load_term(term_str)
+            return deepcopy(self._terms[term_str])
+        else:
+            raise NoSuchTermException
 
     @property
     def count(self):
@@ -106,7 +109,7 @@ class TermsController(object):
                 # Term objet.
                 self.add_term(term)
 
-                # And remove the old version.
+                # And remove the old name from term.term list
                 if previous_term_str in self._terms_list:
                     self._terms_list.remove(previous_term_str)
                 else:
@@ -117,7 +120,7 @@ class TermsController(object):
                 # self._terms  dictionary and added to a list in delete
                 # dictionary:
                 self._deleted_terms[previous_term_str] = self._terms.pop(
-                    previous_term_str)
+                    term.previous_term.term)
                 self._unlink_terms(
                     term.previous_term, term.previous_term.related_terms)
                 self._link_terms(term, term.related_terms)
@@ -138,7 +141,8 @@ class TermsController(object):
             target1.link_term(target2)
             target2.link_term(target1)
             self.update_term(target2, True)
-            logging.debug("-------[" + str(target1) + " <==> " + str(target2) + "]-------")
+            logging.debug("-------[" + str(target1) + " <==> " + str(target2) +
+                          "]-------")
 
     def unlink_terms(self, target1: Term, str_related_terms: list):
         self._unlink_terms(target1, str_related_terms)
@@ -150,10 +154,11 @@ class TermsController(object):
             target1.unlink_term(target2)
             target2.unlink_term(target1)
             self.update_term(target2, True)
-            logging.debug("-------[" + str(target1) + " |   | " + str(target2) + "]-------")
+            logging.debug("-------[" + str(target1) + " |   | " + str(target2)
+                          + "]-------")
 
     def _lazy_load_term(self, term_str):
-        if term_str not in self._terms.keys() and term_str in self._terms_list:
+        if term_str not in self._terms.keys():
             logging.debug("loading term " + term_str)
             term_to_load = Term(term_str)
             self._terms[term_str] = term_to_load.load(self._project_path)
@@ -164,7 +169,7 @@ class TermsController(object):
         Throws FileNotFoundError if can't load the file. The individual terms
         are build lazily when get_term is called.
 
-        :param project_path:
+        :param: project_path
         :return:
         """
         terms_list = load_json(project_path / "terms.json", TermsDecoder())
@@ -186,7 +191,7 @@ class TermsController(object):
         path = self._project_path
         if path.exists() and path is not Path(''):
             for deleted_term in self._deleted_terms.values():
-                deteted_term.delete(path)
+                deleted_term.delete()
             for changed_term in self._changed_terms.keys():
                 self.get_term(changed_term).save(path)
 
@@ -241,6 +246,10 @@ class TermsController(object):
             return "Untitled"
 
         return self.project_path.parts[-1]
+
+
+class NoSuchTermException(Exception):
+    pass
 
 
 class TermsEncoder(json.JSONEncoder):

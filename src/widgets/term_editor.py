@@ -277,7 +277,7 @@ class TermEditor(QWidget):
             os.linesep + "##LIST##" + os.linesep + "item1" + os.linesep +
             "item2" + os.linesep + "item3" + os.linesep + "##END##"
             + os.linesep
-            )
+        )
 
     @pyqtSlot()
     def add_ASCII_tag(self):
@@ -288,7 +288,7 @@ class TermEditor(QWidget):
             os.linesep + "##ASCII##" + os.linesep + "+---+" + os.linesep
             + "|    |" + os.linesep + "+---+" + os.linesep + "##END##" +
             os.linesep
-            )
+        )
 
     ##############################
     # LINKING OF TERMS AND FILES #
@@ -307,8 +307,8 @@ class TermEditor(QWidget):
         if self._current_term.term:
             black_list.append(self._current_term.term)
         if self._current_term.related_terms:
-            [black_list.append(term_str)
-             for term_str in self._current_term.related_terms]
+            for term_str in self._current_term.related_terms:
+                black_list.append(term_str)
 
         [a_list.remove(item) for item in black_list]
 

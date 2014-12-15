@@ -2,7 +2,8 @@
 
 # Form implementation generated from reading ui file 'QTermEditor.ui'
 #
-# Created: Mon Sep 22 02:50:26 2014
+# Created: Wed Oct  1 14:29:07 2014
+#      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -41,7 +42,7 @@ class Ui_TermEditor(object):
         sizePolicy.setHeightForWidth(self.textEditContent.sizePolicy().hasHeightForWidth())
         self.textEditContent.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
-        font.setFamily("Oxygen Mono")
+        font.setFamily("Monospace")
         self.textEditContent.setFont(font)
         self.textEditContent.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
         self.textEditContent.setObjectName("textEditContent")

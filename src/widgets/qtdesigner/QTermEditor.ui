@@ -76,7 +76,7 @@
         </property>
         <property name="font">
          <font>
-          <family>Oxygen Mono</family>
+          <family>Monospace</family>
          </font>
         </property>
         <property name="sizeAdjustPolicy">
