@@ -30,8 +30,7 @@ class DescriptionTestCases(unittest.TestCase):
 
     def setUp(self):
         self.description = src.data.description.Description()
-        self.description.content_text = """
-A cat is a cat animal. It likes to purr.
+        self.description.content_text = """A cat is a cat animal. It likes to purr.
 
 Other things a cat could like to do are:
 
@@ -51,15 +50,15 @@ it could also be like this:
   ^
 ##END##
 
-Or is it a cow?
-"""
+Or is it a cow?"""
         print(self.description.content_text)
 
     def test_confirm_conversion(self):
         html = self.description.content_html
         print(html)
-        self.assertEqual(html, """
-<p>A cat is a cat animal. It likes to purr.</p>
+        self.maxDiff = None
+        self.assertEqual(html,
+                         """<p>A cat is a cat animal. It likes to purr.</p>
 <p>Other things a cat could like to do are:</p>
 <ul>
     <li>run</li>
@@ -74,7 +73,8 @@ it could also be like this:</p>
 ( .)
   ^
 </pre>
-<p>Or is it a cow?</p>""")
+<p>Or is it a cow?</p>
+""")
 
     @classmethod
     def tearDownClass(cls):

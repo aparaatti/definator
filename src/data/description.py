@@ -58,7 +58,7 @@ class Description(object):
         for item in self._content:
             if type(item) in [Paragraph, Title, AttachedImage, BulletList,
                               ASCII]:
-                content.append(item.html)
+                content.append(item.html + os.linesep)
             else:
                 logging.debug('Could not find type ' + str(type(item)) +
                               '. For item "' + str(item) + '".')

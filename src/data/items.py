@@ -199,7 +199,7 @@ class ASCII(object):
 
     @property
     def html(self):
-        return "<pre>" + self._lines + "</pre>"
+        return "<pre>" + os.linesep + self._lines + os.linesep + "</pre>"
 
 
 class BulletList(object):
@@ -239,4 +239,7 @@ class BulletList(object):
 
     @property
     def html(self):
-        return "<ul><li>" + "</li><li>".join(self._items) + "</li></ul>"
+        start_str = "<ul>" + os.linesep + "    <li>"
+        join_str = "</li>" + os.linesep + "    <li>"
+        end_str = "</li>" + os.linesep + "</ul>"
+        return start_str + join_str.join(self._items) + end_str
