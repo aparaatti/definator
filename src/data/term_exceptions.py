@@ -8,6 +8,7 @@ class TermAlreadyExists(Exception):
     def __str__(self):
         return repr(self.value)
 
+
 class DescriptionAlreadySetException(Exception):
     def __init__(self, value):
         """
@@ -15,7 +16,7 @@ class DescriptionAlreadySetException(Exception):
         :param term:
         """
         self.value = \
-            "Term: " + value + " already has a Description object."\
+            "Term: " + value + " already has a Description object." \
             + " Edit current description through provided methods."
 
     def __str__(self):
@@ -25,8 +26,20 @@ class DescriptionAlreadySetException(Exception):
 class LinksAlreadySetException(Exception):
     def __init__(self, value):
         self.value = \
-            "Term: " + value + " already has a Links object."\
+            "Term: " + value + " already has a Links object." \
             + " Edit current links through provided methods."
 
     def __str__(self):
         return repr(self.value)
+
+
+class IllegalCharacterInTermNameException(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class IllegalCharacterInTheBeginningOfTermNameException(IllegalCharacterInTermNameException):
+    pass

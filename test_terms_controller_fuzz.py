@@ -10,6 +10,7 @@ import tempfile
 import os
 import src.terms_controller
 from src.data.term import Term
+from src.data.term_exceptions import IllegalCharacterInTermNameException
 
 unicode = str
 
@@ -26,8 +27,10 @@ class TestTermsController:
 
     @pytest.mark.randomize(name=str, str_attrs=("digits", "punctuation",
                                                 "whitespace", "ascii_letters"),
-                           ncalls=10)
+                           ncalls=100)
     def test_rename_and_save(self, name):
+        name = name.strip()
+
         # min_length apparently not implemented for python 3
         if len(name) == 0:
             return
@@ -38,14 +41,19 @@ class TestTermsController:
 
         term.initialize_next_term()
         new_term = term.next_term
-        new_term.term = name
+        try:
+            new_term.term = name
 
-        tc.update_term(new_term)
-        tc.save_project()
-        tc.load_project(Path("test-generated-project/"))
-        term = tc.get_term(name)
-        TestTermsController.prev_name = name
-        assert isinstance(term, Term)
+            tc.update_term(new_term)
+            tc.save_project()
+            tc.load_project(Path("test-generated-project/"))
+            term = tc.get_term(name)
+            TestTermsController.prev_name = name
+            assert isinstance(term, Term)
+        except IllegalCharacterInTermNameException as ie:
+            print("IllegalCharacterInTermNameException from " + name + ". "
+                  "Illegal character was " + ie.value)
+            return
 
 
     """
@@ -56,11 +64,15 @@ class TestTermsController:
     """
     @pytest.mark.randomize(name2=str, str_attrs=("digits", "punctuation",
                                                 "whitespace", "ascii_letters"),
-                           ncalls=10)
+                           ncalls=100)
     def test_save_rename_and_save(self, name2):
+        name2 = name2.strip()
+
         # min_length apparently not implemented for python 3
         if len(name2) == 0:
             return
+
+
         tc = src.terms_controller.TermsController()
         tc.load_project(Path("test-generated-project/"))
         term = tc.get_term(TestTermsController.prev_name2)
@@ -88,33 +100,38 @@ class TestTermsController:
 
         term.initialize_next_term()
         second_new_term = term.next_term
-        second_new_term.term = name2
-        tc.update_term(second_new_term)
-        tc.save_project()
+        try:
+            second_new_term.term = name2
+            tc.update_term(second_new_term)
+            tc.save_project()
 
-        term = tc.get_term(name2)
-        assert term.term == name2
-        path = Path(term.path / term.term)
+            term = tc.get_term(name2)
+            assert term.term == name2
+            path = Path(term.path / term.term)
 
-        file1 = False
-        file2 = False
-        file3 = False
+            file1 = False
+            file2 = False
+            file3 = False
 
-        for file in path.iterdir():
-            if file.name == 'unsaved-changes-kf5.png':
-                file1 = True
+            for file in path.iterdir():
+                if file.name == 'unsaved-changes-kf5.png':
+                    file1 = True
 
-            if file.name == 'linked-terms-and-files-kf5.png':
-                file2 = True
+                if file.name == 'linked-terms-and-files-kf5.png':
+                    file2 = True
 
-            if file.name == tmp_path.name:
-                file3 = True
+                if file.name == tmp_path.name:
+                    file3 = True
 
-        assert file2
-        assert file3
-        assert file1
+            assert file2
+            assert file3
+            assert file1
 
-        TestTermsController.prev_name2 = name2
+            TestTermsController.prev_name2 = name2
+        except IllegalCharacterInTermNameException as ie:
+            print("IllegalCharacterInTermNameException from " + name2 + ". "
+                  "Illegal character was " + ie.value)
+            return
 
     @classmethod
     def teardown_class(cls):

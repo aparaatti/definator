@@ -4,11 +4,15 @@
 # and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
 __author__ = 'Niko Humalamäki'
 
+import string
 from .description import *
 from .term_links import *
+from .term_exceptions import IllegalCharacterInTermNameException, IllegalCharacterInTheBeginningOfTermNameException
 
 
 class Term(object):
+    allowed_characters = string.ascii_letters + string.digits + 'äöåÄÖÅ-_. ' \
+                         + os.linesep
     """
     Term object. Is given a term string on initialization and tells
     its attributes self._description and self.__links to initialize.
@@ -100,9 +104,15 @@ class Term(object):
 
         :param term: The term as a string.
         """
-        if term is None:
+        if term is None or term is "":
             self._term = ""
         elif term != self._term:
+            if term[0] == '.':
+                raise IllegalCharacterInTheBeginningOfTermNameException(term[0])
+            for character in term:
+                if character not in Term.allowed_characters:
+                        raise IllegalCharacterInTermNameException(character)
+
             self._term = term
 
     @property
