@@ -115,14 +115,21 @@ class TermsController(object):
                 else:
                     raise RuntimeError(
                         "Changing a name of a term that doesn't exist!")
-
                 # The original unchanged Term object is removed from
-                # self._terms  dictionary and added to a list in delete
-                # dictionary:
-                self._deleted_terms[previous_term_str] = self._terms.pop(
-                    term.previous_term.term)
+                # self._terms dictionary
+                old_term = self._terms.pop(term.previous_term.term)
+
+                # We link the new term to the original old, not the cloned one
+                # that is given for UI.
+                old_term.next_term = term
+
+                # We ad old term into the deleted dictionary:
+                self._deleted_terms[previous_term_str] = old_term
+
+                # We remove links to old term
                 self._unlink_terms(
                     term.previous_term, term.previous_term.related_terms)
+                # We add links to new term
                 self._link_terms(term, term.related_terms)
                 return True
 
@@ -182,6 +189,36 @@ class TermsController(object):
         else:
             return None
 
+    def _copy_linked_files_to_new_location(self, deleted_term):
+        # If we have a new file, we have to move the files
+        # to the new location
+        new_term = deleted_term.next_term
+        while new_term.next_term:
+            new_term = new_term.next_term
+
+        if new_term and new_term.term in self._changed_terms.keys():
+            to_copy = list()
+            for file in deleted_term.linked_images:
+                try:
+                    new_term.get_file_path(file.name)
+                    to_copy.append(file.name)
+                except FileNotFoundError:
+                    pass
+
+            for file in deleted_term.linked_files:
+                try:
+                    new_term.get_file_path(file.name)
+                    to_copy.append(file.name)
+                except FileNotFoundError:
+                    pass
+
+            if len(to_copy) > 0:
+                make_dir(new_term.path / new_term.term)
+
+            for file in to_copy:
+                copy_file_to(deleted_term.path / deleted_term.term / file,
+                             new_term.path / new_term.term)
+
     def save_project(self):
         """
         Saves the project to self._project_path.
@@ -191,7 +228,9 @@ class TermsController(object):
         path = self._project_path
         if path.exists() and path is not Path(''):
             for deleted_term in self._deleted_terms.values():
+                self._copy_linked_files_to_new_location(deleted_term)
                 deleted_term.delete()
+
             for changed_term in self._changed_terms.keys():
                 self.get_term(changed_term).save(path)
 
@@ -250,7 +289,6 @@ class TermsController(object):
 
 class NoSuchTermException(Exception):
     pass
-
 
 class TermsEncoder(json.JSONEncoder):
     """ Encodes a Terms object to JSON eg. saves Term self.__term str

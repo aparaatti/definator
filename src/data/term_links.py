@@ -1,8 +1,6 @@
-import os
 import copy
-import shutil
 import mimetypes
-import logging
+from .fs_helpers import *
 from .json_helpers import *
 from pathlib import Path
 
@@ -87,7 +85,7 @@ class Links(object):
         for path in self._to_delete:
             if path.name not in term_files and\
                path.name in term_folder_files:
-                    _remove_file(self._path / path.name)
+                    remove_file(self._path / path.name)
 
     def _save_files_to_term_path(self, description_images: list):
         """
@@ -106,12 +104,12 @@ class Links(object):
 
         for file_path in self._linked_files.values():
             if file_path.name not in term_folder_files:
-                _copy_file_to(file_path, self._path)
+                copy_file_to(file_path, self._path)
                 self._linked_files[file_path.name] = Path(file_path.name)
 
         for img_path in description_images:
             if img_path.name not in term_folder_files:
-                _copy_file_to(img_path, Path(self._path))
+                copy_file_to(img_path, Path(self._path))
                 self._linked_images[img_path.name] = Path(img_path.name)
 
     def load(self, path: Path):
@@ -141,8 +139,12 @@ class Links(object):
             return self._link_file(path)
 
     def delete(self):
-        # TODO delete attached files
-        os.remove(str(self._path / "links.json"))
+        remove_file(self._path / "links.json")
+        for file in self._linked_files.values():
+            remove_file(self._path / file)
+
+        for file in self._linked_images.values():
+            remove_file(self._path / file)
 
     @property
     def linked_terms(self):
@@ -199,16 +201,9 @@ class Links(object):
     def path(self):
         return self._path
 
-
-def _remove_file(file_path: Path):
-    logging.debug('Removing file: ' + str(file_path) + '!')
-    os.remove(str(file_path))
-
-
-def _copy_file_to(src: Path, target: Path):
-    logging.debug('Copying file "' + str(src) + '" to term folder "'
-                  + str(target / src.name))
-    shutil.copy2(str(src), str(target / src.name))
+    @path.setter
+    def path(self, path: Path):
+        self._path = path
 
 
 class LinksEncoder(json.JSONEncoder):
@@ -233,6 +228,5 @@ class LinksEncoder(json.JSONEncoder):
 
 class LinksDecoder(json.JSONDecoder):
     """ Decodes a Terms object from JSON. """
-
-    def decode(self, string):
-        return json.JSONDecoder.decode(self, string)
+    # def decode(self, string):
+    #    return json.JSONDecoder.decode(self, string)

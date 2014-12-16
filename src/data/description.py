@@ -1,6 +1,6 @@
-import os
-import logging
 from .json_helpers import *
+from .fs_helpers import *
+
 from .items import Title, AttachedImage, Paragraph, ASCII, BulletList
 
 
@@ -33,8 +33,8 @@ class Description(object):
         save_json(path / "description.json", self, DescriptionEncoder())
 
     def delete(self):
-        # TODO remove files too.
-        os.remove(str(self._path / "description.json"))
+        # Linker handles removing of linked files.
+        remove_file(self._path / "description.json")
 
     @property
     def path(self):

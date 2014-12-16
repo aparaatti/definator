@@ -4,8 +4,6 @@
 # and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
 __author__ = 'Niko Humalamäki'
 
-import logging
-
 from .description import *
 from .term_links import *
 

@@ -23,6 +23,8 @@
 #       display
 #   -maybe different types of links for terms (sub term, parent term)
 #   -Use python built in serialization/de serialization for saving stuff
+#   -Warn user when removing a term that also the linked files in term folder
+#   will be deleted.
 #
 # RE FACTOR:
 #   -TermDisplay to HtmlDisplay
