@@ -41,7 +41,7 @@ class TermsController(object):
         self._changed_terms = {}
         self._deleted_terms = {}
 
-    def get_term(self, term_str):
+    def get_term(self, term_str) -> Term:
         if term_str in self._terms_list:
             self._lazy_load_term(term_str)
             return deepcopy(self._terms[term_str])
