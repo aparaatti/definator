@@ -50,7 +50,7 @@ project.
 
 For releases and other announcements on definator you can read the mailing list
 [definator-users](https://groups.google.com/forum/#!forum/definator-users) or
-send a [post](mailto:https://groups.google.com/forum/#!forum/definator-users) 
+send a [post](mailto:definator-users@googlegroups.com) 
 to the list
 
 ## Licensing
