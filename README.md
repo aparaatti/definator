@@ -16,7 +16,8 @@ Open help..." -menu.
 
 ## Current release
 
-In current release ([download](https://dl.dropboxusercontent.com/u/15617513/definator-releases/definator-v0.02.zip))
+In current release 
+([download](https://dl.dropboxusercontent.com/u/15617513/definator-releases/definator-v0.02.zip))
 (git tag v0.02) the application is functional, but very little tested. Probably 
 there are bugs and also there are ideas not yet implemented.
 
@@ -36,19 +37,28 @@ Definator is developed on Linux and thus works best in it. It runs on windows
 based on a short test and it should also run in a Mac.
 
 On the development machine Definator uses PyQt 5.3.2, Qt 5.3.2 and Python 3.4.1.
-It would be nice to hear how it runs in other environments. PyQt5 and Qt5 bundle can be downloaded  from here: [Download PyQt5](http://www.riverbankcomputing.co.uk/software/pyqt/download5 "PyQt 5 binarieds"), which should be fairly easy to
-install. On windows python 3 needs to be also installed, before it can run the
-application.
+It would be nice to hear how it runs in other environments. PyQt5 and Qt5 
+bundle can be downloaded  from here: 
+[Download PyQt5](http://www.riverbankcomputing.co.uk/software/pyqt/download5 "PyQt 5 binarieds"), 
+which should be fairly easy to install. On windows python 3 needs to be also 
+installed, before it can run the application.
 
-The application can be run by starting definator.py located at the root of the project.
+The application can be run by starting definator.py located at the root of the 
+project.
 
 ## Mailing list
 
-A mailing list will be set up for informing about developments.
+For releases and other announcements on definator you can read the mailing list
+[definator-users](https://groups.google.com/forum/#!forum/definator-users) or
+send a [post](mailto:https://groups.google.com/forum/#!forum/definator-users) 
+to the list
 
 ## Licensing
 
-**Definator** is licensed **[GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt)**, which is in line with the [Qt 5](http://qt-project.org/doc/qt-5/licensing.html) and [PyQt 5](http://www.riverbankcomputing.co.uk/software/pyqt/license) licensing options.
+**Definator** is licensed **[GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt)**, 
+which is in line with the [Qt 5](http://qt-project.org/doc/qt-5/licensing.html) 
+and [PyQt 5](http://www.riverbankcomputing.co.uk/software/pyqt/license) 
+licensing options.
 
 ## Context
 
