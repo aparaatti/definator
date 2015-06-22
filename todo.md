@@ -1,31 +1,31 @@
-#TODO and ideas
-## All menu items:
+#TODO
 
-- settings
-    - language
-    - remember opened projects
-    - load last opened project on startup
-    - colors of files in linked things
+### Global ###
 
-## Later:
-
-- Generic tag class, that can be used to define a tag and html
-  representation for it.
-- Term browser in side pane (QDockWidget).
+- Make a term with a name, delete it and re-create it
+	- can't save
 - File copy doesn't work on windows (?)
-- Maybe open terms in tabs, with editor/term --> proper undo/redo
-- Writing of unit tests
-- Add list of synonymous terms to a term.
-- Show tags bold on term editor, show references to images bold on term
-  display
-- Maybe different types of links for terms (sub term, parent term)
-- Use python built in serialization/de-serialization for saving stuff
-- Warn user when removing a term, that also the linked files in term folder
-  will be deleted.
-- Exception handler, that shows certain exception as a warning dialog
-  (currently exceptions are not handled).
+- Warn user when removing a term, that also the linked files in term folder will be deleted.
+- Save as.., cancel --> project is saved at "" (path)
 
-## RE FACTOR:
+### Display and related terms ###
+- Block right click from Description and Related terms.
 
-- TermDisplay to HtmlDisplay
+### Editor ###
+- Allow empty lines in ASCII field
+    + monospaced font in ascii area
+        * work around, always monospaced font in editor
+- Html can be pasted to editor view, allow plain text only (no type and css).
+    + Editor view font color can change, while pasting html.
 
+### Termlist ###
+
+- Empty filter field when item chosen
+    + If tags filttered, a tag won't be shown if clicked from related terms and it's not in filtered terms
+
+### Linker ###
+
+- Filtering in linking case insensitive
+    - remeber chosen items while filtering
+    - only link the ones visible once ok is pressed
+- Empty filter field when ok pressed
