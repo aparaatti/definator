@@ -12,7 +12,8 @@ import src.terms_controller
 import src.data.term
 
 # To run these tests, run:
-# python -m unittest discover -v
+# ..as .as
+
 # at project root
 
 

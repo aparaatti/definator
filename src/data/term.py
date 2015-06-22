@@ -4,15 +4,29 @@
 # and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
 __author__ = 'Niko Humalamäki'
 
+
 import string
 from .description import *
 from .term_links import *
-from .term_exceptions import IllegalCharacterInTermNameException, IllegalCharacterInTheBeginningOfTermNameException
+from .term_exceptions import IllegalCharacterInTermNameException, \
+    IllegalCharacterInTheBeginningOfTermNameException
 
 
 class Term(object):
     allowed_characters = string.ascii_letters + string.digits + 'äöåÄÖÅ-_. ' \
                          + os.linesep
+
+    file = open(os.path.join(os.path.dirname(__file__),
+                             'representation/default/term.xhtml'), 'r')
+    html_template_term = string.Template(file.read())
+    file.close()
+
+    file = open(os.path.join(os.path.dirname(__file__),
+                             './representation/default/links.xhtml'), 'r')
+    html_template_links = string.Template(file.read())
+    file.close()
+
+
     """
     Term object. Is given a term string on initialization and tells
     its attributes self._description and self.__links to initialize.
@@ -79,18 +93,10 @@ class Term(object):
 
     @property
     def term_as_html(self):
-        html = '''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-            "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-            <html xmlns="http://www.w3.org/1999/xhtml">
-            <head>
-            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />''' +\
-            "<title>" + self.term + "</title>" +\
-            "</head><body><code>" +\
-            "<h1>" + self.term + "</h1>" +\
-            self._description.content_html +\
-            self._make_html_list_of_files() +\
-            "</code></body></html>"
-        return html
+        return Term.html_template_term\
+            .substitute(term=self.term,
+                        content_html=self._description.content_html,
+                        links=self._make_html_list_of_files())
 
     @property
     def term(self):
@@ -149,23 +155,12 @@ class Term(object):
     @property
     def related_terms_as_html(self):
         html = list()
-        html.append(
-            '''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-            "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-            <html xmlns="http://www.w3.org/1999/xhtml">
-            <head>
-            <meta http-equiv="Content-Type" content="text/html;
-            charset=UTF-8"/>
-            <title>Related terms</title>
-            </head><body><code>''')
 
         for term in self._links.linked_terms:
             html.append(
                 '<a href="' + term + '" target="_blank">' + term + '</a> ')
 
-        html.append("</code></body></html>")
-
-        return "".join(html)
+        return Term.html_template_links.substitute(links_html=''.join(html))
 
     @property
     def links(self):
