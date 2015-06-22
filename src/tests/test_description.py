@@ -6,8 +6,8 @@ __author__ = 'aparaatti'
 # and it is licensed under the GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt).
 #
 import unittest
-import src.data.description
-import src.data.term
+import data.description
+import data.term
 
 
 class DescriptionTestCases(unittest.TestCase):
@@ -29,7 +29,7 @@ class DescriptionTestCases(unittest.TestCase):
         pass
 
     def setUp(self):
-        self.description = src.data.description.Description()
+        self.description = data.description.Description()
         self.description.content_text = """A cat is a cat animal. It likes to purr.
 
 Other things a cat could like to do are:

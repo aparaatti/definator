@@ -8,11 +8,13 @@ import pytest
 import shutil
 import tempfile
 import os
-import src.terms_controller
-from src.data.term import Term
-from src.data.term_exceptions import IllegalCharacterInTermNameException
+
+from terms_controller import TermsController
+from data.term import Term
+from data.term_exceptions import IllegalCharacterInTermNameException
 
 unicode = str
+
 
 class TestTermsController:
     prev_name = "1. Startup"
@@ -21,8 +23,8 @@ class TestTermsController:
     @classmethod
     def setup_class(cls):
         Path("test-generated-project/").mkdir()
-        tc = src.terms_controller.TermsController()
-        tc.load_project(Path("help-project"))
+        tc = TermsController()
+        tc.load_project(Path("../help-project"))
         tc.save_project_as(Path("test-generated-project"))
 
     @pytest.mark.randomize(name=str, str_attrs=("digits", "punctuation",
@@ -35,7 +37,7 @@ class TestTermsController:
         if len(name) == 0:
             return
 
-        tc = src.terms_controller.TermsController()
+        tc = TermsController()
         tc.load_project(Path("test-generated-project/"))
         term = tc.get_term(TestTermsController.prev_name)
 
@@ -72,8 +74,7 @@ class TestTermsController:
         if len(name2) == 0:
             return
 
-
-        tc = src.terms_controller.TermsController()
+        tc = TermsController()
         tc.load_project(Path("test-generated-project/"))
         term = tc.get_term(TestTermsController.prev_name2)
 
@@ -132,6 +133,8 @@ class TestTermsController:
             print("IllegalCharacterInTermNameException from " + name2 + ". "
                   "Illegal character was " + ie.value)
             return
+
+
 
     @classmethod
     def teardown_class(cls):

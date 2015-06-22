@@ -35,7 +35,7 @@ class TermsControllerBackendTestCases(unittest.TestCase):
     def setUpClass(cls):
         Path("test-generated-project/").mkdir()
         tc = src.terms_controller.TermsController()
-        tc.load_project(Path("help-project"))
+        tc.load_project(Path("../help-project"))
         tc.save_project_as(Path("test-generated-project"))
 
     def setUp(self):
