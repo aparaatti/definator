@@ -1,2 +1,3 @@
 #!/bin/bash
-$PATH/../opt/definator/definator.py
+export PYTHONPATH=$PWD/src
+./definator.py

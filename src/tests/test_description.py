@@ -11,6 +11,8 @@ import data.term
 
 
 class DescriptionTestCases(unittest.TestCase):
+    """ Tähän voisi tulla str-template, johon sitten tykitetään eri tekstejä
+    eri paikkoihin ja katsotaan meneekö round robin läpi... """
 
     """
     unittest methods:
@@ -26,7 +28,7 @@ class DescriptionTestCases(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        pass
+        return
 
     def setUp(self):
         self.description = data.description.Description()

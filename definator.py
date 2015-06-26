@@ -10,9 +10,10 @@ import argparse
 
 import PyQt5
 from PyQt5.QtCore import QTextCodec
-import src.qdefinator_gui
+from PyQt5.QtWidgets import QApplication
+from src import qdefinator_gui
 
-
+app = None
 # We set the working directory to the definator.py location
 os.chdir(os.path.dirname(__file__))
 aparser = argparse.ArgumentParser(description="Define some terms.")
@@ -34,11 +35,11 @@ else:
 
 def run():
     QTextCodec.setCodecForLocale(QTextCodec.codecForName("utf-8"))
-    app = PyQt5.QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
 
     logging.debug(os.curdir)
     app.setWindowIcon(PyQt5.QtGui.QIcon("definator.xpm"))
-    form = src.qdefinator_gui.MainWindow()
+    form = qdefinator_gui.MainWindow()
     form.show()
     app.exec()
 

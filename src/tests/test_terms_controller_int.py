@@ -15,7 +15,7 @@ import src.data.term
 # ..as .as
 
 # at project root
-
+TMP = '/tmp/test-generated-project'
 
 class TermsControllerBackendTestCases(unittest.TestCase):
 
@@ -33,14 +33,17 @@ class TermsControllerBackendTestCases(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        Path("test-generated-project/").mkdir()
+        if Path(TMP).exists():
+            shutil.rmtree(TMP)
+        Path(TMP).mkdir()
         tc = src.terms_controller.TermsController()
-        tc.load_project(Path("../help-project"))
-        tc.save_project_as(Path("test-generated-project"))
+        tc.load_project(Path(os.path.join(os.path.dirname(__file__),
+                                          "../../help-project/")))
+        tc.save_project_as(Path(TMP))
 
     def setUp(self):
         self.tc = src.terms_controller.TermsController()
-        self.tc.load_project(Path("test-generated-project/"))
+        self.tc.load_project(Path(TMP))
 
     def test_rename_and_save(self):
         term = self.tc.get_term("1. Startup")
@@ -113,5 +116,5 @@ class TermsControllerBackendTestCases(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree("test-generated-project/", ignore_errors=False,
+        shutil.rmtree(TMP, ignore_errors=False,
                       onerror=None)
